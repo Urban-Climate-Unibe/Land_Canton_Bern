@@ -149,7 +149,8 @@ tiffs <-purrr::map(as.list(tiff_names_short),~raster::raster(paste("../data/Tiff
 
 
 # do.call(raster::intersect,tiffs)
-# This should work but doesnt! 
+# purrr::map(tiffs,~intersect(.))
+# These should work but doesnt! 
 
 #This works: but is very very ugly
 
@@ -158,6 +159,7 @@ common_extent <- extent(tiffs[[1]])
 for (i in 2:length(tiffs)) {
   common_extent <- intersect(common_extent, extent(tiffs[[i]]))
 }
+
 
 
 
