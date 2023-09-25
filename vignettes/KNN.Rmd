@@ -138,14 +138,15 @@ combined <- combined |>
 
 ```{r}
   tiffs <- list()
+
+
   for(coef in tiff_names_short){
     print(coef)
     tiffs[[coef]] <- raster::raster(paste("../data/Tiffs/",coef,".tif",sep = ""))
   }
-  first_extent <- extent(tiffs[[7]])
-  for (x in 1:length(tiffs)) {
-    tiffs[[x]] <- crop(tiffs[[x]], first_extent)
-  } #Somehow this does nothing, dont know hwy, or does it? maybe just continue...
+  first_extent <- extent(tiffs[[7]]) #Very ugly atm, do you have a better idea?
+  tiffs<- purrr::map(tiffs,~crop(., first_extent))
+
 
   stack_tiffs <- raster::stack(tiffs)
 
