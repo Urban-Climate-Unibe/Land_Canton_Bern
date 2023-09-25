@@ -167,7 +167,7 @@ for (i in 2:length(tiffs)) {
 
   stack_tiffs <- raster::stack(tiffs)
 
-  temp <- raster::predict(stack_tiffs,mod_cv)
+  temperature <- raster::predict(stack_tiffs,mod_cv)
   
 ```
 
@@ -175,7 +175,7 @@ for (i in 2:length(tiffs)) {
  extent <- rgdal::readOGR("../data/Extent_Bern.shp")
   rivers <- rgdal::readOGR("../data/Aare.shp")
   color = colorRampPalette(c("blue","deepskyblue", "white","orange", "red"))(100)
-  raster::plot(temp, col = color)
+  raster::plot(temperature, col = color)
   sp::plot(extent, add = T)
   sp::plot(rivers, add = T)
   points(combined$LV_03_E,combined$LV_03_N , pch = 16, cex = 1)
