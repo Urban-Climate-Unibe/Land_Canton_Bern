@@ -49,7 +49,7 @@ load_packages(packages)
 #Somehow not functional but would be prettier.. lets use this:
 
   for (x in 1:length(tables)) {
-    tables[[x]]$time <- with_tz(.,tables[[x]]$time,"Europe/Zurich")
+    tables[[x]]$time <- with_tz(tables[[x]]$time,"Europe/Zurich")
     temp <- tables[[x]] |>
       filter(time > laggingtime)|>
       group_by(topic)|>
