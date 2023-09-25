@@ -3,7 +3,7 @@
 This is the github project of the proseminar AGDS of Patrick Bigler and Nils Tinner. 
 The project will model urban climate temperature distribution based on measurements conducted by the urban climate group of the university of Bern. 
 The project may folow roughly this structure:
-![](https://github.com/sundin01/AGDS_Bigler_Tinner/fig/First_Draft.png)
+![](https://github.com/sundin01/AGDS_Bigler_Tinner/blob/main/fig/First_Draft.png)
 
 Current todo:
 -Get meteoswiss data, how? Moritz?
