@@ -40,8 +40,16 @@ load_packages(packages)
 
 ```{r}
   #adding of data to dataframe
+
+# tables <- purrr::map(tables, ~mutate(.time = with_tz(.x$.time, tz = "Europe/Zurich")))
+# tables <- purrr::map(tables,~filter(time > laggingtime)|>
+#       group_by(topic)|>
+#       summarise(temp = mean(decoded_payload_temperature)))
+           
+#Somehow not functional but would be prettier.. lets use this:
+
   for (x in 1:length(tables)) {
-    tables[[x]]$time <- with_tz(tables[[x]]$time,"Europe/Zurich")
+    tables[[x]]$time <- with_tz(.,tables[[x]]$time,"Europe/Zurich")
     temp <- tables[[x]] |>
       filter(time > laggingtime)|>
       group_by(topic)|>
