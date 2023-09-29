@@ -29,7 +29,7 @@ load_packages(packages)
 ```{r}
 meteoswiss <- read_csv2("../data/Meteoswiss/order_114596_data.txt")
 meteoswiss_names <-meteoswiss|>
-  dplyr::select(-stn)|>
+  dplyr::select(-stn,-time)|>
   colnames() 
 
   tiff_names <- list.files("../data/Tiffs/")
@@ -79,7 +79,7 @@ combined_test <- rsample::testing(split)
   # arguments specific to "ranger" method
   replace = FALSE,
   sample.fraction = 0.5,
-  num.trees = 100,       
+  num.trees = 10,       
   seed = 1982
 )
 
@@ -127,5 +127,66 @@ ggplot(
 ```
 
 
+```{r}
+tiffs <-purrr::map(as.list(tiff_names_short),~raster::raster(paste("../data/Tiffs/",.,".tif",sep = "")))
 
 
+# raster::intersect(tiffs)
+# 
+# extents <- lapply(tiffs, extent)
+# 
+# lapply(extents, min)
+# min_extent <- do.call("min", extents)
+
+
+# do.call(raster::intersect,tiffs)
+# purrr::map(tiffs,~intersect(.))
+# These should work but doesnt! 
+
+#This works: but is very very ugly
+
+common_extent <- extent(tiffs[[1]])
+
+for (i in 2:length(tiffs)) {
+  common_extent <- intersect(common_extent, extent(tiffs[[i]]))
+}
+
+
+
+
+
+  tiffs<- purrr::map(tiffs,~crop(., common_extent))
+
+
+meteo_pred <- c(247,9526,27.8,0.0,393,2.0,238)
+names(meteo_pred) <- c(meteoswiss_names)
+
+meteo_raster <- list()  
+for (name in meteoswiss_names) {
+  meteo_raster[[name]] <- raster(ncol=293, nrow=247, xmn=2592670, xmx=2607320, ymn=1193202, ymx=1205552)
+raster::values(meteo_raster[[name]]) <- unname(meteo_pred[name])
+meteo_raster[[name]] <- crop(meteo_raster[[name]],common_extent)
+
+}
+  
+
+
+
+  stack_tiffs <- raster::stack(tiffs)
+  stack_meteo <- raster::stack(meteo_raster)
+  stack <- raster::stack(stack_meteo,stack_tiffs)
+  temperature <- raster::predict(stack,mod_cv)
+  
+```
+
+
+
+```{r}
+ extent <- rgdal::readOGR("../data/Map/Extent_Bern.shp")
+  rivers <- rgdal::readOGR("../data/Map/Aare.shp")
+  color = colorRampPalette(c("blue","deepskyblue", "white","orange", "red"))(100)
+  raster::plot(temperature, col = color)
+  sp::plot(extent, add = T)
+  sp::plot(rivers, add = T)
+
+```
