@@ -157,7 +157,8 @@ for (i in 2:length(tiffs)) {
 
   tiffs<- purrr::map(tiffs,~crop(., common_extent))
 
-
+# Goes:"gre000z0" "prestas0" "tre200s0" "rre150z0" "ure200s0" "fkl010z0" "dkl010z0"
+#which is Globalstrahlung, Luftdruck, Lufttemperatur, Niederschlag, Relative Luftfeuchtigkeit, Windgeschwindigkeit, Windrichtung
 meteo_pred <- c(247,9526,27.8,0.0,393,2.0,238)
 names(meteo_pred) <- c(meteoswiss_names)
 
