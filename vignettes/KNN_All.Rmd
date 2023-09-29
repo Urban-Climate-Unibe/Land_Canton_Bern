@@ -42,6 +42,7 @@ meteoswiss_names <-meteoswiss|>
 
 ```{r}
 combined <- read_csv("../data/Combined.csv")
+
 combined <- combined |>
   mutate(hour = hour(time),
          month = month(time),
@@ -165,11 +166,11 @@ for (i in 2:length(tiffs)) {
 
 # Goes:"gre000z0" "prestas0" "tre200s0" "rre150z0" "ure200s0" "fkl010z0" "dkl010z0"
 #which is Globalstrahlung, Luftdruck, Lufttemperatur, Niederschlag, Relative Luftfeuchtigkeit, Windgeschwindigkeit, Windrichtung
-meteo_pred <- c(0,1005,22.8,0.0,500,1.0,238,12,8,22)
-names(meteo_pred) <- c(meteoswiss_names[-1],"day","month","hour")
-
-# meteo_pred <- c(1000,1005,27.8,0.0,500,1.0,238,12,8,12)
+# meteo_pred <- c(0,1005,22.8,0.0,500,1.0,238,12,8,22)
 # names(meteo_pred) <- c(meteoswiss_names[-1],"day","month","hour")
+
+meteo_pred <- c(1000,1005,27.8,0.0,500,1.0,238,12,8,12)
+names(meteo_pred) <- c(meteoswiss_names[-1],"day","month","hour")
 
 meteo_raster <- list()  
 for (name in c(meteoswiss_names[-1],"day","month","hour")) {
