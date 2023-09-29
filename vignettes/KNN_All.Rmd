@@ -29,7 +29,7 @@ load_packages(packages)
 ```{r}
 meteoswiss <- read_csv2("../data/Meteoswiss/order_114596_data.txt")
 meteoswiss_names <-meteoswiss|>
-  dplyr::select(-stn,-time)|>
+  dplyr::select(-stn)|>
   colnames() 
 
   tiff_names <- list.files("../data/Tiffs/")
@@ -43,16 +43,20 @@ meteoswiss_names <-meteoswiss|>
 ```{r}
 combined <- read_csv("../data/Combined.csv")
 combined <- combined |>
+  mutate(hour = hour(time),
+         month = month(time),
+         day = day(time))
+
+combined <- combined |>
     filter(complete.cases(across(all_of(tiff_names_short)))) |>
-    dplyr::select(all_of(c(tiff_names_short,meteoswiss_names)),temperature) |> drop_na()
-
-split <- rsample::initial_split(combined, prop = 0.7)
-combined_train <- rsample::training(split)
-combined_test <- rsample::testing(split)
+    dplyr::select(all_of(c(tiff_names_short,meteoswiss_names)),temperature,hour,month,day) |> drop_na()
+combined_test <- combined |> filter(time < ymd("20200101"))
+combined_train <- combined |> filter(time > ymd("20200101"))
 
 
-  correlators <- c(tiff_names_short,meteoswiss_names)|>
-    paste(collapse  = "+")
+
+  correlators <- c(tiff_names_short,meteoswiss_names[-1],"hour","day","month")|>
+    paste(collapse  = "+",sep = "+")
 
   formula_local = as.formula(paste("temperature","~", correlators))
 
@@ -63,7 +67,8 @@ combined_test <- rsample::testing(split)
 
   mod_cv <- caret::train(
   pp, 
-  data = combined_train, 
+  data = combined_train |>
+    dplyr::select(-time), 
   method = "ranger",
   metric = "RMSE",
   trControl = trainControl(
@@ -90,6 +95,7 @@ combined_test <- rsample::testing(split)
     yardstick::metrics(temperature, fitted)
   
 ```
+
 ```{r}
  rmse_test <- metrics_test |> 
     filter(.metric == "rmse") |> 
@@ -159,11 +165,14 @@ for (i in 2:length(tiffs)) {
 
 # Goes:"gre000z0" "prestas0" "tre200s0" "rre150z0" "ure200s0" "fkl010z0" "dkl010z0"
 #which is Globalstrahlung, Luftdruck, Lufttemperatur, Niederschlag, Relative Luftfeuchtigkeit, Windgeschwindigkeit, Windrichtung
-meteo_pred <- c(247,9526,27.8,0.0,393,2.0,238)
-names(meteo_pred) <- c(meteoswiss_names)
+meteo_pred <- c(0,1005,22.8,0.0,500,1.0,238,12,8,22)
+names(meteo_pred) <- c(meteoswiss_names[-1],"day","month","hour")
+
+# meteo_pred <- c(1000,1005,27.8,0.0,500,1.0,238,12,8,12)
+# names(meteo_pred) <- c(meteoswiss_names[-1],"day","month","hour")
 
 meteo_raster <- list()  
-for (name in meteoswiss_names) {
+for (name in c(meteoswiss_names[-1],"day","month","hour")) {
   meteo_raster[[name]] <- raster(ncol=293, nrow=247, xmn=2592670, xmx=2607320, ymn=1193202, ymx=1205552)
 raster::values(meteo_raster[[name]]) <- unname(meteo_pred[name])
 meteo_raster[[name]] <- crop(meteo_raster[[name]],common_extent)

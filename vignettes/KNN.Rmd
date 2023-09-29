@@ -174,8 +174,8 @@ for (i in 2:length(tiffs)) {
 ```
 
 ```{r}
- extent <- rgdal::readOGR("../data/Extent_Bern.shp")
-  rivers <- rgdal::readOGR("../data/Aare.shp")
+ extent <- rgdal::readOGR("../data/Map/Extent_Bern.shp")
+  rivers <- rgdal::readOGR("../data/Map/Aare.shp")
   color = colorRampPalette(c("blue","deepskyblue", "white","orange", "red"))(100)
   raster::plot(temperature, col = color)
   sp::plot(extent, add = T)
