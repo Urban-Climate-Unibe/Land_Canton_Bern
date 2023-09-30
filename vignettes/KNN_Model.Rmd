@@ -1,0 +1,65 @@
+---
+title: 'KNN Model'
+author: "Patrick Bigler, Nils Tinner"
+date: "2023-04-03"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+    number_sections: yes
+  '': default
+editor_options:
+  markdown:
+    wrap: 75
+---
+
+
+
+```{r}
+# We load our functions
+source("../R/ml_functions/lm.and.knn.model.R")
+source("../R/ml_functions/knn.evaluation.R")
+source("../R/ml_functions/knn_cv_optimizer.R")
+source("../R/ml_functions/knn.cv.model.creater.R")
+source("../R/extracter.R")
+
+# For reproducibility (pseudo random choice)
+set.seed(123)  
+
+# Split 70 % to 30 % 
+split_Combined <- rsample::initial_split(Combined, prop = 0.7)
+# We create a training set and a test set
+Combined_train <- rsample::training(split_Combined)
+Combined_test <- rsample::testing(split_Combined)
+
+
+
+knn.cv.model <- function(database_train, number.of.k = 8, number.of.validation = 10){
+  # Model and pre-processing formulation, use all variables but LW_IN_F
+  pp <- recipes::recipe(temperature ~ gre000z0 + prestas0,
+                        data = database_train |> drop_na()) |>
+    recipes::step_BoxCox(all_predictors()) |>
+    recipes::step_center(all_numeric(), -all_outcomes()) |>
+    recipes::step_scale(all_numeric(), -all_outcomes())
+
+  # us cv (cross validation) as method
+  mod_cv <- caret::train(pp, data = database_train |> drop_na(),
+                         method = "knn",
+                         trControl = caret::trainControl(method = "cv",
+                                                         number = number.of.validation),
+                         tuneGrid = data.frame(k = number.of.k),
+                         metric = "MAE")
+  return(mod_cv)
+}
+
+knn.cv.model(Combined_train, 8, 10)
+
+
+
+
+# We calculate a KNN model
+model.ZOLL.opt.appraoch <- knn.cv.model.a(ZOLL_train_approach, 2)
+
+# We calculate a lm-model (to comapre with)
+model.ZOLL.lm.approach <- lm.model.a(ZOLL_train_approach)
+```

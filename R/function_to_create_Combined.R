@@ -1,13 +1,7 @@
-packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
-              "dplyr","googledrive","caret","rgdal","keras")
-
-source("../AGDS_Bigler_Tinner/R/load_packages.R")
-load_packages(packages)
 
 
-# We want to know, if a certain file already exists
 looking_for_Combined.csv <- function(){
-
+  # We want to know, if a certain file already exists
   name.of.file <- '../data/Combined.csv'
 
   # If do not exists such a file, create it!
@@ -34,7 +28,7 @@ looking_for_Combined.csv <- function(){
     combined = inner_join(measurement_files,meteoswiss,by = "time")
     combined = inner_join(combined, measurement_metadata, by = "Log_Nr")
 
-    tiff_names <- list.files("../data/Tiffs/")
+    tiff_names <- list.files("../AGDS_Bigler_Tinner/data/Tiffs/")
     tiff_names_short <- tiff_names |>
       str_sub(end = -5)
 
