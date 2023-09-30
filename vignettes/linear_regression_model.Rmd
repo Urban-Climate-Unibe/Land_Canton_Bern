@@ -51,12 +51,17 @@ We create a stepwise regression and visualize it
 ```{r stepwise_regression, error=FALSE, message=FALSE, warning=FALSE}
 source('../R/stepwise/stepforward.R')
 
-multi.model <- multivariate.reg.model(Combined, c(1, 2, 4, 5, 13, 14, 15, 16, 17))
+multi.model <- multivariate.reg.model(Combined, c(1, 2, 3, 4, 5, 13, 14, 15))
 
 source("../R/function.vis.stepwise.R")
 
 p1 <- vis.and.dev.multi.model(multi.model)
 p1
+
+pdf('../analysis/development_of.rsq.pdf',
+    height = 5, width = 10)
+p1
+dev.off
 
 ```
 
@@ -64,9 +69,9 @@ p1
 
 # Calculate the probably best multivariate model
 multi.lm <- lm(temperature ~ tre200s0 + gre000z0 + ure200s0 + BUL_250 + 
-                      dkl010z0 + prestas0 + VH_150 + AC_750 + rre150z0 + HuM + TPI_500 +
-                 GA_25 + FO_1000 + WA_150 + SLO_50 + fkl010z0, 
-                    data = Combined)
+                      dkl010z0 + prestas0 + VH_150 + AC_750 + rre150z0 + LV_03_E +
+                      GA_25 + FO_1000 + TPI_500 + HuM + WA_150 + SLO_50 + LV_03_N + fkl010z0, 
+                      data = Combined)
 
 # Shows the residues
 plot(multi.lm)
