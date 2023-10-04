@@ -43,6 +43,8 @@ meteoswiss_names <-meteoswiss|>
 ```{r}
 combined <- read_csv("../data/Combined.csv")
 
+combined <- combined |> dplyr::filter(!(Log_Nr %in% c(60,76,38,2)))
+
 combined <- combined |>
   mutate(hour = hour(time),
          month = month(time),
@@ -147,7 +149,7 @@ combined_train <- combined |> filter(time > ymd("20200101"))
 #   scale_y_continuous(expand = c(0, 0))
 
   ggplot(data = combined_test,
-         aes(x = as.factor(Log_Nr), y = difference))+
+         aes(x = as.factor(Log_Nr), y = abs(difference)))+
     geom_boxplot()
   
     ggplot(data = combined,
@@ -191,11 +193,12 @@ for (i in 2:length(tiffs)) {
 #which is Globalstrahlung, Luftdruck, Lufttemperatur, Niederschlag, Relative Luftfeuchtigkeit, Windgeschwindigkeit, Windrichtung
 
 
-meteo_pred <- c(0,10005,22.8,0.0,600,2.3,206,12,8,22)
+meteo_pred <- c(0,9500,22.8,0.0,600,2.3,206,12,8,22)
 names(meteo_pred) <- c(meteoswiss_names[-1],"day","month","hour")
 
 meteo_pred <- c(1000,9559,25,0.0,600,2.3,206,12,8,14)
 names(meteo_pred) <- c(meteoswiss_names[-1],"day","month","hour")
+
 
 meteo_raster <- list()  
 for (name in c(meteoswiss_names[-1],"day","month","hour")) {
