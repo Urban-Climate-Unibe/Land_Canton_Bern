@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r}
-packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster","dplyr","googledrive","caret","rgdal","keras")
+packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster","dplyr","googledrive","caret","rgdal","keras","vip")
 
 source("../R/load_packages.R")
 load_packages(packages)
@@ -46,11 +46,12 @@ combined <- read_csv("../data/Combined.csv")
 combined <- combined |>
   mutate(hour = hour(time),
          month = month(time),
-         day = day(time))
+         day = day(time),
+         temperature = temperature - tre200s0)
 
 combined <- combined |>
     filter(complete.cases(across(all_of(tiff_names_short)))) |>
-    dplyr::select(all_of(c(tiff_names_short,meteoswiss_names)),temperature,hour,month,day) |> drop_na()
+    dplyr::select(all_of(c(tiff_names_short,meteoswiss_names)),temperature,hour,month,day,Log_Nr) |> drop_na()
 combined_test <- combined |> filter(time < ymd("20200101"))
 combined_train <- combined |> filter(time > ymd("20200101"))
 
@@ -85,7 +86,7 @@ combined_train <- combined |> filter(time > ymd("20200101"))
   # arguments specific to "ranger" method
   replace = FALSE,
   sample.fraction = 0.5,
-  num.trees = 10,       
+  num.trees = 20,       
   seed = 1982
 )
 
@@ -94,6 +95,8 @@ combined_train <- combined |> filter(time > ymd("20200101"))
   combined_test$fitted <- predict(mod_cv, newdata = combined_test)
   metrics_test <- combined_test |> 
     yardstick::metrics(temperature, fitted)
+  
+  combined_test<- combined_test|>mutate(difference = fitted-temperature)
   
 ```
 
@@ -105,31 +108,51 @@ combined_train <- combined |> filter(time > ymd("20200101"))
     filter(.metric == "rsq") |> 
     pull(.estimate)
   
-ggplot(data = combined_test, aes(temperature, fitted)) +
-    geom_point(alpha = 0.3) +
-    geom_smooth(method = "lm", se = FALSE, color = "red") +
-    geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
-    labs(subtitle = bquote( italic(R)^2 == .(format(rsq_test, digits = 2)) ~~
-                            RMSE == .(format(rmse_test, digits = 3))),
-         title = "Test set") +
-    theme_classic()
+  
+  vip::vip(mod_cv,                        # Model to use
+         train = mod_cv$trainingData,   # Training data used in the model
+         method = "permute",            # VIP method
+         target = "temperature",     # Target variable
+         nsim = 2,                      # Number of simulations
+         metric = "RMSE",               # Metric to assess quantify permutation
+         sample_frac = 0.1,             # Fraction of training data to use
+         pred_wrapper = predict ,
+         num_features = 15L# Prediction function to use
+         )
+  
+  
+# ggplot(data = combined_test, aes(temperature, fitted)) +
+#     geom_point(alpha = 0.3) +
+#     geom_smooth(method = "lm", se = FALSE, color = "red") +
+#     geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
+#     labs(subtitle = bquote( italic(R)^2 == .(format(rsq_test, digits = 2)) ~~
+#                             RMSE == .(format(rmse_test, digits = 3))),
+#          title = "Test set") +
+#     theme_classic()
+# 
+# 
+# ggplot(
+#     data = combined_test,
+#     aes(x = temperature, y = fitted)) +
+#   stat_density_2d(
+#     geom = "raster", # the geometric object to display the data
+#     aes(fill = after_stat(density)), # using `density`, a variable calculated by the stat
+#     contour = FALSE 
+#     ) +
+#   scale_fill_viridis_c() +
+#   labs(x = expression(paste("Shortwave radiation (W m"^-2, ")")), 
+#        y = expression(paste("GPP (", mu,"mol CO"[2], " m"^-2, "s"^-1, ")")) ) +
+#   theme_classic() + 
+#   scale_x_continuous(expand = c(0, 0)) +  # avoid gap between plotting area and axis
+#   scale_y_continuous(expand = c(0, 0))
 
-
-ggplot(
-    data = combined_test,
-    aes(x = temperature, y = fitted)) +
-  stat_density_2d(
-    geom = "raster", # the geometric object to display the data
-    aes(fill = after_stat(density)), # using `density`, a variable calculated by the stat
-    contour = FALSE 
-    ) +
-  scale_fill_viridis_c() +
-  labs(x = expression(paste("Shortwave radiation (W m"^-2, ")")), 
-       y = expression(paste("GPP (", mu,"mol CO"[2], " m"^-2, "s"^-1, ")")) ) +
-  theme_classic() + 
-  scale_x_continuous(expand = c(0, 0)) +  # avoid gap between plotting area and axis
-  scale_y_continuous(expand = c(0, 0))
-
+  ggplot(data = combined_test,
+         aes(x = as.factor(Log_Nr), y = difference))+
+    geom_boxplot()
+  
+    ggplot(data = combined,
+         aes(x = as.factor(Log_Nr), y = tre200s0-temperature))+
+    geom_boxplot()
 
 ```
 
@@ -166,10 +189,12 @@ for (i in 2:length(tiffs)) {
 
 # Goes:"gre000z0" "prestas0" "tre200s0" "rre150z0" "ure200s0" "fkl010z0" "dkl010z0"
 #which is Globalstrahlung, Luftdruck, Lufttemperatur, Niederschlag, Relative Luftfeuchtigkeit, Windgeschwindigkeit, Windrichtung
-# meteo_pred <- c(0,1005,22.8,0.0,500,1.0,238,12,8,22)
-# names(meteo_pred) <- c(meteoswiss_names[-1],"day","month","hour")
 
-meteo_pred <- c(1000,1005,27.8,0.0,500,1.0,238,12,8,12)
+
+meteo_pred <- c(0,10005,22.8,0.0,600,2.3,206,12,8,22)
+names(meteo_pred) <- c(meteoswiss_names[-1],"day","month","hour")
+
+meteo_pred <- c(1000,9559,25,0.0,600,2.3,206,12,8,14)
 names(meteo_pred) <- c(meteoswiss_names[-1],"day","month","hour")
 
 meteo_raster <- list()  
@@ -199,5 +224,7 @@ meteo_raster[[name]] <- crop(meteo_raster[[name]],common_extent)
   raster::plot(temperature, col = color)
   sp::plot(extent, add = T)
   sp::plot(rivers, add = T)
+  points( 2601930.3,1204410.1 , pch = 16, cex = 1)
+
 
 ```
