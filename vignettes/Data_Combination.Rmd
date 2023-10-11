@@ -50,7 +50,7 @@ meteoswiss <- meteoswiss |>
          fkl010z0 = as.numeric(fkl010z0))
 
 meteoswiss <- meteoswiss |>
-  mutate(hour = hour(time),
+  mutate(hour = hour(time+hours(2)),
          month = month(time),
          day = day(time),
          year = year(time))

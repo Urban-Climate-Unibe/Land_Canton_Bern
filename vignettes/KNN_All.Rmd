@@ -89,7 +89,7 @@ combined_train <- combined |> filter(year %in% c(2019,2020,2022))
   # arguments specific to "ranger" method
   replace = FALSE,
   sample.fraction = 0.5,
-  num.trees = 100,       
+  num.trees = 300,       
   seed = 1982
 )
 
@@ -158,6 +158,10 @@ ggplot(data = combined_test, aes(temperature, fitted)) +
          aes(x = as.factor(Log_Nr), y = tre200s0-temperature))+
     geom_boxplot()
 
+  ggplot(data = combined_test,
+         aes(x = as.factor(hour), y = abs(difference)))+
+    geom_boxplot()
+    
 ```
 
 
