@@ -29,8 +29,9 @@ load_packages(packages)
 ```{r}
 meteoswiss <- read_csv2("../data/Meteoswiss/order_114596_data.txt")
 meteoswiss_names <-meteoswiss|>
-  dplyr::select(-stn)|>
+  dplyr::select(-stn,-time)|>
   colnames() 
+
 
   tiff_names <- list.files("../data/Tiffs/")
   tiff_names_short <- tiff_names |>
@@ -43,19 +44,21 @@ meteoswiss_names <-meteoswiss|>
 ```{r}
 combined <- read_csv("../data/Combined.csv")
 
+
+
+
 combined <- combined |> dplyr::filter(!(Log_Nr %in% c(60,76,38,2)))
 
-combined <- combined |>
-  mutate(hour = hour(time),
-         month = month(time),
-         day = day(time),
-         temperature = temperature - tre200s0)
+
 
 combined <- combined |>
     filter(complete.cases(across(all_of(tiff_names_short)))) |>
-    dplyr::select(all_of(c(tiff_names_short,meteoswiss_names)),temperature,hour,month,day,Log_Nr) |> drop_na()
-combined_test <- combined |> filter(time < ymd("20200101"))
-combined_train <- combined |> filter(time > ymd("20200101"))
+    dplyr::select(all_of(c(tiff_names_short,meteoswiss_names)),temperature,hour,month,year,day,Log_Nr) |> drop_na()
+
+
+
+combined_test <- combined |> filter(year == 2019)
+combined_train <- combined |> filter(year > 2019)
 
 
 
@@ -71,24 +74,23 @@ combined_train <- combined |> filter(time > ymd("20200101"))
 
   mod_cv <- caret::train(
   pp, 
-  data = combined_train |>
-    dplyr::select(-time), 
+  data = combined_train,
   method = "ranger",
   metric = "RMSE",
   trControl = trainControl(
     method = "cv",
-    number = 3,
+    number = 5,
     savePredictions = "final"
     ),
   tuneGrid = expand.grid(
-    .mtry = floor(16 / 3),       # default p/3
-    .min.node.size = 5,         # set to 5
+    .mtry = floor(71 / 3),       # default p/3
+    .min.node.size = 10,         # set to 10
     .splitrule = "variance"     # default variance
     ),
   # arguments specific to "ranger" method
   replace = FALSE,
   sample.fraction = 0.5,
-  num.trees = 20,       
+  num.trees = 200,       
   seed = 1982
 )
 
@@ -111,26 +113,27 @@ combined_train <- combined |> filter(time > ymd("20200101"))
     pull(.estimate)
   
   
-  vip::vip(mod_cv,                        # Model to use
-         train = mod_cv$trainingData,   # Training data used in the model
-         method = "permute",            # VIP method
-         target = "temperature",     # Target variable
-         nsim = 2,                      # Number of simulations
-         metric = "RMSE",               # Metric to assess quantify permutation
-         sample_frac = 0.1,             # Fraction of training data to use
-         pred_wrapper = predict ,
-         num_features = 15L# Prediction function to use
-         )
+  # vip::vip(mod_cv,                        # Model to use
+  #        train = mod_cv$trainingData,   # Training data used in the model
+  #        method = "permute",            # VIP method
+  #        target = "temperature",     # Target variable
+  #        nsim = 2,                      # Number of simulations
+  #        metric = "RMSE",               # Metric to assess quantify permutation
+  #        sample_frac = 0.1,             # Fraction of training data to use
+  #        pred_wrapper = predict ,
+  #        num_features = 15L# Prediction function to use
+  #        )
   
   
-# ggplot(data = combined_test, aes(temperature, fitted)) +
-#     geom_point(alpha = 0.3) +
-#     geom_smooth(method = "lm", se = FALSE, color = "red") +
-#     geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
-#     labs(subtitle = bquote( italic(R)^2 == .(format(rsq_test, digits = 2)) ~~
-#                             RMSE == .(format(rmse_test, digits = 3))),
-#          title = "Test set") +
-#     theme_classic()
+ggplot(data = combined_test, aes(temperature, fitted)) +
+    geom_point(alpha = 0.3) +
+    geom_smooth(method = "lm", se = FALSE, color = "red") +
+    geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
+    labs(subtitle = bquote( italic(R)^2 == .(format(rsq_test, digits = 2)) ~~
+                            RMSE == .(format(rmse_test, digits = 3))),
+         title = "Test set") +
+    theme_classic()
+
 # 
 # 
 # ggplot(
@@ -151,10 +154,10 @@ combined_train <- combined |> filter(time > ymd("20200101"))
   ggplot(data = combined_test,
          aes(x = as.factor(Log_Nr), y = abs(difference)))+
     geom_boxplot()
-  
-    ggplot(data = combined,
-         aes(x = as.factor(Log_Nr), y = tre200s0-temperature))+
-    geom_boxplot()
+  # 
+  #   ggplot(data = combined,
+  #        aes(x = as.factor(Log_Nr), y = tre200s0-temperature))+
+  #   geom_boxplot()
 
 ```
 

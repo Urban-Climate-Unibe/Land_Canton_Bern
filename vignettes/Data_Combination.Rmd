@@ -17,11 +17,24 @@ load_packages(packages)
 measurement_files <- list.files("../data/Measurements/")
 measurement_files <- purrr::map(as.list(paste("../data/Measurements/",measurement_files,sep = "")),~read_csv(.))
 measurement_files <- bind_rows(measurement_files, .id = "column_label")
-
-measurement_files <-  measurement_files |> pivot_longer(cols = starts_with("L"), names_to = "Log_Nr",values_to = "temperature") |>
-  mutate(Log_Nr = as.numeric(str_replace(Log_Nr, "Log_", "")))
 measurement_files <-  mutate(measurement_files,time = mdy_hm(Zeit)) |>
   dplyr::select(-Zeit)
+measurement_files <- measurement_files |>
+  mutate(hour = hour(time),
+         month = month(time),
+         day = day(time),
+         year = year(time))
+
+measurement_files <- measurement_files |>
+  group_by(hour, day, month, year) |>
+  summarise(across(where(is.numeric), mean))
+
+measurement_files <-  measurement_files |> pivot_longer(cols = starts_with("L"), names_to = "Log_Nr",values_to = "temperature") |>
+  mutate(Log_Nr = as.numeric(str_replace(Log_Nr, "Log_", ""))) |>
+  drop_na()
+
+
+
 
 
 
@@ -31,11 +44,23 @@ measurement_files <-  mutate(measurement_files,time = mdy_hm(Zeit)) |>
 ```{r}
 meteoswiss <- read_csv2("../data/Meteoswiss/order_114596_data.txt")
 meteoswiss <- meteoswiss |>
-  mutate(time = as.POSIXct(as.character(time), format = "%Y%m%d%H%M")) 
-meteoswiss_names <-meteoswiss|>
-  dplyr::select(-stn)|>
-  colnames() 
-combined = inner_join(measurement_files,meteoswiss,by = "time")
+  mutate(time = as.POSIXct(as.character(time), format = "%Y%m%d%H%M"),
+         tre200s0 = as.numeric(tre200s0),
+         rre150z0 = as.numeric(rre150z0),
+         fkl010z0 = as.numeric(fkl010z0))
+
+meteoswiss <- meteoswiss |>
+  mutate(hour = hour(time),
+         month = month(time),
+         day = day(time),
+         year = year(time))
+meteoswiss <- meteoswiss |>
+  group_by(hour, day, month, year) |>
+  summarise(across(where(is.numeric), mean))
+
+
+
+combined = inner_join(measurement_files,meteoswiss,by = c("hour","day","month","year"))
 
 ```
 
@@ -44,6 +69,8 @@ measurement_metadata <- read_csv("../data/Metadata_19-22.csv")
   
 
 combined = inner_join(combined, measurement_metadata, by = "Log_Nr")
+
+
 
 
 
