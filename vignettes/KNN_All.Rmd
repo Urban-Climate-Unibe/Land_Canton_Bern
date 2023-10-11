@@ -47,7 +47,6 @@ combined <- read_csv("../data/Combined.csv")
 
 
 
-combined <- combined |> dplyr::filter(!(Log_Nr %in% c(60,76,38,2)))
 
 
 
@@ -57,8 +56,8 @@ combined <- combined |>
 
 
 
-combined_test <- combined |> filter(year == 2019)
-combined_train <- combined |> filter(year > 2019)
+combined_test <- combined |> filter(year == 2021)
+combined_train <- combined |> filter(year %in% c(2019,2020,2022))
 
 
 
@@ -83,14 +82,14 @@ combined_train <- combined |> filter(year > 2019)
     savePredictions = "final"
     ),
   tuneGrid = expand.grid(
-    .mtry = floor(71 / 3),       # default p/3
+    .mtry = floor(73 / 3),       # default p/3
     .min.node.size = 10,         # set to 10
     .splitrule = "variance"     # default variance
     ),
   # arguments specific to "ranger" method
   replace = FALSE,
   sample.fraction = 0.5,
-  num.trees = 200,       
+  num.trees = 100,       
   seed = 1982
 )
 
@@ -103,7 +102,7 @@ combined_train <- combined |> filter(year > 2019)
   combined_test<- combined_test|>mutate(difference = fitted-temperature)
   
 ```
-
+Idea for better performance: when Log_Nr is added = better, because. some bias etc... Maybe add meteoswiss temp as own row then use the meteoswiss "logger" to generalise... Would that work?
 ```{r}
  rmse_test <- metrics_test |> 
     filter(.metric == "rmse") |> 
@@ -113,16 +112,16 @@ combined_train <- combined |> filter(year > 2019)
     pull(.estimate)
   
   
-  # vip::vip(mod_cv,                        # Model to use
-  #        train = mod_cv$trainingData,   # Training data used in the model
-  #        method = "permute",            # VIP method
-  #        target = "temperature",     # Target variable
-  #        nsim = 2,                      # Number of simulations
-  #        metric = "RMSE",               # Metric to assess quantify permutation
-  #        sample_frac = 0.1,             # Fraction of training data to use
-  #        pred_wrapper = predict ,
-  #        num_features = 15L# Prediction function to use
-  #        )
+  vip::vip(mod_cv,                        # Model to use
+         train = mod_cv$trainingData,   # Training data used in the model
+         method = "permute",            # VIP method
+         target = "temperature",     # Target variable
+         nsim = 2,                      # Number of simulations
+         metric = "RMSE",               # Metric to assess quantify permutation
+         sample_frac = 0.1,             # Fraction of training data to use
+         pred_wrapper = predict ,
+         num_features = 15L# Prediction function to use
+         )
   
   
 ggplot(data = combined_test, aes(temperature, fitted)) +
@@ -155,9 +154,9 @@ ggplot(data = combined_test, aes(temperature, fitted)) +
          aes(x = as.factor(Log_Nr), y = abs(difference)))+
     geom_boxplot()
   # 
-  #   ggplot(data = combined,
-  #        aes(x = as.factor(Log_Nr), y = tre200s0-temperature))+
-  #   geom_boxplot()
+    ggplot(data = combined,
+         aes(x = as.factor(Log_Nr), y = tre200s0-temperature))+
+    geom_boxplot()
 
 ```
 
