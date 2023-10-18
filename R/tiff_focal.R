@@ -16,6 +16,5 @@ for (x in c(5,11,21,51,101,201)) {
   filename1 = paste("./data/Tiffs/",str_sub(file, end = -5),"_",x,".tif",sep = "")
   print(filename1)
   writeRaster(mean_focal, filename=filename1, format="GTiff")
-}
-
+    }
 }

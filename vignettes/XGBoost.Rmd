@@ -1,0 +1,100 @@
+---
+title: "XGBoost"
+author: "Nils Tinner"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+```{r}
+packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster","dplyr","googledrive","caret","rgdal","keras","vip")
+
+source("../R/load_packages.R")
+load_packages(packages)
+
+```
+
+```{r}
+meteoswiss <- read_csv2("../data/Meteoswiss/order_114596_data.txt")
+meteoswiss_names <-meteoswiss|>
+  dplyr::select(-stn,-time)|>
+  colnames() 
+
+
+  tiff_names <- list.files("../data/Tiffs/")
+  tiff_names_short <- tiff_names |>
+    str_sub(end = -5)
+
+```
+
+```{r}
+combined <- read_csv("../data/Combined.csv")
+
+
+
+
+
+
+
+combined <- combined |>
+    filter(complete.cases(across(all_of(tiff_names_short)))) |>
+    dplyr::select(all_of(c(tiff_names_short,meteoswiss_names)),temperature,hour,month,year,day,Log_Nr) |> drop_na()
+
+
+
+combined_test <- combined |> filter(year == 2021)
+combined_train <- combined |> filter(year %in% c(2019,2020,2022))
+
+
+
+  correlators <- c(tiff_names_short,meteoswiss_names[-1],"hour","day","month")|>
+    paste(collapse  = "+",sep = "+")
+
+  formula_local = as.formula(paste("temperature","~", correlators))
+
+  pp <- recipes::recipe(formula_local,
+                        data = combined_train) |>
+    recipes::step_center(recipes::all_numeric(), -recipes::all_outcomes()) |>
+    recipes::step_scale(recipes::all_numeric(), -recipes::all_outcomes())
+
+  
+
+  
+  
+tune_grid <- expand.grid(
+  nrounds = 100,
+  eta = c(0.01, 0.1, 0.3),
+  max_depth = c(2, 3, 5, 10),
+  gamma = c(0),
+  colsample_bytree = 1,
+  min_child_weight = 1,
+  subsample = 1
+)
+
+tune_control <- caret::trainControl(
+  method = "cv", # cross-validation
+  number = 3, # with n folds 
+  verboseIter = FALSE, # no training log
+  allowParallel = TRUE #
+)
+
+xgb_tune <- caret::train(
+  pp, 
+  data = combined_train,
+  trControl = tune_control,
+  tuneGrid = tune_grid,
+  method = "xgbTree",
+  verbose = TRUE,
+  nthreads = 4
+)
+
+
+
+  combined_test$fitted <- predict(xgb_tune, newdata = combined_test)
+  metrics_test <- combined_test |> 
+    yardstick::metrics(temperature, fitted)
+  
+  combined_test<- combined_test|>mutate(difference = fitted-temperature)
+  
+```
+

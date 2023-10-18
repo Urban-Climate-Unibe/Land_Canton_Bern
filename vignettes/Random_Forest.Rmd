@@ -1,5 +1,5 @@
 ---
-title: "KNN"
+title: "Random Forest"
 author: "Nils Tinner"
 date: "`r Sys.Date()`"
 output: html_document
@@ -56,8 +56,10 @@ combined <- combined |>
 
 
 
-combined_test <- combined |> filter(year == 2021)
-combined_train <- combined |> filter(year %in% c(2019,2020,2022))
+combined_test <- combined |> filter(year == 2021) |>
+  filter((Log_Nr %in% c(82,45)))
+combined_train <- combined |> filter(year %in% c(2019,2020,2022)) |>
+  filter(!(Log_Nr %in% c(82,45)))
 
 
 
@@ -82,14 +84,14 @@ combined_train <- combined |> filter(year %in% c(2019,2020,2022))
     savePredictions = "final"
     ),
   tuneGrid = expand.grid(
-    .mtry = floor(73 / 3),       # default p/3
-    .min.node.size = 10,         # set to 10
+    .mtry = 35,       # default p/3
+    .min.node.size = 2,         # set to 5
     .splitrule = "variance"     # default variance
     ),
   # arguments specific to "ranger" method
   replace = FALSE,
   sample.fraction = 0.5,
-  num.trees = 300,       
+  num.trees = 100,       
   seed = 1982
 )
 
@@ -112,16 +114,16 @@ Idea for better performance: when Log_Nr is added = better, because. some bias e
     pull(.estimate)
   
   
-  vip::vip(mod_cv,                        # Model to use
-         train = mod_cv$trainingData,   # Training data used in the model
-         method = "permute",            # VIP method
-         target = "temperature",     # Target variable
-         nsim = 2,                      # Number of simulations
-         metric = "RMSE",               # Metric to assess quantify permutation
-         sample_frac = 0.1,             # Fraction of training data to use
-         pred_wrapper = predict ,
-         num_features = 15L# Prediction function to use
-         )
+  # vip::vip(mod_cv,                        # Model to use
+  #        train = mod_cv$trainingData,   # Training data used in the model
+  #        method = "permute",            # VIP method
+  #        target = "temperature",     # Target variable
+  #        nsim = 1,                      # Number of simulations
+  #        metric = "RMSE",               # Metric to assess quantify permutation
+  #        sample_frac = 0.1,             # Fraction of training data to use
+  #        pred_wrapper = predict ,
+  #        num_features = 20L# Prediction function to use
+  #        )
   
   
 ggplot(data = combined_test, aes(temperature, fitted)) +
@@ -133,22 +135,7 @@ ggplot(data = combined_test, aes(temperature, fitted)) +
          title = "Test set") +
     theme_classic()
 
-# 
-# 
-# ggplot(
-#     data = combined_test,
-#     aes(x = temperature, y = fitted)) +
-#   stat_density_2d(
-#     geom = "raster", # the geometric object to display the data
-#     aes(fill = after_stat(density)), # using `density`, a variable calculated by the stat
-#     contour = FALSE 
-#     ) +
-#   scale_fill_viridis_c() +
-#   labs(x = expression(paste("Shortwave radiation (W m"^-2, ")")), 
-#        y = expression(paste("GPP (", mu,"mol CO"[2], " m"^-2, "s"^-1, ")")) ) +
-#   theme_classic() + 
-#   scale_x_continuous(expand = c(0, 0)) +  # avoid gap between plotting area and axis
-#   scale_y_continuous(expand = c(0, 0))
+
 
   ggplot(data = combined_test,
          aes(x = as.factor(Log_Nr), y = abs(difference)))+
