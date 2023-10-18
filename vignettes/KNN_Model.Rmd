@@ -15,51 +15,167 @@ editor_options:
 
 
 
-```{r}
-# We load our functions
-source("../R/ml_functions/lm.and.knn.model.R")
-source("../R/ml_functions/knn.evaluation.R")
-source("../R/ml_functions/knn_cv_optimizer.R")
-source("../R/ml_functions/knn.cv.model.creater.R")
-source("../R/extracter.R")
+
+```{r preparation}
+use_pkgs <-  c("dplyr", "tidyr", "readr", "lubridate", "stringr", "purrr",
+               "ggplot2", "tidyverse", "visdat", "terra", "hexbin", "jsonlite",
+               "MODISTools", "forcats", "yardstick", "recipes", "caret",
+               "broom", "skimr", "cowplot", "scico", "hwsdr", "usethis",
+               "renv", "rsample", "modelr", "rmarkdown", "rpart",
+               "rpart.plot", "ranger", "sessioninfo", "ncdf4")
+
+new_pkgs <- use_pkgs[!(use_pkgs %in% installed.packages()[, "Package"])]
+if (length(new_pkgs) > 0) install.packages(new_pkgs,repos = "http://cran.us.r-project.org")
+invisible(lapply(use_pkgs, require, character.only = TRUE))
+
+
+combined <- read_csv("../data/Combined.csv")
+
+
+meteoswiss <- read_csv2("../data/Meteoswiss/order_114596_data.txt")
+meteoswiss_names <-meteoswiss|>
+  dplyr::select(-stn,-time)|>
+  colnames() 
+
+
+
+tiff_names <- list.files("../data/Tiffs/")
+tiff_names_short <- tiff_names |>
+    str_sub(end = -5)
+
+combined <- combined |>
+    filter(complete.cases(across(all_of(tiff_names_short)))) |>
+    dplyr::select(all_of(c(tiff_names_short,meteoswiss_names)),temperature,hour,month,year,day,Log_Nr) |> drop_na()
+
+
+combined_test <- combined |> filter(year == 2021)
+combined_train <- combined |> filter(year %in% c(2019,2020,2022))
+
+
+correlators <- c(tiff_names_short,meteoswiss_names[-1],"hour","day","month")|>
+    paste(collapse  = "+",sep = "+")
+
+formula_local = as.formula(paste("temperature","~", correlators))
 
 # For reproducibility (pseudo random choice)
 set.seed(123)  
 
-# Split 70 % to 30 % 
-split_Combined <- rsample::initial_split(Combined, prop = 0.7)
+# Split 80 % to 20 % 
+split_Combined <- rsample::initial_split(combined, prop = 0.8)
+
 # We create a training set and a test set
 Combined_train <- rsample::training(split_Combined)
 Combined_test <- rsample::testing(split_Combined)
 
+# We prepare our data (standardization etc.)
+pp <- recipes::recipe(formula_local,
+                        data = combined_train  |> drop_na()) |>
+      recipes::step_BoxCox(all_predictors()) |>
+      recipes::step_center(all_numeric(), -all_outcomes()) |>
+      recipes::step_scale(all_numeric(), -all_outcomes())
 
-
-knn.cv.model <- function(database_train, number.of.k = 8, number.of.validation = 10){
-  # Model and pre-processing formulation, use all variables but LW_IN_F
-  pp <- recipes::recipe(temperature ~ gre000z0 + prestas0,
-                        data = database_train |> drop_na()) |>
-    recipes::step_BoxCox(all_predictors()) |>
-    recipes::step_center(all_numeric(), -all_outcomes()) |>
-    recipes::step_scale(all_numeric(), -all_outcomes())
-
-  # us cv (cross validation) as method
-  mod_cv <- caret::train(pp, data = database_train |> drop_na(),
+# We calculate a KNN Model with cross validation as method
+mod_cv <- caret::train(pp, data = combined_train |> drop_na(),
                          method = "knn",
-                         trControl = caret::trainControl(method = "cv",
-                                                         number = number.of.validation),
-                         tuneGrid = data.frame(k = number.of.k),
+                         trControl = caret::trainControl(method = "none"),
+                         tuneGrid = data.frame(k = 50),
                          metric = "MAE")
-  return(mod_cv)
-}
 
-knn.cv.model(Combined_train, 8, 10)
-
-
-
-
-# We calculate a KNN model
-model.ZOLL.opt.appraoch <- knn.cv.model.a(ZOLL_train_approach, 2)
-
-# We calculate a lm-model (to comapre with)
-model.ZOLL.lm.approach <- lm.model.a(ZOLL_train_approach)
+# We calculate a multivariate linear regression model with cross validation
+mod_lm <- caret::train(pp, data = combined_train  |> drop_na(),
+                         method = "lm",
+                         trControl = caret::trainControl(method = "cv", 10),
+                         metric = "MAE")
 ```
+
+
+
+```{r function for evaluation, message=FALSE, warning=FALSE}
+eval_model <- function(mod, df_train, df_test){
+  
+  # add predictions to the data frames
+  df_train <- df_train |> 
+    drop_na()
+  df_train$fitted <- predict(mod, newdata = df_train)
+  
+  df_test <- df_test |> 
+    drop_na()
+  df_test$fitted <- predict(mod, newdata = df_test)
+  
+  # get metrics tables
+  metrics_train <- df_train |> 
+    yardstick::metrics(temperature, fitted)
+  
+  metrics_test <- df_test |> 
+    yardstick::metrics(temperature, fitted)
+  
+  # extract values from metrics tables
+  mae_train <- metrics_train |> 
+    filter(.metric == "mae") |> 
+    pull(.estimate)
+  rsq_train <- metrics_train |> 
+    filter(.metric == "rsq") |> 
+    pull(.estimate)
+  
+  mae_test <- metrics_test |> 
+    filter(.metric == "mae") |> 
+    pull(.estimate)
+  rsq_test <- metrics_test |> 
+    filter(.metric == "rsq") |> 
+    pull(.estimate)
+  
+  # visualise as a scatterplot
+  # adding information of metrics as sub-titles
+  plot_1 <- ggplot(data = df_train, aes(temperature, fitted)) +
+    geom_point(alpha = 0.3) +
+    geom_smooth(method = "lm", se = FALSE, color = "red") +
+    geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
+    labs(subtitle = bquote( italic(R)^2 == .(format(rsq_train, digits = 2)) ~~
+                            MAE == .(format(mae_train, digits = 3))),
+         title = "Training set") +
+    theme_classic()
+  
+  plot_2 <- ggplot(data = df_test, aes(temperature, fitted)) +
+    geom_point(alpha = 0.3) +
+    geom_smooth(method = "lm", se = FALSE, color = "red") +
+    geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
+    labs(subtitle = bquote( italic(R)^2 == .(format(rsq_test, digits = 2)) ~~
+                            MAE == .(format(mae_test, digits = 3))),
+         title = "Test set") +
+    theme_classic()
+  
+  out <- cowplot::plot_grid(plot_1, plot_2)
+  
+  return(out)
+}
+```
+
+
+
+```{r evaluation of the lm model, message=TRUE, paged.print=FALSE}
+eval_model(mod_cv, combined_train, combined_test)
+eval_model(mod_lm, combined_train, combined_test)
+```
+
+
+
+```{r}
+eval_model(mod_lm, combined_train, combined_test)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
