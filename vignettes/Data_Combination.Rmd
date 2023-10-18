@@ -32,13 +32,6 @@ measurement_files <- measurement_files |>
 measurement_files <-  measurement_files |> pivot_longer(cols = starts_with("L"), names_to = "Log_Nr",values_to = "temperature") |>
   mutate(Log_Nr = as.numeric(str_replace(Log_Nr, "Log_", ""))) |>
   drop_na()
-
-
-
-
-
-
-
 ```
 
 ```{r}
@@ -64,24 +57,23 @@ combined = inner_join(measurement_files,meteoswiss,by = c("hour","day","month","
 
 ```
 
+
+
 ```{r}
 measurement_metadata <- read_csv("../data/Metadata_19-22.csv")
   
 
 combined = inner_join(combined, measurement_metadata, by = "Log_Nr")
 
-
-
-
-
-
 ```
+
+
 
 ```{r}
 
-  tiff_names <- list.files("../data/Tiffs/")
-  tiff_names_short <- tiff_names |>
-    str_sub(end = -5)
+tiff_names <- list.files("../data/Tiffs/")
+tiff_names_short <- tiff_names |>
+  str_sub(end = -5)
 
 for (file in tiff_names) {
     # Read the TIF file
@@ -97,6 +89,4 @@ for (file in tiff_names) {
 }
 
 write_csv(combined,"../data/Combined.csv")
-
-
 ```
