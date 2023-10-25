@@ -91,7 +91,7 @@ combined_train <- combined |> filter(year %in% c(2019,2020,2022)) |>
   # arguments specific to "ranger" method
   replace = FALSE,
   sample.fraction = 0.5,
-  num.trees = 100,       
+  num.trees = 10,       
   seed = 1982
 )
 
@@ -140,10 +140,7 @@ ggplot(data = combined_test, aes(temperature, fitted)) +
   ggplot(data = combined_test,
          aes(x = as.factor(Log_Nr), y = abs(difference)))+
     geom_boxplot()
-  # 
-    ggplot(data = combined,
-         aes(x = as.factor(Log_Nr), y = tre200s0-temperature))+
-    geom_boxplot()
+
 
   ggplot(data = combined_test,
          aes(x = as.factor(hour), y = abs(difference)))+
@@ -153,61 +150,56 @@ ggplot(data = combined_test, aes(temperature, fitted)) +
 
 
 ```{r}
-tiffs <-purrr::map(as.list(tiff_names_short),~raster::raster(paste("../data/Tiffs/",.,".tif",sep = "")))
 
 
-# raster::intersect(tiffs)
-# 
-# extents <- lapply(tiffs, extent)
-# 
-# lapply(extents, min)
-# min_extent <- do.call("min", extents)
-
-
-# do.call(raster::intersect,tiffs)
-# purrr::map(tiffs,~intersect(.))
-# These should work but doesnt! 
-
-#This works: but is very very ugly
-
-common_extent <- extent(tiffs[[1]])
-
-for (i in 2:length(tiffs)) {
-  common_extent <- intersect(common_extent, extent(tiffs[[i]]))
+tiffs <- list()
+for (tif in tiff_names_short) {
+  tiffs[tif] = terra::rast(paste("../data/Tiffs/",tif,".tif",sep = ""))
+  terra::set.names(tiffs[[tif]],tif)
 }
 
 
-
-
-
-  tiffs<- purrr::map(tiffs,~crop(., common_extent))
 
 # Goes:"gre000z0" "prestas0" "tre200s0" "rre150z0" "ure200s0" "fkl010z0" "dkl010z0"
 #which is Globalstrahlung, Luftdruck, Lufttemperatur, Niederschlag, Relative Luftfeuchtigkeit, Windgeschwindigkeit, Windrichtung
 
 
-meteo_pred <- c(0,9500,22.8,0.0,600,2.3,206,12,8,22)
-names(meteo_pred) <- c(meteoswiss_names[-1],"day","month","hour")
 
 meteo_pred <- c(1000,9559,25,0.0,600,2.3,206,12,8,14)
 names(meteo_pred) <- c(meteoswiss_names[-1],"day","month","hour")
 
 
-meteo_raster <- list()  
+
 for (name in c(meteoswiss_names[-1],"day","month","hour")) {
-  meteo_raster[[name]] <- raster(ncol=293, nrow=247, xmn=2592670, xmx=2607320, ymn=1193202, ymx=1205552)
-raster::values(meteo_raster[[name]]) <- unname(meteo_pred[name])
-meteo_raster[[name]] <- crop(meteo_raster[[name]],common_extent)
+  tiffs[[name]] <- terra::rast(ncol=293, nrow=247, xmin=2592670, xmax=2607320, ymin=1193202, ymax=1205552,names = name)
+terra::values(tiffs[[name]]) <- unname(meteo_pred[name])
 
 }
-  
 
 
 
-  stack_tiffs <- raster::stack(tiffs)
-  stack_meteo <- raster::stack(meteo_raster)
-  stack <- raster::stack(stack_meteo,stack_tiffs)
-  temperature <- raster::predict(stack,mod_cv)
+
+ minimal_extent <- terra::ext(tiffs[[1]])
+
+# Loop through the list of raster paths to find the minimal extent
+for (tif in tiffs) {
+    raster_extent <- terra::ext(tif)
+    minimal_extent <- terra::intersect(minimal_extent, raster_extent)
+}
+cropped <- terra::crop(tiffs[[1]],minimal_extent)
+
+
+for (x in 2:length(tiffs)) {
+tiffs[[x]]<- terra::crop(tiffs[[x]],minimal_extent)
+}
+
+tiffs_stack <- tiffs[[1]]
+
+ for (x in 2:length(tiffs)) {
+  tiffs_stack <- c(tiffs_stack,tiffs[[x]])
+}
+
+  temperature <- terra::predict(tiffs_stack,mod_cv,na.rm = T)
   
 ```
 

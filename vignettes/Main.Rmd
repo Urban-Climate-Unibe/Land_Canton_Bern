@@ -51,17 +51,17 @@ Model Training
 source("../R/random_forest.R")
 random_forest_model <- random_forest(pp,combined_train)
 
-  combined_test$fitted <- predict(mod_cv, newdata = combined_test)
-  metrics_test <- combined_test |> 
-    yardstick::metrics(temperature, fitted)
-  
-  combined_test<- combined_test|>mutate(difference = fitted-temperature)
+
   
   
 ```
 Evaluation
 
 ```{r}
+
+source("../R/evaluation.R")
+evaluate(combined_test,random_forest_model)
+
 
 
 ```
