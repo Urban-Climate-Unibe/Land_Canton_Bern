@@ -115,21 +115,11 @@ Model Training
 ```{r}
 source("../R/random_forest.R")
 random_forest_model <- random_forest(pp,combined_train)
-<<<<<<< Updated upstream
-=======
-
-<<<<<<< Updated upstream
-
-=======
-  combined_test$fitted <- predict(random_forest_model, newdata = combined_test)
+combined_test$fitted <- predict(random_forest_model, newdata = combined_test)
   metrics_test <- combined_test |> 
     yardstick::metrics(temperature, fitted)
   
   combined_test<- combined_test|>mutate(difference = fitted-temperature)
->>>>>>> Stashed changes
-  
-  
->>>>>>> Stashed changes
 ```
 
 
