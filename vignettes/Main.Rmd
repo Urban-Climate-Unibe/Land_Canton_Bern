@@ -21,18 +21,36 @@ source("../R/data_combination.R")
 # combined <- data_combination() |> drop_na() #not very clean but okay
 combined <- read_csv("../data/Combined.csv") |> drop_na()
 
+set.seed(123)
+loggers_test <- sample(unique(combined$Log_Nr),10)
 
-combined_test <- combined |> filter(year == 2021) |>
-  filter((Log_Nr %in% c(82,45)))
-combined_train <- combined |> filter(year %in% c(2019,2020,2022)) |>
-  filter(!(Log_Nr %in% c(82,45)))
+combined_test <- combined |> 
+  filter((Log_Nr %in% loggers_test))
+combined_train <- combined |> 
+  filter(!(Log_Nr %in% loggers_test))
 
 ```
 
 Model Definitions
 ```{r}
+#Old Version
+
+# predictors <- combined |>
+#   dplyr::select(-c(Log_Nr,temperature,Name,NORD_CHTOP,OST_CHTOPO)) |>
+#   colnames()
+#   formula_local <- as.formula(paste("temperature","~", paste(predictors,collapse  = "+")))
+#   
+# 
+#   pp <- recipes::recipe(formula_local,
+#                         data = combined_train) |>
+#     recipes::step_center(recipes::all_numeric(), -recipes::all_outcomes()) |>
+#     recipes::step_scale(recipes::all_numeric(), -recipes::all_outcomes())
+#   
+
+  
+
 predictors <- combined |>
-  dplyr::select(-c(Log_Nr,temperature,Name,NORD_CHTOP,OST_CHTOPO,LV_03_N,LV_03_E)) |>
+  dplyr::select(c(hour,day,month,temp,rain,rain1,temp_3,temp_5,rain1,rain2,rain3,SE_Raster_101,FO_Raster_51,GA_Raster_5,WA_Raster_21,AC_Raster_101,SLO_21,VH_WSL_21_21,SVF_5,BH_51,LV_03_E,LV_03_N)) |>
   colnames()
   formula_local <- as.formula(paste("temperature","~", paste(predictors,collapse  = "+")))
   
@@ -44,24 +62,21 @@ predictors <- combined |>
   
 
 
+
+
 ```
 Model Training
 
 ```{r}
 source("../R/random_forest.R")
 random_forest_model <- random_forest(pp,combined_train)
-
-
-  
-  
 ```
 Evaluation
 
 ```{r}
-
 source("../R/evaluation.R")
-evaluate(combined_test,random_forest_model)
-
-
+eval <- evaluate(combined_test,random_forest_model)
+eval[[1]]
+eval[[2]]
 
 ```

@@ -12,7 +12,7 @@ mod_cv <- caret::train(
     savePredictions = "final"
   ),
   tuneGrid = expand.grid(
-    .mtry = 35,       # default p/3
+    .mtry = 7,       # default p/3
     .min.node.size = 2,         # set to 5
     .splitrule = "variance"     # default variance
   ),

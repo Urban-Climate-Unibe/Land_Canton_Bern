@@ -65,6 +65,8 @@ measurement_metadata <- read_csv("../data/Metadata_19-22.csv")
 
 combined = inner_join(combined, measurement_metadata, by = "Log_Nr")
 
+
+
 ```
 
 
