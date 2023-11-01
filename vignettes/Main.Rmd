@@ -2,27 +2,38 @@
 title: "main"
 author: "Nils Tinner, Patrick Bigler"
 date: "`r Sys.Date()`"
-output: html_document
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+    number_sections: yes
+  '': default
+editor_options:
+  markdown:
+    wrap: 75
 ---
-Setup
+
+
+## Preparation
+
 ```{r}
-packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster","dplyr","googledrive","caret","rgdal","keras","vip")
+packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
+              "dplyr","googledrive","caret","rgdal","keras","vip")
 
 source("../R/load_packages.R")
 load_packages(packages)
 
 ```
 
-Data Wrangling
-
-```{r}
+## Data Wrangling
+```{r message=FALSE, warning=FALSE}
 source("../R/data_combination.R")
 #here add check, if present load if not run function
 # combined <- data_combination() |> drop_na() #not very clean but okay
 combined <- read_csv("../data/Combined.csv") |> drop_na()
 
 set.seed(123)
-loggers_test <- sample(unique(combined$Log_Nr),10)
+loggers_test <- sample(unique(combined$Log_Nr), 10)
 
 combined_test <- combined |> 
   filter((Log_Nr %in% loggers_test))
@@ -30,6 +41,7 @@ combined_train <- combined |>
   filter(!(Log_Nr %in% loggers_test))
 
 ```
+
 
 Model Definitions
 ```{r}
@@ -50,29 +62,43 @@ Model Definitions
   
 
 predictors <- combined |>
-  dplyr::select(c(hour,day,month,temp,rain,rain1,temp_3,temp_5,rain1,rain2,rain3,SE_Raster_101,FO_Raster_51,GA_Raster_5,WA_Raster_21,AC_Raster_101,SLO_21,VH_WSL_21_21,SVF_5,BH_51,LV_03_E,LV_03_N)) |>
+  dplyr::select(c(hour,day,month,temp,rain,rain1,temp_3,temp_5,rain1,rain2,
+                  rain3,SE_Raster_101,FO_Raster_51,GA_Raster_5,WA_Raster_21,
+                  AC_Raster_101,SLO_21,VH_WSL_21_21,SVF_5,BH_51,LV_03_E,LV_03_N)) |>
   colnames()
   formula_local <- as.formula(paste("temperature","~", paste(predictors,collapse  = "+")))
   
 
-  pp <- recipes::recipe(formula_local,
-                        data = combined_train) |>
+pp <- recipes::recipe(formula_local,
+                      data = combined_train) |>
+    recipes::step_BoxCox(recipes::all_predictors()) |>
     recipes::step_center(recipes::all_numeric(), -recipes::all_outcomes()) |>
     recipes::step_scale(recipes::all_numeric(), -recipes::all_outcomes())
-  
-
-
-
 
 ```
-Model Training
 
+
+Chose the model
+
+KNN
 ```{r}
-source("../R/random_forest.R")
-random_forest_model <- random_forest(pp,combined_train)
+source('../')
 ```
-Evaluation
 
+
+LM Model 
+```{r}
+source('../')
+```
+
+
+Random Forest 
+```{r}
+source('../')
+```
+
+
+Evaluation
 ```{r}
 source("../R/evaluation.R")
 eval <- evaluate(combined_test,random_forest_model)
@@ -80,3 +106,31 @@ eval[[1]]
 eval[[2]]
 
 ```
+
+
+
+
+
+Model Training
+```{r}
+source("../R/random_forest.R")
+random_forest_model <- random_forest(pp,combined_train)
+<<<<<<< Updated upstream
+=======
+
+<<<<<<< Updated upstream
+
+=======
+  combined_test$fitted <- predict(random_forest_model, newdata = combined_test)
+  metrics_test <- combined_test |> 
+    yardstick::metrics(temperature, fitted)
+  
+  combined_test<- combined_test|>mutate(difference = fitted-temperature)
+>>>>>>> Stashed changes
+  
+  
+>>>>>>> Stashed changes
+```
+
+
+
