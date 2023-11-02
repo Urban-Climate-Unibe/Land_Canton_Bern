@@ -30,7 +30,9 @@ load_packages(packages)
 source("../R/data_combination.R")
 #here add check, if present load if not run function
 # combined <- data_combination() |> drop_na() #not very clean but okay
-combined <- read_csv("../data/Combined.csv") |> drop_na()
+combined <- read_csv("../data/Combined.csv") |> 
+  mutate(temperature = temperature-temp) |>
+  drop_na()
 
 set.seed(123)
 loggers_test <- sample(unique(combined$Log_Nr), 10)
@@ -64,7 +66,7 @@ Model Definitions
 predictors <- combined |>
   dplyr::select(c(hour,day,month,temp,rain,rain1,temp_3,temp_5,rain1,rain2,
                   rain3,SE_Raster_101,FO_Raster_51,GA_Raster_5,WA_Raster_21,
-                  AC_Raster_101,SLO_21,VH_WSL_21_21,SVF_5,BH_51,LV_03_E,LV_03_N)) |>
+                  AC_Raster_101,SLO_21,VH_WSL_21_21,SVF_5,Bul_Raster_51,BH_21,DEM,LV_03_E,LV_03_N)) |>
   colnames()
   formula_local <- as.formula(paste("temperature","~", paste(predictors,collapse  = "+")))
   
@@ -78,23 +80,13 @@ pp <- recipes::recipe(formula_local,
 ```
 
 
-Chose the model
 
-KNN
+
+Model Training
 ```{r}
-source('../')
-```
+source("../R/random_forest.R")
+random_forest_model <- random_forest(pp,combined_train)
 
-
-LM Model 
-```{r}
-source('../')
-```
-
-
-Random Forest 
-```{r}
-source('../')
 ```
 
 
@@ -106,21 +98,5 @@ eval[[1]]
 eval[[2]]
 
 ```
-
-
-
-
-
-Model Training
-```{r}
-source("../R/random_forest.R")
-random_forest_model <- random_forest(pp,combined_train)
-combined_test$fitted <- predict(random_forest_model, newdata = combined_test)
-  metrics_test <- combined_test |> 
-    yardstick::metrics(temperature, fitted)
-  
-  combined_test<- combined_test|>mutate(difference = fitted-temperature)
-```
-
 
 
