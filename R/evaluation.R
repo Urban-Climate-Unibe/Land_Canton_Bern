@@ -2,7 +2,7 @@
 evaluate <- function(data_evaluate,model){
 
   #prepping data
-  data_evaluate$fitted <- predict(model, newdata = data_evaluate)
+  data_evaluate$fitted <- unlist(predict(model, data_evaluate))
   metrics_test <- data_evaluate |>
     yardstick::metrics(temperature, fitted)
 
@@ -31,9 +31,9 @@ p1 <- ggplot(data = data_evaluate, aes(temperature, fitted)) +
 
 
 
-p2 <- ggplot(data = data_evaluate,
-       aes(x = as.factor(Log_Nr), y = abs(difference)))+
-  geom_boxplot()
+# p2 <- ggplot(data = data_evaluate,
+#        aes(x = as.factor(Log_Nr), y = abs(difference)))+
+#   geom_boxplot()
 
 
 p3 <- ggplot(data = data_evaluate,
@@ -41,18 +41,18 @@ p3 <- ggplot(data = data_evaluate,
   geom_boxplot()
 
 
-p4 <- vip::vip(model,                        # Model to use
-         train = model$trainingData,   # Training data used in the model
-         method = "permute",            # VIP method
-         target = "temperature",     # Target variable
-         nsim = 1,                      # Number of simulations
-         metric = "RMSE",               # Metric to assess quantify permutation
-         sample_frac = 0.01,             # Fraction of training data to use
-         pred_wrapper = predict ,
-         num_features = 20L# Prediction function to use
-)
+# p4 <- vip::vip(model,                        # Model to use
+#          train = model$trainingData,   # Training data used in the model
+#          method = "permute",            # VIP method
+#          target = "temperature",     # Target variable
+#          nsim = 1,                      # Number of simulations
+#          metric = "RMSE",               # Metric to assess quantify permutation
+#          sample_frac = 0.01,             # Fraction of training data to use
+#          pred_wrapper = predict ,
+#          num_features = 20L# Prediction function to use
+# )
 
-plot <- cowplot::plot_grid(p1,p2,p3,p4,
+plot <- cowplot::plot_grid(p1,p3,
                    ncol = 2)
 
 return(list(metrics_test,plot))

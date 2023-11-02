@@ -17,13 +17,6 @@ xgb <- function(xgb_workflow,train){
 
 
 
-hp_settings <- dials::grid_latin_hypercube(
-  tune::extract_parameter_set_dials(xgb_workflow),
-  size = 3
-)
-
-print(hp_settings)
-
 
 
 hp_settings <- dials::grid_latin_hypercube(
@@ -51,33 +44,8 @@ xgb_results <- tune::tune_grid(
 )
 
 
-# select the best model based upon
-# the root mean squared error
-xgb_best <- tune::select_best(
-  xgb_results,
-  metric = "rmse"
-)
-
-# cook up a model using finalize_workflow
-# which takes workflow (model) specifications
-# and combines it with optimal model
-# parameters into a model workflow
-xgb_best_hp <- tune::finalize_workflow(
-  xgb_workflow,
-  xgb_best
-)
-
-print(xgb_best_hp)
 
 
-
-
-
-# train a final (best) model with optimal
-# hyper-parameters
-xgb_best_model <- fit(xgb_best_hp, train)
-
-
-return(xgb_best_model)
+return(xgb_results)
 
 }

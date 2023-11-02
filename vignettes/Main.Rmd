@@ -114,20 +114,54 @@ model_settings <- parsnip::boost_tree(
   tree_depth = tune(),
   learn_rate = tune(),
   loss_reduction = tune(),
-  sample_size = tune(),
-  stop_iter = tune()
+  stop_iter = 20,
 ) |>
-  set_engine("xgboost") |>
+  set_engine("xgboost",nthread = 6, verbose = T) |>
   set_mode("regression")
 xgb_workflow <- workflows::workflow() |>
   add_formula(temperature ~ .) |>
   add_model(model_settings)
-xgb(xgb_workflow,combined_train |> dplyr::select(c(temperature,hour,day,month,temp,rain,rain1,temp_3,temp_5,rain1,rain2,
+
+combined_train_xgb <- combined_train |> dplyr::select(temperature,hour,day,month,temp,rain,rain1,temp_3,temp_5,rain1,rain2,
+                  rain3,SE_Raster_101,FO_Raster_51,GA_Raster_5,WA_Raster_21,
+                  AC_Raster_101,SLO_21,VH_WSL_21_21,SVF_5,Bul_Raster_51,BH_21,DEM,LV_03_E,LV_03_N)
+
+xgb_results <- xgb(xgb_workflow,train = combined_train_xgb)
+
+
+
+# select the best model based upon
+# the root mean squared error
+xgb_best <- tune::select_best(
+  xgb_results,
+  metric = "rmse"
+)
+
+# cook up a model using finalize_workflow
+# which takes workflow (model) specifications
+# and combines it with optimal model
+# parameters into a model workflow
+xgb_best_hp <- tune::finalize_workflow(
+  xgb_workflow,
+  xgb_best
+)
+
+
+
+combined_test_xgb <- combined_test|> dplyr::select(c(temperature,hour,day,month,temp,rain,rain1,temp_3,temp_5,rain1,rain2,
                   rain3,SE_Raster_101,FO_Raster_51,GA_Raster_5,WA_Raster_21,
                   AC_Raster_101,SLO_21,VH_WSL_21_21,SVF_5,Bul_Raster_51,BH_21,DEM,LV_03_E,LV_03_N))
-      )
 
 
+# train a final (best) model with optimal
+# hyper-parameters
+xgb_best_model <- fit(xgb_best_hp, combined_train_xgb)
+
+
+source("../R/evaluation.R")
+eval <- evaluate(combined_test_xgb,xgb_best_model)
+ eval[[1]]
+ eval[[2]]
 
 ```
 
