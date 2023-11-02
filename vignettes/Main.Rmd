@@ -18,7 +18,7 @@ editor_options:
 
 ```{r}
 packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
-              "dplyr","googledrive","caret","rgdal","keras","vip")
+              "dplyr","googledrive","caret","rgdal","keras","vip","parsnip","workflows","tune","dials")
 
 source("../R/load_packages.R")
 load_packages(packages)
@@ -96,6 +96,38 @@ source("../R/evaluation.R")
 eval <- evaluate(combined_test,random_forest_model)
 eval[[1]]
 eval[[2]]
+
+
+
+
+
+```
+
+
+```{r}
+
+source("../R/XGB.R")
+# type of task we want to evaluate
+model_settings <- parsnip::boost_tree(
+  trees = tune(),
+  min_n = tune(),
+  tree_depth = tune(),
+  learn_rate = tune(),
+  loss_reduction = tune(),
+  sample_size = tune(),
+  stop_iter = tune()
+) |>
+  set_engine("xgboost") |>
+  set_mode("regression")
+xgb_workflow <- workflows::workflow() |>
+  add_formula(temperature ~ .) |>
+  add_model(model_settings)
+xgb(xgb_workflow,combined_train |> dplyr::select(c(temperature,hour,day,month,temp,rain,rain1,temp_3,temp_5,rain1,rain2,
+                  rain3,SE_Raster_101,FO_Raster_51,GA_Raster_5,WA_Raster_21,
+                  AC_Raster_101,SLO_21,VH_WSL_21_21,SVF_5,Bul_Raster_51,BH_21,DEM,LV_03_E,LV_03_N))
+      )
+
+
 
 ```
 
