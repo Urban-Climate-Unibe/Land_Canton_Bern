@@ -29,7 +29,7 @@ load_packages(packages)
 ```{r message=FALSE, warning=FALSE}
 source("../R/data_combination.R")
 #here add check, if present load if not run function
-# combined <- data_combination() |> drop_na() #not very clean but okay
+combined <- data_combination() |> drop_na() #not very clean but okay
 combined <- read_csv("../data/Combined.csv") |> 
   mutate(temperature = temperature-temp) |>
   drop_na()
@@ -64,7 +64,7 @@ Model Definitions
   
 
 predictors <- combined |>
-  dplyr::select(c(hour,day,month,temp,rain,rain1,temp_3,temp_5,rain1,rain2,
+  dplyr::select(c(hour,day,month,temp,rad,rain,rain1,temp_3,temp_5,rain1,rain2,
                   rain3,SE_Raster_101,FO_Raster_51,GA_Raster_5,WA_Raster_21,
                   AC_Raster_101,SLO_21,VH_WSL_21_21,SVF_5,Bul_Raster_51,BH_21,DEM,LV_03_E,LV_03_N)) |>
   colnames()
@@ -122,7 +122,7 @@ xgb_workflow <- workflows::workflow() |>
   add_formula(temperature ~ .) |>
   add_model(model_settings)
 
-combined_train_xgb <- combined_train |> dplyr::select(temperature,hour,day,month,temp,rain,rain1,temp_3,temp_5,rain1,rain2,
+combined_train_xgb <- combined_train |> dplyr::select(temperature,hour,day,month,temp,rad,rain,rain1,temp_3,temp_5,rain1,rain2,
                   rain3,SE_Raster_101,FO_Raster_51,GA_Raster_5,WA_Raster_21,
                   AC_Raster_101,SLO_21,VH_WSL_21_21,SVF_5,Bul_Raster_51,BH_21,DEM,LV_03_E,LV_03_N)
 
@@ -148,7 +148,7 @@ xgb_best_hp <- tune::finalize_workflow(
 
 
 
-combined_test_xgb <- combined_test|> dplyr::select(c(temperature,hour,day,month,temp,rain,rain1,temp_3,temp_5,rain1,rain2,
+combined_test_xgb <- combined_test|> dplyr::select(c(temperature,hour,day,month,temp,rad,rain,rain1,temp_3,temp_5,rain1,rain2,
                   rain3,SE_Raster_101,FO_Raster_51,GA_Raster_5,WA_Raster_21,
                   AC_Raster_101,SLO_21,VH_WSL_21_21,SVF_5,Bul_Raster_51,BH_21,DEM,LV_03_E,LV_03_N))
 

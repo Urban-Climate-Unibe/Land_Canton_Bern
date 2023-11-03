@@ -24,8 +24,9 @@ meteoswiss <- read_delim("../data/Meteoswiss/order_114596_data.txt",delim = ";")
 meteoswiss <- meteoswiss |>
   mutate(time = as.POSIXct(as.character(time), format = "%Y%m%d%H%M"),
          temp = as.numeric(tre200s0),
-         rain = as.numeric(rre150z0))|>
-  dplyr::select(time,temp,rain) |>
+         rain = as.numeric(rre150z0),
+         rad = as.numeric(gre000z0))|>
+  dplyr::select(time,temp,rain,rad) |>
   mutate(time = time+hours(2)) |>
   drop_na() #some parsing error,dk why, 60 NA..
 
