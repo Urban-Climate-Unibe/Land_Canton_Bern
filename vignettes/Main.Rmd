@@ -18,7 +18,7 @@ editor_options:
 
 ```{r}
 packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
-              "dplyr","googledrive","caret","rgdal","keras","vip","parsnip","workflows","tune","dials")
+              "dplyr","googledrive","caret","rgdal","keras","vip","parsnip","workflows","tune","dials","stringr","terra","stars","sf")
 
 source("../R/load_packages.R")
 load_packages(packages)
@@ -27,6 +27,10 @@ load_packages(packages)
 
 ## Data Wrangling
 ```{r message=FALSE, warning=FALSE}
+
+source("../R/raw_tif_processing.R")
+
+
 source("../R/data_combination.R")
 #here add check, if present load if not run function
 combined <- data_combination() |> drop_na() #not very clean but okay
