@@ -68,9 +68,7 @@ Model Definitions
   
 
 predictors <- combined |>
-  dplyr::select(c(hour,day,month,temp,rad,rain,rain1,temp_3,temp_5,rain1,rain2,
-                  rain3,SE_Raster_101,FO_Raster_51,GA_Raster_5,WA_Raster_21,
-                  AC_Raster_101,SLO_21,VH_WSL_21_21,SVF_5,Bul_Raster_51,BH_21,DEM,LV_03_E,LV_03_N)) |>
+  dplyr::select(-c(Log_Nr,temperature,timestamp,Name,NORD_CHTOP,OST_CHTOPO)) |>
   colnames()
   formula_local <- as.formula(paste("temperature","~", paste(predictors,collapse  = "+")))
   
@@ -97,7 +95,9 @@ random_forest_model <- random_forest(pp,combined_train)
 Evaluation
 ```{r}
 source("../R/evaluation.R")
+combined_test$fitted <- predict(random_forest_model, combined_test)
 eval <- evaluate(combined_test,random_forest_model)
+
 eval[[1]]
 eval[[2]]
 
