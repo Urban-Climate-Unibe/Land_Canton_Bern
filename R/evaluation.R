@@ -1,12 +1,17 @@
 
 evaluate <- function(data_evaluate,model){
 
-  #prepping data
-  data_evaluate$fitted <- unlist(predict(model, data_evaluate))
-  metrics_test <- data_evaluate |>
-    yardstick::metrics(temperature, fitted)
+library(plyr)
+library(doParallel)
+cores <- detectCores()
+registerDoParallel(cores=detectCores())
 
-  data_evaluate<- data_evaluate|>mutate(difference = fitted-temperature)
+#prepping data
+data_evaluate$fitted <- unlist(predict(model, data_evaluate))
+metrics_test <- data_evaluate |>
+  yardstick::metrics(temperature, fitted)
+
+data_evaluate<- data_evaluate|>mutate(difference = fitted-temperature)
 
 
 rmse_test <- metrics_test |>

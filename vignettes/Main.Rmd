@@ -18,7 +18,9 @@ editor_options:
 
 ```{r}
 packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
-              "dplyr","googledrive","caret","rgdal","keras","vip","parsnip","workflows","tune","dials","stringr","terra","stars","sf")
+              "dplyr","googledrive","caret","rgdal","keras","vip","parsnip",
+              "workflows","tune","dials","stringr","terra","stars","sf", "plyr",
+              "doParallel")
 
 source("../R/load_packages.R")
 load_packages(packages)
@@ -46,6 +48,7 @@ combined_test <- combined |>
 combined_train <- combined |> 
   filter(!(Log_Nr %in% loggers_test))
 
+write_csv(combined,"../data/Combined.csv")
 ```
 
 
@@ -82,7 +85,33 @@ pp <- recipes::recipe(formula_local,
 ```
 
 
+```{r}
+source("../R/knn_model.R")
+knn_model <- KNN_Model(pp, combined_train)
 
+source("../R/evaluation.R")
+combined_test$fitted <- predict(knn_model, combined_test)
+eval <- evaluate(combined_test,knn_model)
+
+eval[[1]]
+eval[[2]]
+
+```
+
+
+
+```{r}
+source("../R/lm_model.R")
+lm_model <- LM_Model(pp, combined_train)
+
+source("../R/evaluation.R")
+combined_test$fitted <- predict(lm_model, combined_test)
+eval <- evaluate(combined_test,lm_model)
+
+eval[[1]]
+eval[[2]]
+
+```
 
 Model Training
 ```{r}
