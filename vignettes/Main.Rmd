@@ -176,6 +176,27 @@ eval <- evaluate(combined_test,xgb_best_model)
  eval[[1]]
  eval[[2]]
 
+ 
+```
+ 
+```{r}
+ 
+predictors <- combined_train |>
+  dplyr::select(-c(Log_Nr,temperature,timestamp,Name,NORD_CHTOP,OST_CHTOPO))
+  
+temperature <- combined_train$temperature
+scaled_predictors <- scale(predictors)
+ 
+   library(doParallel)
+  cores <- detectCores()
+  registerDoParallel(cores=detectCores())
+ 
+ nn <- neuralnet(temperature ~., data = scaled_predictors, hidden = c(100, 60), linear.output = TRUE)
+ 
+ plot(nn)
+ 
+ 
+predicted_values <- compute(nn, scaled_predictors)$net.result
 ```
 
 
