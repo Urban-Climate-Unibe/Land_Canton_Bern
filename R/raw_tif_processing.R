@@ -7,11 +7,11 @@ unzip(paste0(tempdir(),"mopu.zip"),exdir = paste0(tempdir(),"mopu"))
 
 
 
-# https://geofiles.be.ch/geoportal/pub/download/GEBHOEHE/GEBHOEHE.zip
+
 
 
 #Todo:
-#building height
+
 #DEM
 #slope
 #svf
@@ -116,9 +116,44 @@ for (file in files) {
     unique() |>
     as.numeric()
 print(meter)
-  tiff_focal(raster_data,meter)
+  tiff_focal(raster_data,meter,file)
 
 }
+
+#Now BH
+
+download.file("https://geofiles.be.ch/geoportal/pub/download/GEBHOEHE/GEBHOEHE.zip",destfile = paste0(tempdir(),"GEBHOEHE.zip"))
+unzip(paste0(tempdir(),"GEBHOEHE.zip"),exdir = paste0(tempdir(),"/GEBHOEH"))
+
+# Read in the shapefile
+shapefile <- st_read(paste0(tempdir(),"/GEBHOEH/GEBHOEHE/data/GEBHOEHE_GEBHOEHE.shp"))
+
+# Define the extent you want to cut to
+# Replace these values with your desired extent (xmin, xmax, ymin, ymax)
+extent_to_cut <- st_bbox(c(xmin = 2594313, xmax = 2605813, ymin = 1194069, ymax = 1204804), crs = st_crs(shapefile))
+
+# Cut the shapefile to the specified extent
+shapefile_cropped <- st_crop(shapefile, extent_to_cut)
+
+
+
+st_rasterize(shapefile_cropped,file = paste0(tempdir(),"/GEBHOEH/GEBHOEHE/data/GEBHOEHE_GEBHOEHE.shp"),dx = 5, dy = 5) #resolution of 5 meters
+
+raster <- terra::rast(paste0(tempdir(),"/GEBHOEH/GEBHOEHE/data/GEBHOEHE_GEBHOEHE.shp"))
+raster <- raster[[2]]
+
+tiff_focal(tiff = raster,150,"BH_NA.tif")
+
+raster <- terra::rast("../data/Tiffs/BH_NA_150.tif")
+subst(raster, NA, 0)
+writeRaster(raster, filename="../data/Tiffs/BH_150.tif",overwrite = T)
+file.remove("../data/Tiffs/BH_NA_150.tif")
+
+
+
+
+
+#DEM
 
 
 

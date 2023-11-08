@@ -30,7 +30,7 @@ load_packages(packages)
 ## Data Wrangling
 ```{r message=FALSE, warning=FALSE}
 
-# source("../R/raw_tif_processing.R")
+source("../R/raw_tif_processing.R")
 
 
 source("../R/data_combination.R")
