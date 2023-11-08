@@ -35,8 +35,8 @@ source("../R/raw_tif_processing.R")
 
 source("../R/data_combination.R")
 #here add check, if present load if not run function
-combined <- data_combination() |> drop_na() #not very clean but okay
-combined <- read_csv("../data/Combined.csv") |> 
+# combined <- data_combination() |> drop_na() #not very clean but okay
+combined <- read_csv("../data/Combined.csv") |>
   mutate(temperature = temperature-temp) |>
   drop_na()
 
@@ -48,27 +48,13 @@ combined_test <- combined |>
 combined_train <- combined |> 
   filter(!(Log_Nr %in% loggers_test))
 
-write_csv(combined,"../data/Combined.csv")
+
 ```
 
 
 Model Definitions
 ```{r}
-#Old Version
 
-# predictors <- combined |>
-#   dplyr::select(-c(Log_Nr,temperature,Name,NORD_CHTOP,OST_CHTOPO)) |>
-#   colnames()
-#   formula_local <- as.formula(paste("temperature","~", paste(predictors,collapse  = "+")))
-#   
-# 
-#   pp <- recipes::recipe(formula_local,
-#                         data = combined_train) |>
-#     recipes::step_center(recipes::all_numeric(), -recipes::all_outcomes()) |>
-#     recipes::step_scale(recipes::all_numeric(), -recipes::all_outcomes())
-#   
-
-  
 
 predictors <- combined |>
   dplyr::select(-c(Log_Nr,temperature,timestamp,Name,NORD_CHTOP,OST_CHTOPO)) |>
@@ -117,7 +103,6 @@ Model Training
 ```{r}
 source("../R/random_forest.R")
 random_forest_model <- random_forest(pp,combined_train)
-
 ```
 
 

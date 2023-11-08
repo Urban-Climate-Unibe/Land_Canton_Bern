@@ -13,7 +13,7 @@ measurement_files <- measurement_files |>
 
 measurement_files <- measurement_files |>
   group_by(hour, day, month, year) |>
-  summarise(across(where(is.numeric), mean))
+  dplyr::summarise(across(where(is.numeric), mean))
 
 measurement_files <-  measurement_files |> pivot_longer(cols = starts_with("L"), names_to = "Log_Nr",values_to = "temperature") |>
   mutate(Log_Nr = as.numeric(str_replace(Log_Nr, "Log_", ""))) |>
@@ -40,8 +40,8 @@ meteoswiss <- meteoswiss |>
          day = day(time),
          year = year(time))
 meteoswiss <- meteoswiss |>
-  group_by(hour, day, month, year) |>
-  summarise(across(where(is.numeric), mean),.groups = 'drop')
+  dplyr::group_by(hour, day, month, year) |>
+  dplyr::summarise(across(where(is.numeric), mean),.groups = 'drop')
 
 meteoswiss <- meteoswiss|>
   mutate(timestamp = ymd_h(paste(year,month,day,hour,sep = "-")))|>
@@ -55,8 +55,8 @@ meteoswiss_rain_day1 <- meteoswiss|>
          hour = hour(timestamp),
          month = month(timestamp),
          year = year(timestamp))|>
-  group_by(year,month,day)|>
-  summarise(rain1 = mean(rain),.groups = 'drop')
+  dplyr::group_by(year,month,day)|>
+  dplyr::summarise(rain1 = mean(rain),.groups = 'drop')
 
 
 meteoswiss_rain_day2 <- meteoswiss|>
@@ -65,8 +65,8 @@ meteoswiss_rain_day2 <- meteoswiss|>
          hour = hour(timestamp),
          month = month(timestamp),
          year = year(timestamp))|>
-  group_by(year,month,day)|>
-  summarise(rain2 = mean(rain),.groups = 'drop')
+  dplyr::group_by(year,month,day)|>
+  dplyr::summarise(rain2 = mean(rain),.groups = 'drop')
 
 meteoswiss_rain_day3 <- meteoswiss|>
   mutate(timestamp = timestamp-hours(24*3))|>
@@ -74,8 +74,8 @@ meteoswiss_rain_day3 <- meteoswiss|>
          hour = hour(timestamp),
          month = month(timestamp),
          year = year(timestamp))|>
-  group_by(year,month,day)|>
-  summarise(rain3 = mean(rain),.groups = 'drop')
+  dplyr::group_by(year,month,day)|>
+  dplyr::summarise(rain3 = mean(rain),.groups = 'drop')
 
 meteoswiss<- inner_join(meteoswiss,meteoswiss_rain_day1,by = c("day","month","year")) |>
   inner_join(meteoswiss_rain_day2) |>

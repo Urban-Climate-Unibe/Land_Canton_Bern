@@ -36,9 +36,6 @@ st_rasterize(shapefile_cropped,file = paste0(tempdir(),"mopu/data/MOPUBE_BBF.tif
 raster <- terra::rast(paste0(tempdir(),"mopu/data/MOPUBE_BBF.tif"))
 raster <- raster[[1]]
 
-land_classes <- dplyr::tibble(Art = shapefile$ART, Bez = shapefile$BBARTT_BEZ)
-land_classes <- land_classes |> group_by(Art,Bez) |>
-  summarise()
 
 
 
@@ -84,19 +81,16 @@ print(class)
 print(number_classes)
 temp_raster <- raster %in% number_classes*1
 name <- classification |>
-  filter(Reclassified_category == class) |>
+  dplyr::filter(Reclassified_category == class) |>
   dplyr::select(Variable) |>
-  dplyr::group_by(Variable) |>
-  summarise()|>
-  unlist()
+  unlist() |>
+  unique()
 
 terra::writeRaster(temp_raster,paste0("../data-raw/",name,".tif"),overwrite = T)
 
 }
 
 
-
-# Creating the tibble
 
 
 
@@ -118,9 +112,9 @@ for (file in files) {
   meter <- classification |>
     filter(Variable == str_sub(file,end = -5)) |>
     dplyr::select(Chosen_buffer_radiusm) |>
-    dplyr::group_by(Chosen_buffer_radiusm)|>
-    summarise()|>
-    unlist()
+    unlist() |>
+    unique() |>
+    as.numeric()
 print(meter)
   tiff_focal(raster_data,meter)
 
