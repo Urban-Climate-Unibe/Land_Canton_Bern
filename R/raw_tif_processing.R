@@ -154,6 +154,42 @@ file.remove("../data/Tiffs/BH_NA_150.tif")
 
 
 #DEM
+# Read the CSV file containing links
+file_data <- read.table("./data/ch.swisstopo.swissalti3d-R0nQWQPf.csv",header = F)
 
+# Function to download files
+download_files <- function(url, destination_folder) {
+  # Extract the file name from the URL
+  file_name <- basename(url)
+
+  # Create the destination file path
+  destination_path <- file.path(destination_folder, file_name)
+
+  # Download the file
+  download.file(url, destfile = destination_path, mode = "wb")
+}
+
+# Folder where you want to save the downloaded files
+output_folder <- "./data-raw/DEM"
+
+# Create the output folder if it doesn't exist
+dir.create(output_folder, showWarnings = FALSE)
+
+# Loop through each link and download the file
+for (link in file_data$V1) {
+  download_files(link, output_folder)
+}
+
+
+DEM_paths <- paste0("./data-raw/DEM/",list.files("./data-raw/DEM/"))
+
+terrainr::merge_rasters(DEM_paths,output_raster = "./data-raw/DEM.tif",options = "BIGTIFF=YES",overwrite = TRUE)
+
+
+DEM <- terra::rast("./data-raw/DEM.tif")
+ext <- c(2594313, 2605813, 1194069, 1204804)
+terra::rast
+DEM <- crop(DEM, ext)
+terra::writeRaster(DEM, filename = "./data/Tiffs/DEM.tif", format = "GTiff")
 
 

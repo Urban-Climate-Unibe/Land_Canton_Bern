@@ -20,7 +20,7 @@ editor_options:
 packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
               "dplyr","googledrive","caret","rgdal","keras","vip","parsnip",
               "workflows","tune","dials","stringr","terra","stars","sf", "plyr",
-              "doParallel")
+              "doParallel","terrainr")
 
 source("../R/load_packages.R")
 load_packages(packages)
@@ -35,7 +35,7 @@ source("../R/raw_tif_processing.R")
 
 source("../R/data_combination.R")
 #here add check, if present load if not run function
-# combined <- data_combination() |> drop_na() #not very clean but okay
+combined <- data_combination() |> drop_na() #not very clean but okay
 combined <- read_csv("../data/Combined.csv") |>
   mutate(temperature = temperature-temp) |>
   drop_na()
