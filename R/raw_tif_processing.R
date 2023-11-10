@@ -139,10 +139,10 @@ shapefile_cropped <- st_crop(shapefile, extent_to_cut)
 
 st_rasterize(shapefile_cropped,file = paste0(tempdir(),"/GEBHOEH/GEBHOEHE/data/GEBHOEHE_GEBHOEHE.shp"),dx = 5, dy = 5) #resolution of 5 meters
 
-raster <- terra::rast(paste0(tempdir(),"/GEBHOEH/GEBHOEHE/data/GEBHOEHE_GEBHOEHE.shp"))
-raster <- raster[[2]]
+raster_BH <- terra::rast(paste0(tempdir(),"/GEBHOEH/GEBHOEHE/data/GEBHOEHE_GEBHOEHE.shp"))
+raster_BH <- raster[[2]]
 
-tiff_focal(tiff = raster,150,"BH_NA.tif")
+tiff_focal(tiff = raster_BH,150,"BH_NA.tif")
 
 raster <- terra::rast("../data/Tiffs/BH_NA_150.tif")
 subst(raster, NA, 0)
@@ -155,7 +155,7 @@ file.remove("../data/Tiffs/BH_NA_150.tif")
 
 #DEM
 # Read the CSV file containing links
-file_data <- read.table("./data/ch.swisstopo.swissalti3d-R0nQWQPf.csv",header = F)
+file_data <- read.table("./data/ch.swisstopo.swissalti3d-TMP02zny.csv",header = F)
 
 # Function to download files
 download_files <- function(url, destination_folder) {
@@ -170,7 +170,7 @@ download_files <- function(url, destination_folder) {
 }
 
 # Folder where you want to save the downloaded files
-output_folder <- "./data-raw/DEM"
+output_folder <- paste0(tempdir(),"/DEM")
 
 # Create the output folder if it doesn't exist
 dir.create(output_folder, showWarnings = FALSE)
@@ -181,15 +181,35 @@ for (link in file_data$V1) {
 }
 
 
-DEM_paths <- paste0("./data-raw/DEM/",list.files("./data-raw/DEM/"))
+DEM_paths <- paste0(paste0(tempdir(),"/DEM/"),list.files(paste0(tempdir(),"/DEM")))
 
-terrainr::merge_rasters(DEM_paths,output_raster = "./data-raw/DEM.tif",options = "BIGTIFF=YES",overwrite = TRUE)
+terrainr::merge_rasters(DEM_paths,output_raster = paste0(tempdir(),"/DEM/DEM.tif"),options = "BIGTIFF=YES",overwrite = TRUE)
 
 
-DEM <- terra::rast("./data-raw/DEM.tif")
-ext <- c(2594313, 2605813, 1194069, 1204804)
-terra::rast
-DEM <- crop(DEM, ext)
-terra::writeRaster(DEM, filename = "./data/Tiffs/DEM.tif", format = "GTiff")
+DEM <- terra::rast(paste0(tempdir(),"/DEM/DEM.tif"))
+ex <- terra::rast("./data/Tiffs/OS_AC_500.tif") #not very elegant, maybe improve?
+
+DEM <- terra::resample(DEM,ex)
+
+terra::writeRaster(DEM, filename = "./data/Tiffs/DEM.tif",overwrite = T)
+
+DEM <- st_as_stars(DEM)
+#Slope
+
+slope <- slope(DEM)
+slope<-terra::rast(slope)
+slope <- terra::resample(slope,ex)
+
+tiff_focal(tiff = slope,100,"SLO.tif")
+
+
+
+#SVF
+DEM <- terra::rast(paste0(tempdir(),"/DEM/DEM.tif"))
+raster_BH #Building height
+VH <- terra::rast("./VH/VH_WSL_21.tif") #needs to change! Read in from net...
+
+
+
 
 

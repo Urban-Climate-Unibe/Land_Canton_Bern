@@ -20,7 +20,7 @@ editor_options:
 packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
               "dplyr","googledrive","caret","rgdal","keras","vip","parsnip",
               "workflows","tune","dials","stringr","terra","stars","sf", "plyr",
-              "doParallel","terrainr")
+              "doParallel","terrainr","starsExtra")
 
 source("../R/load_packages.R")
 load_packages(packages)
