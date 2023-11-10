@@ -140,7 +140,7 @@ shapefile_cropped <- st_crop(shapefile, extent_to_cut)
 st_rasterize(shapefile_cropped,file = paste0(tempdir(),"/GEBHOEH/GEBHOEHE/data/GEBHOEHE_GEBHOEHE.shp"),dx = 5, dy = 5) #resolution of 5 meters
 
 raster_BH <- terra::rast(paste0(tempdir(),"/GEBHOEH/GEBHOEHE/data/GEBHOEHE_GEBHOEHE.shp"))
-raster_BH <- raster[[2]]
+raster_BH <- raster_BH[[2]]
 
 tiff_focal(tiff = raster_BH,150,"BH_NA.tif")
 
@@ -155,7 +155,7 @@ file.remove("../data/Tiffs/BH_NA_150.tif")
 
 #DEM
 # Read the CSV file containing links
-file_data <- read.table("./data/ch.swisstopo.swissalti3d-TMP02zny.csv",header = F)
+file_data <- read.table("../data/ch.swisstopo.swissalti3d-TMP02zny.csv",header = F)
 
 # Function to download files
 download_files <- function(url, destination_folder) {
@@ -187,27 +187,53 @@ terrainr::merge_rasters(DEM_paths,output_raster = paste0(tempdir(),"/DEM/DEM.tif
 
 
 DEM <- terra::rast(paste0(tempdir(),"/DEM/DEM.tif"))
-ex <- terra::rast("./data/Tiffs/OS_AC_500.tif") #not very elegant, maybe improve?
+ex <- terra::rast("../data/Tiffs/OS_AC_500.tif") #not very elegant, maybe improve?
 
 DEM <- terra::resample(DEM,ex)
 
-terra::writeRaster(DEM, filename = "./data/Tiffs/DEM.tif",overwrite = T)
+terra::writeRaster(DEM, filename = "../data/Tiffs/DEM.tif",overwrite = T)
 
-DEM <- st_as_stars(DEM)
-#Slope
 
-slope <- slope(DEM)
-slope<-terra::rast(slope)
+#Slope and aspect(NOR from Burger)
+
+
+slope <- terra::terrain(DEM,v = "slope")
+
 slope <- terra::resample(slope,ex)
 
 tiff_focal(tiff = slope,100,"SLO.tif")
 
 
+aspect <- terra::terrain(DEM,v = "aspect")
+aspect <- terra::resample(aspect,ex)
+tiff_focal(tiff = slope,150,"ASP.tif")
 
-#SVF
-DEM <- terra::rast(paste0(tempdir(),"/DEM/DEM.tif"))
-raster_BH #Building height
-VH <- terra::rast("./VH/VH_WSL_21.tif") #needs to change! Read in from net...
+#and Vegetation height
+
+download.file("https://www.dropbox.com/scl/fi/ywx8f4cufj0l43p9nh5ze/VH_WSL_21.tif?rlkey=swtvr5zw4sit9qtw5pu4ju5o3&dl=1", destfile = paste0(tempdir(),"/VH.tif"))
+VH <- terra::rast(paste0(tempdir(),"/VH.tif"))
+VH <- terra::resample(VH,ex)
+tiff_focal(tiff = VH,150,"VH.tif")
+
+
+#Flowacc based on DSM
+ #needs to change! Read in from net...
+VH <- terra::resample(VH,ex)
+DSM <- terra::mosaic(DEM,raster_BH,fun = "sum")
+DSM <- terra::mosaic(DSM,VH,fun = "sum")
+
+
+flowacc <- terra::terrain(DSM,v = "flowdir")
+flowacc <- terra::resample(flowacc,ex)
+tiff_focal(tiff = flowacc,200,"FLAC.tif")
+
+
+#sky view alternative: roughness? just the opposite? who knows
+
+roughness <- terra::terrain(DSM,v = "roughness")
+roughness <- terra::resample(roughness,ex)
+tiff_focal(tiff = flowacc,25,"ROU.tif")
+
 
 
 
