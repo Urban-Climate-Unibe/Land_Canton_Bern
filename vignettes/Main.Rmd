@@ -13,93 +13,170 @@ editor_options:
     wrap: 75
 ---
 
-
 ## Preparation
 
-```{r}
+First, we need some R-Packages. This code chunk install and load all
+packages you need for this project. If you think you need another package
+as well, then write it into the vector 'packages'.
+
+```{r Load the Packages needed, message=FALSE, warning=FALSE, include=FALSE}
+# Decide which packages you need. For this Project you need the following:
 packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
               "dplyr","googledrive","caret","rgdal","keras","vip","parsnip",
-              "workflows","tune","dials","stringr","terra","stars","sf", "plyr",
-              "doParallel","terrainr","starsExtra")
+              "workflows","tune","dials","stringr","terra","stars","sf","plyr",
+              "doParallel","terrainr","starsExtra", "pdp", "kableExtra")
 
+# Load the R script to install and load all the packages from above
 source("../R/load_packages.R")
-load_packages(packages)
-
 ```
 
 ## Data Wrangling
-```{r message=FALSE, warning=FALSE}
 
-source("../R/raw_tif_processing.R")
+### Raw TIF processing
 
+### Data Combination
 
-source("../R/data_combination.R")
-#here add check, if present load if not run function
-combined <- data_combination() |> drop_na() #not very clean but okay
-combined <- read_csv("../data/Combined.csv") |>
-  mutate(temperature = temperature-temp) |>
-  drop_na()
+This code chunk creates the 'combined.csv' file which is the basis of the
+whole project. It contains 10 geospatial data (6 land use classes and 4
+geospatial layers)
 
-set.seed(123)
-loggers_test <- sample(unique(combined$Log_Nr), 10)
+```{r Data Wrangling, echo=FALSE, message=FALSE, warning=FALSE}
+# We want to know, if a certain file already exists
+name.of.file <- "../data/Combined.csv"
 
-combined_test <- combined |> 
-  filter((Log_Nr %in% loggers_test))
-combined_train <- combined |> 
-  filter(!(Log_Nr %in% loggers_test))
+# If do not exists such a file, we create it
+if (!file.exists(name.of.file)){
+  # Load the R script to processing the raw tif files
+  source("../R/raw_tif_processing.R")
+  
+  # Load the R script to create the data frame "combined" which is the basis of this project
+  source("../R/data_combination.R")
+  
+  # We run the loaded function and drop all NAs
+  combined <- data_combination() |> drop_na()
+  combined <- read_csv("../data/Combined.csv") |>
+    mutate(temperature = temperature-temp) |>
+    drop_na()
+  
+  set.seed(123)
+  loggers_test <- sample(unique(combined$Log_Nr), 10)
 
+  combined_test <- combined |> 
+    filter((Log_Nr %in% loggers_test))
+  combined_train <- combined |> 
+    filter(!(Log_Nr %in% loggers_test))
+  
+# If exists such a file, read it in
+}else{combined <- read_csv("../data/Combined.csv")|>
+    mutate(temperature = temperature-temp) |>
+    drop_na()
 
+  set.seed(123)
+  loggers_test <- sample(unique(combined$Log_Nr), 10)
+
+  combined_test <- combined |> 
+    filter((Log_Nr %in% loggers_test))
+  combined_train <- combined |> 
+    filter(!(Log_Nr %in% loggers_test))}
 ```
 
+# Models
 
-Model Definitions
+In this section we define our predictors
+
+## Model Definitions and Recipe
+
 ```{r}
 
-
+# Take all column-names you need as predictors from the combined file
 predictors <- combined |>
   dplyr::select(-c(Log_Nr,temperature,timestamp,Name,NORD_CHTOP,OST_CHTOPO)) |>
   colnames()
-  formula_local <- as.formula(paste("temperature","~", paste(predictors,collapse  = "+")))
-  
 
+# Define a formula in the following format: target ~ predictor_1 + ... + predictor_n
+formula_local <- as.formula(paste("temperature","~", paste(predictors,collapse  = "+")))
+  
+# Make a recipe which can be used for the km, KNN, Random Forest, and the XGB Boost model
 pp <- recipes::recipe(formula_local,
                       data = combined_train) |>
     recipes::step_BoxCox(recipes::all_predictors()) |>
     recipes::step_center(recipes::all_numeric(), -recipes::all_outcomes()) |>
     recipes::step_scale(recipes::all_numeric(), -recipes::all_outcomes())
-
 ```
 
+# Different Models
+
+Here, you can select the model that will be used to eventually estimate the
+map's spatial temperature distribution. The table shows that the model with
+the random forest approach shows the best performance, which is why it was
+used for the map.
+
+| Model             | RSQ [Test] | RMSE [Test] | MAE [Test] | Bias [Test] |
+|-------------------|------------|-------------|------------|-------------|
+| Linear Regression | 0.12       | 0.97 °C     | 0.76 °C    | 0.007 °C    |
+| KNN               |            |             |            |             |
+| Random Forest     |            |             |            |             |
+| XGB Boost         |            |             |            |             |
+| Neuronal Network  |            |             |            |             |
+
+: **TABLE 1:** Overview of the evaluation of the models. The RMSE describes
+the precision and the bias describes accuracy.
+
+To fully implement the Open Sciences approach, the models can be computed
+using the following code chunks. Further, for every model, a short synopsis
+of the optimized hyperparameters is given. It must therefore be decided
+before running the code chunk whether the hyperparameters determined by us
+are to be used or whether the hyperparameters are to be optimized.
+
+## LM Model
+
+```{r Calculate a LM-Model, message=FALSE, warning=FALSE}
+# Load the R script to calculate a lm model
+source("../R/lm_model.R")
+# The function needs the recipe and a dataset which can be used for model training
+lm_model <- LM_Model(pp, combined_train)
+lm_model$results$Rsquared
+
+source("../R/evaluation.R")
+evaluation <- evaluation_function(combined_test, combined_train ,lm_model)
+
+# If we want a table 
+evaluation[[1]]
+
+# Overview Training and Test
+evaluation[[2]]
+```
+
+## KNN Model
+
+The computational complexity is enormous and thus, KNN is not suitable for
+very large data sets. You will need a very good device. We recommend using
+our hyperparameter k = xx.
 
 ```{r}
+# Load the R script to calculate a KNN model
 source("../R/knn_model.R")
-knn_model <- KNN_Model(pp, combined_train)
+
+# hyperpar.k <- c(5, 10, 15)
+# knn_model <- KNN_Model(pp, combined_train, hyperpar.k)
+
+# The function needs the recipe and a dataset which can be used for model training
+knn_model <- KNN_Model(pp, combined_train, hyperpar.k)
+
+# Call the function
+result <- KNN_Model(pp = your_pp_value, 
+                    training_data = your_training_data, 
+                    hyperpar.k = hyperpar.k_values)
 
 source("../R/evaluation.R")
 combined_test$fitted <- predict(knn_model, combined_test)
 eval <- evaluate(combined_test,knn_model)
-
 eval[[1]]
 eval[[2]]
-
 ```
 
+## Random Forest Model
 
-
-```{r}
-source("../R/lm_model.R")
-lm_model <- LM_Model(pp, combined_train)
-
-source("../R/evaluation.R")
-combined_test$fitted <- predict(lm_model, combined_test)
-eval <- evaluate(combined_test,lm_model)
-
-eval[[1]]
-eval[[2]]
-
-```
-
-Model Training
 ```{r}
 source("../R/random_forest.R")
 random_forest_model <- random_forest(pp,combined_train)
@@ -120,6 +197,7 @@ eval[[2]]
 
 ```
 
+## XGB Model
 
 ```{r}
 
@@ -178,7 +256,9 @@ eval <- evaluate(combined_test,xgb_best_model)
 
  
 ```
- 
+
+## Neuronal Network
+
 ```{r}
  
 predictors <- combined_train |>
@@ -198,5 +278,3 @@ scaled_predictors <- scale(predictors)
  
 predicted_values <- compute(nn, scaled_predictors)$net.result
 ```
-
-

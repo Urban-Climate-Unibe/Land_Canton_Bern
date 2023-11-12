@@ -1,52 +1,103 @@
 
-evaluate <- function(data_evaluate,model){
-
-library(plyr)
-library(doParallel)
-cores <- detectCores()
-registerDoParallel(cores=detectCores())
+evaluation_function <- function(data_evaluate = combined_test, train_data = combined_train, model){
 
 #prepping data
 data_evaluate$fitted <- unlist(predict(model, data_evaluate))
+
+train_data$fitted <- unlist(predict(model, train_data))
+
+###############################################################################
+# Metrics
+
+# -----------------------------------------------------------------------------
+# Metrics Train (RMSE, MAE, RSQ, Bias)
+rmse_train <- model$results$RMSE
+mae_train <- model$results$MAE
+rsq_train <- model$results$Rsquared
+
+train_data <- train_data|>mutate(Bias = fitted - temperature)
+bias.train <- mean(train_data$Bias)
+
+
+# -----------------------------------------------------------------------------
+# Metrics Test (RMSE, MAE, RSQ, Bias)
+
 metrics_test <- data_evaluate |>
   yardstick::metrics(temperature, fitted)
-
-data_evaluate<- data_evaluate|>mutate(difference = fitted-temperature)
-
 
 rmse_test <- metrics_test |>
   filter(.metric == "rmse") |>
   pull(.estimate)
+
+mae_test <- metrics_test |>
+  filter(.metric == "mae") |>
+  pull(.estimate)
+
 rsq_test <- metrics_test |>
   filter(.metric == "rsq") |>
   pull(.estimate)
 
-#plots
 
 
+# We calculate the Bias
+# --> if the bias is negative, then the model underestimate the temperature
+# --> if the bias is positive, then the model overestimate the temperature
+data_evaluate <- data_evaluate|>mutate(Bias = fitted - temperature)
+bias.test <- mean(data_evaluate$Bias)
 
-p1 <- ggplot(data = data_evaluate, aes(temperature, fitted)) +
+###############################################################################
+# data frame
+
+tabl <- tibble::tibble('Metric' = c('RSQ', ' RMSE', 'MAE', 'Bias'),
+                       'Values of training set' = c(rsq_train, rmse_train, mae_train, bias.train),
+                       'Values of the test set' = c(rsq_test, rmse_test, mae_test, bias.test))|>
+  kableExtra::kbl(align = 'lcc')|>
+  kableExtra::kable_classic_2(full_width = T, html_font = "Cambria")
+
+###############################################################################
+# Plots
+
+p1 <- ggplot(data = train_data, aes(temperature, fitted)) +
   geom_point(alpha = 0.3) +
-  geom_smooth(method = "lm", se = FALSE, color = "red") +
-  geom_abline(slope = 1, intercept = 0, linetype = "dotted") +
-  labs(subtitle = bquote( italic(R)^2 == .(format(rsq_test, digits = 2)) ~~
-                            RMSE == .(format(rmse_test, digits = 3))),
-       title = "Test set") +
+  geom_smooth(method = "lm", se = FALSE, color = "red", linewidth = 0.5) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dotdash",
+              linewidth = 0.5, color = "orange") +
+  labs(subtitle = bquote(italic(R)^2 == .(format(rsq_train, digits = 2)) ~~
+                           RMSE == .(format(rmse_train, digits = 3)) ~~
+                           MAE == .(format(mae_train, digits = 3)) ~~
+                           Bias == .(format(bias.train, digits = 3))),
+       title = "Train set") +
+  theme_classic()
+
+p2 <- ggplot(data = data_evaluate, aes(temperature, fitted)) +
+ geom_point(alpha = 0.3) +
+ geom_smooth(method = "lm", se = TRUE, color = "red", linewidth = 1) +
+ geom_abline(slope = 1, intercept = 0, linetype = "dotted", color = 'orange', linewidth = 0.5) +
+ labs(subtitle = bquote(italic(R)^2 == .(format(rsq_test, digits = 2)) ~~
+                           RMSE == .(format(rmse_test, digits = 3)) ~~
+                           MAE == .(format(mae_test, digits = 3)) ~~
+                           Bias == .(format(bias.test, digits = 3))),
+  title = "Test set") +
   theme_classic()
 
 
 
-# p2 <- ggplot(data = data_evaluate,
+
+out <- cowplot::plot_grid(p1, p2)
+
+
+
+# p3 <- ggplot(data = data_evaluate,
 #        aes(x = as.factor(Log_Nr), y = abs(difference)))+
 #   geom_boxplot()
 
 
-p3 <- ggplot(data = data_evaluate,
-       aes(x = as.factor(hour), y = abs(difference)))+
-  geom_boxplot()
+#p4 <- ggplot(data = data_evaluate,
+#       aes(x = as.factor(hour), y = abs(difference)))+
+#  geom_boxplot()
 
 
-# p4 <- vip::vip(model,                        # Model to use
+# p5 <- vip::vip(model,                        # Model to use
 #          train = model$trainingData,   # Training data used in the model
 #          method = "permute",            # VIP method
 #          target = "temperature",     # Target variable
@@ -57,10 +108,9 @@ p3 <- ggplot(data = data_evaluate,
 #          num_features = 20L# Prediction function to use
 # )
 
-plot <- cowplot::plot_grid(p1,p3,
-                   ncol = 2)
+#plot <- cowplot::plot_grid(p1,p3,ncol = 2)
 
-return(list(metrics_test,plot))
+return(list(tabl, out))
 
 #
 # preds <-

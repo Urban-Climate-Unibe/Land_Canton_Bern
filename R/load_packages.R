@@ -11,3 +11,5 @@ if (any(installed_packages == FALSE)) {
 invisible(lapply(packages, library, character.only = TRUE)) #load packages
 print("All packages installed and loaded")
 }
+
+load_packages(packages)
