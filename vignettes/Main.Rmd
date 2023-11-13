@@ -53,7 +53,8 @@ if (!file.exists(name.of.file)){
   source("../R/data_combination.R")
   
   # We run the loaded function and drop all NAs
-  combined <- data_combination() |> drop_na()
+  data_combination() 
+}#generate file
   combined <- read_csv("../data/Combined.csv") |>
     mutate(temperature = temperature-temp) |>
     drop_na()
@@ -66,18 +67,7 @@ if (!file.exists(name.of.file)){
   combined_train <- combined |> 
     filter(!(Log_Nr %in% loggers_test))
   
-# If exists such a file, read it in
-}else{combined <- read_csv("../data/Combined.csv")|>
-    mutate(temperature = temperature-temp) |>
-    drop_na()
 
-  set.seed(123)
-  loggers_test <- sample(unique(combined$Log_Nr), 10)
-
-  combined_test <- combined |> 
-    filter((Log_Nr %in% loggers_test))
-  combined_train <- combined |> 
-    filter(!(Log_Nr %in% loggers_test))}
 ```
 
 # Models
@@ -90,7 +80,7 @@ In this section we define our predictors
 
 # Take all column-names you need as predictors from the combined file
 predictors <- combined |>
-  dplyr::select(-c(Log_Nr,temperature,timestamp,Name,NORD_CHTOP,OST_CHTOPO)) |>
+  dplyr::select(-c(Log_Nr,temperature,timestamp,Name,NORD_CHTOP,OST_CHTOPO,year)) |>
   colnames()
 
 # Define a formula in the following format: target ~ predictor_1 + ... + predictor_n
@@ -99,7 +89,7 @@ formula_local <- as.formula(paste("temperature","~", paste(predictors,collapse  
 # Make a recipe which can be used for the km, KNN, Random Forest, and the XGB Boost model
 pp <- recipes::recipe(formula_local,
                       data = combined_train) |>
-    recipes::step_BoxCox(recipes::all_predictors()) |>
+    recipes::step_YeoJohnson(all_numeric(), -all_outcomes()) |> #extension of BoxCox? we will see wether that works...
     recipes::step_center(recipes::all_numeric(), -recipes::all_outcomes()) |>
     recipes::step_scale(recipes::all_numeric(), -recipes::all_outcomes())
 ```
@@ -199,8 +189,6 @@ random_forest_model <- random_forest(pp,combined_train)
 
 source("../R/evaluation.R")
 evaluation <- evaluation_function(combined_test, combined_train, random_forest_model)
-combined_test$fitted <- predict(random_forest_model, combined_test)
-eval <- evaluate(combined_test,random_forest_model)
 
 # If we want a table 
 evaluation[[1]]
