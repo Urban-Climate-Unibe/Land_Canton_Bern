@@ -145,7 +145,7 @@ raster_BH <- raster_BH[[2]]
 tiff_focal(tiff = raster_BH,150,"BH_NA.tif")
 
 raster <- terra::rast("../data/Tiffs/BH_NA_150.tif")
-subst(raster, NA, 0)
+raster <- subst(raster, NA, 0)
 writeRaster(raster, filename="../data/Tiffs/BH_150.tif",overwrite = T)
 file.remove("../data/Tiffs/BH_NA_150.tif")
 
