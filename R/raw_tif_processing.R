@@ -72,16 +72,16 @@ meters <- tibble(
 classification <- inner_join(classification,meters, by = "Reclassified_category")
 
 
-for (class in unique(classification$Reclassified_category)) {
+for (class in unique(classification$Variable)) {
 number_classes <- classification |>
-    filter(Reclassified_category == class) |>
+    filter(Variable == class) |>
     dplyr::select(Number_raw_data) |>
   unlist()
 print(class)
 print(number_classes)
 temp_raster <- raster %in% number_classes*1
 name <- classification |>
-  dplyr::filter(Reclassified_category == class) |>
+  dplyr::filter(Variable == class) |>
   dplyr::select(Variable) |>
   unlist() |>
   unique()
@@ -100,23 +100,23 @@ terra::writeRaster(temp_raster,paste0("../data-raw/",name,".tif"),overwrite = T)
 source("../R/tiff_focal.R")
 
 
-files <- list.files("../data-raw/")
-
-for (file in files) {
 
 
-  raster_data <- rast(paste("../data-raw/",file,sep = ""))
+for (file in unique(classification$Variable)) {
+
+
+  raster_data <- rast(paste0("../data-raw/",file,".tif"))
 
   print(file)
-  print(str_sub(file,end = -5))
+
   meter <- classification |>
-    filter(Variable == str_sub(file,end = -5)) |>
+    filter(Variable == file) |>
     dplyr::select(Chosen_buffer_radiusm) |>
     unlist() |>
     unique() |>
     as.numeric()
 print(meter)
-  tiff_focal(raster_data,meter,file)
+  tiff_focal(raster_data,meter,paste0(file,".tif"))
 
 }
 

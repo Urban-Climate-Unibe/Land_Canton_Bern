@@ -7,7 +7,7 @@ library(stringr)
 
 
   n <-2 * round(meter/2)/5+1 #get unequal number, div by 5 since 5m resolution
-print(n)
+
   mean_focal <- focal(tiff, w=matrix(1, nrow=n, ncol=n), fun=mean, na.rm=TRUE)
   filename1 = paste("../data/Tiffs/",str_sub(filename, end = -5),"_",meter,".tif",sep = "")
   print(filename1)
