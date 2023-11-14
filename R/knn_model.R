@@ -1,9 +1,9 @@
 # We define a function to calculate the KNN model
-KNN_Model <- function(pp, training_data, hyperpar.k = c(10)) {
+KNN_Model <- function(pp, training_data, hyperpar.k = c(2) ){
   # How many cores? (depends on your device)
   cores <- detectCores()
   # We make cluster to calculate parallel
-  cl <- makeCluster(cores)
+  cl <- makeCluster(cores, type = 'FORK')
   registerDoParallel(cl)
 
   # We define a new training function to calculate our model faster by using foreach
@@ -13,7 +13,7 @@ KNN_Model <- function(pp, training_data, hyperpar.k = c(10)) {
                    # We want a KNN model
                    method = "knn",
                    # we use cross validation as method
-                   trControl = caret::trainControl(method = "cv", 2),
+                   trControl = caret::trainControl(method = "cv", 5),
                    # we set k = k to optimize the hyperparameter k. We substitute it later with a vector
                    tuneGrid = data.frame(k = k),
                    # we want the RMSE as our metrics

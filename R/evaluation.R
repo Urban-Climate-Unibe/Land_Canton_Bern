@@ -59,23 +59,22 @@ tabl <- tibble::tibble('Metric' = c('RSQ', ' RMSE', 'MAE', 'Bias'),
 
 p1 <- ggplot(data = train_data, aes(temperature, fitted)) +
   geom_point(alpha = 0.3) +
-  geom_smooth(method = "lm", se = FALSE, color = "red", linewidth = 0.5) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dotdash",
-              linewidth = 0.5, color = "orange") +
+  geom_smooth(method = "lm", se = FALSE, color = "red", linewidth = 1) +
+  geom_abline(slope = 1, intercept = 0,
+              linewidth = 0.5, color = "orange", linewidth = 0.5) +
   labs(subtitle = bquote(italic(R)^2 == .(format(rsq_train, digits = 2)) ~~
-                           RMSE == .(format(rmse_train, digits = 3)) ~~
-                           MAE == .(format(mae_train, digits = 3)) ~~
-                           Bias == .(format(bias.train, digits = 3))),
+                          RMSE == .(format(rmse_train, digits = 3)) ~~
+                          Bias == .(format(bias.train, digits = 3))),
        title = "Train set") +
   theme_classic()
+
 
 p2 <- ggplot(data = data_evaluate, aes(temperature, fitted)) +
  geom_point(alpha = 0.3) +
  geom_smooth(method = "lm", se = TRUE, color = "red", linewidth = 1) +
- geom_abline(slope = 1, intercept = 0, linetype = "dotted", color = 'orange', linewidth = 0.5) +
+ geom_abline(slope = 1, intercept = 0, color = 'orange', linewidth = 0.5) +
  labs(subtitle = bquote(italic(R)^2 == .(format(rsq_test, digits = 2)) ~~
                            RMSE == .(format(rmse_test, digits = 3)) ~~
-                           MAE == .(format(mae_test, digits = 3)) ~~
                            Bias == .(format(bias.test, digits = 3))),
   title = "Test set") +
   theme_classic()
@@ -86,31 +85,31 @@ p2 <- ggplot(data = data_evaluate, aes(temperature, fitted)) +
 out <- cowplot::plot_grid(p1, p2)
 
 
-
-# p3 <- ggplot(data = data_evaluate,
-#        aes(x = as.factor(Log_Nr), y = abs(difference)))+
-#   geom_boxplot()
-
-
-#p4 <- ggplot(data = data_evaluate,
-#       aes(x = as.factor(hour), y = abs(difference)))+
-#  geom_boxplot()
+boxplot_logger <- ggplot(data = train_data,
+             aes(x = as.factor(Log_Nr), y = Bias))+
+  geom_boxplot() +
+  theme_classic()
 
 
-# p5 <- vip::vip(model,                        # Model to use
-#          train = model$trainingData,   # Training data used in the model
-#          method = "permute",            # VIP method
-#          target = "temperature",     # Target variable
-#          nsim = 1,                      # Number of simulations
-#          metric = "RMSE",               # Metric to assess quantify permutation
-#          sample_frac = 0.01,             # Fraction of training data to use
-#          pred_wrapper = predict ,
-#          num_features = 20L# Prediction function to use
-# )
+boxplot_hour <- ggplot(data = train_data,
+       aes(x = as.factor(hour), y = Bias))+
+  geom_boxplot(fill = "skyblue", alpha = 0.5, lwd = 0.3, width = 0.5,
+               outlier.color = "red", outlier.shape = 17, outlier.size = 2) +
+  stat_boxplot(geom = "errorbar", size = 0.3, width = 0.3)+
+  theme_classic()
 
-#plot <- cowplot::plot_grid(p1,p3,ncol = 2)
 
-return(list(tabl, out))
+vip_plot <- vip::vip(model,                        # Model to use
+          train = model$trainingData,   # Training data used in the model
+          method = "permute",            # VIP method
+          target = "temperature",     # Target variable
+          nsim = 10,                      # Number of simulations
+          metric = "RMSE",               # Metric to assess quantify permutation
+          sample_frac = 0.01,             # Fraction of training data to use
+          pred_wrapper = predict ,
+          num_features = 20L)
+
+return(list(tabl, out, vip_plot, boxplot_logger, boxplot_hour))
 
 #
 # preds <-

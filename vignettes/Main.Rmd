@@ -16,15 +16,16 @@ editor_options:
 ## Preparation
 
 First, we need some R-Packages. This code chunk install and load all
-packages you need for this project. If you think you need another package
-as well, then write it into the vector 'packages'.
+packages you need for reproduce this project. If you think you need another
+package as well, then write it into the vector 'packages' and run the code
+again.
 
 ```{r Load the Packages needed, message=FALSE, warning=FALSE, include=FALSE}
 # Decide which packages you need. For this Project you need the following:
 packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
               "dplyr","googledrive","caret","rgdal","keras","vip","parsnip",
               "workflows","tune","dials","stringr","terra","stars","sf","plyr",
-              "doParallel","terrainr","starsExtra", "pdp", "kableExtra")
+              "doParallel","terrainr","starsExtra", "pdp", "kableExtra", "recipes")
 
 # Load the R script to install and load all the packages from above
 source("../R/load_packages.R")
@@ -32,7 +33,11 @@ source("../R/load_packages.R")
 
 ## Data Wrangling
 
+In this section, the data...
+
 ### Raw TIF processing
+
+What are we doing here and why?
 
 ### Data Combination
 
@@ -66,13 +71,12 @@ if (!file.exists(name.of.file)){
     filter((Log_Nr %in% loggers_test))
   combined_train <- combined |> 
     filter(!(Log_Nr %in% loggers_test))
-  
 
 ```
 
 # Models
 
-In this section we define our predictors
+In this section, we define our predictors
 
 ## Model Definitions and Recipe
 
@@ -86,7 +90,7 @@ predictors <- combined |>
 # Define a formula in the following format: target ~ predictor_1 + ... + predictor_n
 formula_local <- as.formula(paste("temperature","~", paste(predictors,collapse  = "+")))
   
-# Make a recipe which can be used for the km, KNN, Random Forest, and the XGB Boost model
+# Make a recipe which can be used for the lm, KNN, and Random Forest model
 pp <- recipes::recipe(formula_local,
                       data = combined_train) |>
     recipes::step_YeoJohnson(all_numeric(), -all_outcomes()) |> #extension of BoxCox? we will see wether that works...
@@ -97,7 +101,7 @@ pp <- recipes::recipe(formula_local,
 # Different Models
 
 Here, you can select the model that will be used to eventually estimate the
-map's spatial temperature distribution. The table shows that the model with
+map's spatial temperature distribution. You will find that the model with
 the random forest approach shows the best performance, which is why it was
 used for the map.
 
@@ -118,19 +122,16 @@ are to be used or whether the hyperparameters are to be optimized.
 
 : **TABLE 1:** Overview of the function return of the evaluation function
 
-| Model             | RSQ [Test] | RMSE [Test] | MAE [Test] | Bias [Test] |
-|-------------------|------------|-------------|------------|-------------|
-| Linear Regression | 0.12       | 0.97 °C     | 0.76 °C    | 0.007 °C    |
-| KNN               |            |             |            |             |
-| Random Forest     | 0.64       | 0.68 °C     | 0.51 °C    | -0.14 °C    |
-| XGB Boost         |            |             |            |             |
-| Neuronal Network  |            |             |            |             |
+| Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
+|-----------------|---------------|---------------|---------------|---------------|
+| Linear Regression | 0.14           | 1.01 °C         | 0.8 °C         | -0.04 °C        |
+| KNN               |                |                 |                |                 |
+| Random Forest     | 0.64           | 0.68 °C         | 0.51 °C        | -0.14 °C        |
+| XGB Boost         |                |                 |                |                 |
+| Neuronal Network  |                |                 |                |                 |
 
 : **TABLE 2:** Overview of the evaluation of the models. The RMSE describes
 the precision and the bias describes accuracy.
-
-|     |
-|-----|
 
 ## LM Model
 
@@ -139,16 +140,25 @@ the precision and the bias describes accuracy.
 source("../R/lm_model.R")
 # The function needs the recipe and a dataset which can be used for model training
 lm_model <- LM_Model(pp, combined_train)
-lm_model$results$Rsquared
 
 source("../R/evaluation.R")
 # The function will return a list
 evaluation <- evaluation_function(combined_test, combined_train, lm_model)
 
-# If we want a table 
+
+
+# If we want our metrics in table, we chose the first element of the list
 evaluation[[1]]
-# Overview Training and Test
+# If we want a visualization of the training and test set
 evaluation[[2]]
+# VIP Plot
+evaluation[[3]]
+
+evaluation[[4]]
+
+evaluation[[5]]
+
+
 ```
 
 ## KNN Model
@@ -161,11 +171,11 @@ our hyperparameter k = xx.
 # Load the R script to calculate a KNN model
 source("../R/knn_model.R")
 
-# hyperpar.k <- c(5, 10, 15)
+hyperpar.k <- c(5)
 # knn_model <- KNN_Model(pp, combined_train, hyperpar.k)
 
 # The function needs the recipe and a dataset which can be used for model training
-knn_model <- KNN_Model(pp, combined_train, hyperpar.k)
+knn_model <- KNN_Model(pp = pp, training_data =  combined_train, hyperpar.k = hyperpar.k)
 
 # Call the function
 result <- KNN_Model(pp = your_pp_value, 
@@ -173,6 +183,7 @@ result <- KNN_Model(pp = your_pp_value,
                     hyperpar.k = hyperpar.k_values)
 
 source("../R/evaluation.R")
+evaluation <- evaluation_function(combined_test, combined_train, knn_model)
 combined_test$fitted <- predict(knn_model, combined_test)
 eval <- evaluate(combined_test,knn_model)
 eval[[1]]

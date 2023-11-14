@@ -9,7 +9,7 @@ if (any(installed_packages == FALSE)) {
   install.packages(packages[!installed_packages], repos = "http://cran.us.r-project.org")
 }
 invisible(lapply(packages, library, character.only = TRUE)) #load packages
-print("All packages installed and loaded")
+print("All packages installed and loaded. Now you are ready!")
 }
 
 load_packages(packages)
