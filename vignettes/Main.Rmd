@@ -291,4 +291,83 @@ scaled_predictors <- scale(predictors)
  
  
 predicted_values <- compute(nn, scaled_predictors)$net.result
+
+
+
+
+
+```
+
+
+
+```{r}
+
+
+
+
+tiff_names <- str_sub(list.files("../data/Tiffs/"),end = -5)
+
+
+tiffs <- list()
+
+for (tif in tiff_names) {
+  tiffs[tif] = terra::rast(paste("../data/Tiffs/",tif,".tif",sep = ""))
+  terra::set.names(tiffs[[tif]],tif)
+}
+
+
+meteoswiss <- read_csv2("../data/Meteoswiss/order_114596_data.txt")
+meteoswiss_names <-meteoswiss|>
+  dplyr::select(-stn,-time)|>
+  colnames() 
+# Goes:"gre000z0" "prestas0" "tre200s0" "rre150z0" "ure200s0" "fkl010z0" "dkl010z0"
+#which is Globalstrahlung, Luftdruck, Lufttemperatur, Niederschlag, Relative Luftfeuchtigkeit, Windgeschwindigkeit, Windrichtung
+
+
+
+meteo_pred <- c(1000,9559,25,0.0,600,2.3,206,12,8,14)
+names(meteo_pred) <- c(meteoswiss_names[-1],"day","month","hour")
+
+
+
+for (name in c(meteoswiss_names[-1],"day","month","hour")) {
+  tiffs[[name]] <- terra::rast(ncol=293, nrow=247, xmin=2592670, xmax=2607320, ymin=1193202, ymax=1205552,names = name)
+terra::values(tiffs[[name]]) <- unname(meteo_pred[name])
+
+}
+
+
+
+
+ minimal_extent <- terra::ext(tiffs[[1]])
+
+# Loop through the list of raster paths to find the minimal extent
+for (tif in tiffs) {
+    raster_extent <- terra::ext(tif)
+    minimal_extent <- terra::intersect(minimal_extent, raster_extent)
+}
+cropped <- terra::crop(tiffs[[1]],minimal_extent)
+
+
+for (x in 2:length(tiffs)) {
+tiffs[[x]]<- terra::crop(tiffs[[x]],minimal_extent)
+}
+
+tiffs_stack <- tiffs[[1]]
+
+ for (x in 2:length(tiffs)) {
+  tiffs_stack <- c(tiffs_stack,tiffs[[x]])
+}
+
+  temperature <- terra::predict(tiffs_stack,mod_cv,na.rm = T)
+  
+  
+   extent <- rgdal::readOGR("../data/Map/Extent_Bern.shp")
+  rivers <- rgdal::readOGR("../data/Map/Aare.shp")
+  color = colorRampPalette(c("blue","deepskyblue", "white","orange", "red"))(100)
+  raster::plot(temperature, col = color)
+  sp::plot(extent, add = T)
+  sp::plot(rivers, add = T)
+  points( 2601930.3,1204410.1 , pch = 16, cex = 1)
+  
 ```
