@@ -3,7 +3,7 @@ random_forest <- function(pp,training_data){
 
 mod_cv <- caret::train(
   pp,
-  data = combined_train,
+  data = training_data,
   method = "ranger",
   metric = "RMSE",
   trControl = trainControl(
