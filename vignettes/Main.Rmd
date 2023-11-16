@@ -52,7 +52,7 @@ name.of.file <- "../data/Combined.csv"
 # If do not exists such a file, we create it
 if (!file.exists(name.of.file)){
   # Load the R script to processing the raw tif files
-  source("../R/raw_tif_processing.R")
+  source("../R/raw_tif_processing_2.R")
   
   # Load the R script to create the data frame "combined" which is the basis of this project
   source("../R/data_combination.R")

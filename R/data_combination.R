@@ -46,42 +46,24 @@ data_combination <- suppressWarnings(function(){
     dplyr::summarise(across(where(is.numeric), mean),.groups = 'drop')
 
   meteoswiss <- meteoswiss|>
-    mutate(timestamp = ymd_h(paste(year,month,day,hour,sep = "-")))|>
-    mutate(temp_1 = dplyr::lag(temp,order_by = timestamp,n = 24),
-           temp_3 = dplyr::lag(temp,order_by = timestamp, n = 3*24),
-           temp_5 = dplyr::lag(temp,order_by = timestamp, n = 5*24))
+    mutate(timestamp = ymd_h(paste(year,month,day,hour,sep = "-"))) |>
+    arrange(timestamp)|>
+    mutate(
+      mean_temp_6_hours = zoo::rollmean(temp, k = 6, fill = NA, align = "right"),
+      mean_temp_12_hours = zoo::rollmean(temp, k = 12, fill = NA, align = "right"),
+      mean_temp_1_day = zoo::rollmean(temp, k = 24 * 1, fill = NA, align = "right"),
+      mean_temp_3_days = zoo::rollmean(temp, k = 24 * 3, fill = NA, align = "right"),
+      mean_temp_5_days = zoo::rollmean(temp, k = 24 * 5, fill = NA, align = "right"),
+      sum_precipitation_6_hours = zoo::rollsum(rain, k = 6, fill = NA, align = "right"),
+      sum_precipitation_12_hours = zoo::rollsum(rain, k = 12, fill = NA, align = "right"),
+      sum_precipitation_1_day = zoo::rollsum(rain, k = 24 * 1, fill = NA, align = "right"),
+      sum_precipitation_3_days = zoo::rollsum(rain, k = 24 * 3, fill = NA, align = "right"),
+      sum_precipitation_5_days = zoo::rollsum(rain, k = 24 * 5, fill = NA, align = "right")
+    )
 
-  meteoswiss_rain_day1 <- meteoswiss|>
-    mutate(timestamp = timestamp-hours(24))|>
-    mutate(day = day(timestamp),
-           hour = hour(timestamp),
-           month = month(timestamp),
-           year = year(timestamp))|>
-    dplyr::group_by(year,month,day)|>
-    dplyr::summarise(rain1 = mean(rain),.groups = 'drop')
 
 
-  meteoswiss_rain_day2 <- meteoswiss|>
-    mutate(timestamp = timestamp-hours(24*2))|>
-    mutate(day = day(timestamp),
-           hour = hour(timestamp),
-           month = month(timestamp),
-           year = year(timestamp))|>
-    dplyr::group_by(year,month,day)|>
-    dplyr::summarise(rain2 = mean(rain),.groups = 'drop')
 
-  meteoswiss_rain_day3 <- meteoswiss|>
-    mutate(timestamp = timestamp-hours(24*3))|>
-    mutate(day = day(timestamp),
-           hour = hour(timestamp),
-           month = month(timestamp),
-           year = year(timestamp))|>
-    dplyr::group_by(year,month,day)|>
-    dplyr::summarise(rain3 = mean(rain),.groups = 'drop')
-
-  meteoswiss<- inner_join(meteoswiss,meteoswiss_rain_day1,by = c("day","month","year")) |>
-    inner_join(meteoswiss_rain_day2) |>
-    inner_join(meteoswiss_rain_day3)
 
 
   combined = inner_join(measurement_files,meteoswiss,by = c("hour","day","month","year"))
