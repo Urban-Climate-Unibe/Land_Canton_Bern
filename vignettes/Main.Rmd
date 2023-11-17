@@ -84,7 +84,7 @@ In this section, we define our predictors
 
 # Take all column-names you need as predictors from the combined file
 predictors <- combined |>
-  dplyr::select(-c(Log_Nr,temperature,timestamp,Name,NORD_CHTOP,OST_CHTOPO,year)) |>
+  dplyr::select(-c(Log_Nr,temperature,timestamp,Name,NORD_CHTOP,OST_CHTOPO,year,month,day,hour)) |>
   colnames()
 
 # Define a formula in the following format: target ~ predictor_1 + ... + predictor_n
@@ -197,6 +197,10 @@ Hyperparamater:
 ```{r Random Forest, echo=FALSE, message=FALSE, warning=FALSE}
 source("../R/random_forest.R")
 random_forest_model <- random_forest(pp,combined_train)
+
+combined_test$fitted <- unlist(predict(random_forest_model, combined_test))
+combined_test |>
+  yardstick::metrics(temperature, fitted)
 
 source("../R/evaluation.R")
 evaluation <- evaluation_function(combined_test, combined_train, random_forest_model)
