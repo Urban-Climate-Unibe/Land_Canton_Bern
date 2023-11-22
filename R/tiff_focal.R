@@ -10,6 +10,7 @@ library(stringr)
 
   mean_focal <- focal(tiff, w=matrix(1, nrow=n, ncol=n), fun=mean, na.rm=TRUE)
   filename1 = paste("../data/Tiffs/",str_sub(filename, end = -5),"_",meter,".tif",sep = "")
+  names(mean_focal) <- paste0(str_sub(filename, end = -5),"_",meter)
   print(filename1)
   writeRaster(mean_focal, filename=filename1,overwrite = T)
 

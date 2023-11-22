@@ -1,3 +1,4 @@
+print("Downloading data MOPU")
 
 options(timeout=4000)
 download.file("https://geofiles.be.ch/geoportal/pub/download/MOPUBE/MOPUBE.zip",destfile = paste0(tempdir(),"mopu.zip"))
@@ -57,7 +58,7 @@ classification <- tibble(
     "Open Space Agriculture", "Open Space Agriculture", "Open Space Agriculture", "Open Space Garden",
     "Did not appear", "Open Space Agriculture", "Open Space Water", "Open Space Water",
     "Open Space Water", "Open Space Forest", "Did not appear", "Did not appear", "Open Space Forest",
-    "Open Space Sealed", "Did not appear", "Open Space Sealed", "Open Space Sealed", NA
+    "Open Space Sealed", "Did not appear", "Open Space Sealed", "Open Space Sealed", "Open Space Sealed"
   )
 ) |> tidyr::drop_na()
 
@@ -71,7 +72,7 @@ meters <- tibble(
 )
 classification <- inner_join(classification,meters, by = "Reclassified_category")
 
-
+print("Processing MOPU raw layers")
 for (class in unique(classification$Variable)) {
 number_classes <- classification |>
     filter(Variable == class) |>
@@ -100,17 +101,15 @@ terra::writeRaster(temp_raster,paste0("../data-raw/",name,".tif"),overwrite = T)
 source("../R/tiff_focal.R")
 
 
-
-
 for (file in unique(classification$Variable)) {
 
 
   raster_data <- rast(paste0("../data-raw/",file,".tif"))
 
-  print(file)
+  print(paste0("Current file: ",file))
 
 
-for (meter in c(25,250,1000)) {
+for (meter in c(25,150,1000)) {
 
 
   tiff_focal(raster_data,meter,paste0(file,".tif"))
@@ -139,24 +138,27 @@ st_rasterize(shapefile_cropped,file = paste0(tempdir(),"/GEBHOEH/GEBHOEHE/data/G
 
 raster_BH <- terra::rast(paste0(tempdir(),"/GEBHOEH/GEBHOEHE/data/GEBHOEHE_GEBHOEHE.shp"))
 raster_BH <- raster_BH[[2]]
-for (meter in c(25,250,1000)) {
+for (meter in c(25,150,1000)) {
 
 
   tiff_focal(tiff = raster_BH,meter,"BH_NA.tif")
 }
 
-
+#processing for NA removal, a bit ugly and non generic, sorry..
 raster_25 <- terra::rast("../data/Tiffs/BH_NA_25.tif")
-raster_250 <- terra::rast("../data/Tiffs/BH_NA_250.tif")
+raster_150 <- terra::rast("../data/Tiffs/BH_NA_150.tif")
 raster_1000 <- terra::rast("../data/Tiffs/BH_NA_1000.tif")
 raster_25 <- subst(raster_25, NA, 0)
-raster_250 <- subst(raster_250, NA, 0)
+raster_150 <- subst(raster_150, NA, 0)
 raster_1000 <- subst(raster_1000, NA, 0)
+names(raster_25) <- "BH_25"
+names(raster_150) <- "BH_150"
+names(raster_1000) <- "BH_1000"
 writeRaster(raster_25, filename="../data/Tiffs/BH_25.tif",overwrite = T)
-writeRaster(raster_250, filename="../data/Tiffs/BH_250.tif",overwrite = T)
+writeRaster(raster_150, filename="../data/Tiffs/BH_150.tif",overwrite = T)
 writeRaster(raster_1000, filename="../data/Tiffs/BH_1000.tif",overwrite = T)
 file.remove("../data/Tiffs/BH_NA_25.tif")
-file.remove("../data/Tiffs/BH_NA_250.tif")
+file.remove("../data/Tiffs/BH_NA_150.tif")
 file.remove("../data/Tiffs/BH_NA_1000.tif")
 
 
@@ -210,7 +212,7 @@ slope <- terra::terrain(DEM,v = "slope")
 
 slope <- terra::resample(slope,ex)
 
-for (meter in c(25,250,1000)) {
+for (meter in c(25,150,1000)) {
 
 
   tiff_focal(tiff = slope,meter,"SLO.tif")
@@ -221,7 +223,7 @@ for (meter in c(25,250,1000)) {
 
 aspect <- terra::terrain(DEM,v = "aspect")
 aspect <- terra::resample(aspect,ex)
-for (meter in c(25,250,1000)) {
+for (meter in c(25,150,1000)) {
 
 
   tiff_focal(tiff = slope,meter,"ASP.tif")
@@ -234,7 +236,7 @@ download.file("https://www.dropbox.com/scl/fi/ywx8f4cufj0l43p9nh5ze/VH_WSL_21.ti
 VH <- terra::rast(paste0(tempdir(),"/VH.tif"))
 VH <- terra::resample(VH,ex)
 
-for (meter in c(25,250,1000)) {
+for (meter in c(25,150,1000)) {
 
 
 
@@ -252,7 +254,7 @@ DSM <- terra::mosaic(DSM,VH,fun = "sum")
 
 flowacc <- terra::terrain(DSM,v = "flowdir")
 flowacc <- terra::resample(flowacc,ex)
-for (meter in c(25,250,1000)) {
+for (meter in c(25,150,1000)) {
 
 
 
@@ -265,6 +267,6 @@ for (meter in c(25,250,1000)) {
 
 roughness <- terra::terrain(DSM,v = "roughness")
 roughness <- terra::resample(roughness,ex)
-for (meter in c(25,250,1000)) {
-  tiff_focal(tiff = roughness,meter,"FLAC.tif")
+for (meter in c(25,150,1000)) {
+  tiff_focal(tiff = roughness,meter,"ROU.tif")
 }

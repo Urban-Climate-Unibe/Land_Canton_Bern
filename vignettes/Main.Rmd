@@ -46,20 +46,8 @@ whole project. It contains 10 geospatial data (6 land use classes and 4
 geospatial layers)
 
 ```{r Data Wrangling, echo=FALSE, message=FALSE, warning=FALSE}
-# We want to know, if a certain file already exists
-name.of.file <- "../data/Combined.csv"
 
-# If do not exists such a file, we create it
-if (!file.exists(name.of.file)){
-  # Load the R script to processing the raw tif files
-  source("../R/raw_tif_processing_2.R")
-  
-  # Load the R script to create the data frame "combined" which is the basis of this project
-  source("../R/data_combination.R")
-  
-  # We run the loaded function and drop all NAs
-  data_combination() 
-}#generate file
+source("../R/Processing_Brain.R")
   combined <- read_csv("../data/Combined.csv") |>
     mutate(temperature = temperature-temp) |>
     drop_na()
@@ -84,7 +72,7 @@ In this section, we define our predictors
 
 # Take all column-names you need as predictors from the combined file
 predictors <- combined |>
-  dplyr::select(-c(Log_Nr,temperature,timestamp,Name,NORD_CHTOP,OST_CHTOPO,year,month,day,hour)) |>
+  dplyr::select(-c(Log_Nr,temperature,timestamp,Name,NORD_CHTOP,OST_CHTOPO,year,month,day,hour,LV_03_E,LV_03_N)) |>
   colnames()
 
 # Define a formula in the following format: target ~ predictor_1 + ... + predictor_n
@@ -196,7 +184,7 @@ Hyperparamater:
 
 ```{r Random Forest, echo=FALSE, message=FALSE, warning=FALSE}
 source("../R/random_forest.R")
-random_forest_model <- random_forest(pp,combined_train)
+random_forest_model <- random_forest(pp,combined_train,tune = F)
 
 combined_test$fitted <- unlist(predict(random_forest_model, combined_test))
 combined_test |>
@@ -312,58 +300,44 @@ predicted_values <- compute(nn, scaled_predictors)$net.result
 tiff_names <- str_sub(list.files("../data/Tiffs/"),end = -5)
 
 
-tiffs <- list()
 
-for (tif in tiff_names) {
-  tiffs[tif] = terra::rast(paste("../data/Tiffs/",tif,".tif",sep = ""))
-  terra::set.names(tiffs[[tif]],tif)
+tiffs <- terra::rast(paste0("../data/Tiffs/",tiff_names,".tif"))
+
+
+
+
+
+
+
+
+meteoswiss <- paste(c("temp","precip","rad","wind","rain"), collapse = "|")
+meteoswiss <- combined |>
+  dplyr::select(matches(meteoswiss),
+                -temperature) |>
+  colnames()
+# Goes:""temp"                       "rad"                        "winds"                      "windd"                      "mean_temp_6_hours"    "mean_temp_12_hours"         "mean_temp_1_day"            "mean_temp_3_days"           "mean_temp_5_days"           "sum_precipitation_6_hours" "sum_precipitation_12_hours" "sum_precipitation_1_day"    "sum_precipitation_3_days"   "sum_precipitation_5_days"  
+
+meteo_pred <- c(22,0,0,0,0,30,27,23,21,20,0,0,0,0,0)
+
+
+
+
+for (name_var in meteoswiss) {
+  temp <- terra::rast(ncol=293, nrow=247, xmin=2592670, xmax=2607320, ymin=1193202, ymax=1205552,names = name_var)
+  temp <- crop(temp,tiffs)
+  temp <- resample(temp,tiffs)
+  tiffs <- c(tiffs,temp)
+
+
 }
 
 
-meteoswiss <- read_csv2("../data/Meteoswiss/order_114596_data.txt")
-meteoswiss_names <-meteoswiss|>
-  dplyr::select(-stn,-time)|>
-  colnames() 
-# Goes:"gre000z0" "prestas0" "tre200s0" "rre150z0" "ure200s0" "fkl010z0" "dkl010z0"
-#which is Globalstrahlung, Luftdruck, Lufttemperatur, Niederschlag, Relative Luftfeuchtigkeit, Windgeschwindigkeit, Windrichtung
-
-
-
-meteo_pred <- c(1000,9559,25,0.0,600,2.3,206,12,8,14)
-names(meteo_pred) <- c(meteoswiss_names[-1],"day","month","hour")
-
-
-
-for (name in c(meteoswiss_names[-1],"day","month","hour")) {
-  tiffs[[name]] <- terra::rast(ncol=293, nrow=247, xmin=2592670, xmax=2607320, ymin=1193202, ymax=1205552,names = name)
-terra::values(tiffs[[name]]) <- unname(meteo_pred[name])
-
-}
 
 
 
 
- minimal_extent <- terra::ext(tiffs[[1]])
 
-# Loop through the list of raster paths to find the minimal extent
-for (tif in tiffs) {
-    raster_extent <- terra::ext(tif)
-    minimal_extent <- terra::intersect(minimal_extent, raster_extent)
-}
-cropped <- terra::crop(tiffs[[1]],minimal_extent)
-
-
-for (x in 2:length(tiffs)) {
-tiffs[[x]]<- terra::crop(tiffs[[x]],minimal_extent)
-}
-
-tiffs_stack <- tiffs[[1]]
-
- for (x in 2:length(tiffs)) {
-  tiffs_stack <- c(tiffs_stack,tiffs[[x]])
-}
-
-  temperature <- terra::predict(tiffs_stack,mod_cv,na.rm = T)
+  temperature <- terra::predict(tiffs,random_forest_model,na.rm = T)
   
   
    extent <- rgdal::readOGR("../data/Map/Extent_Bern.shp")

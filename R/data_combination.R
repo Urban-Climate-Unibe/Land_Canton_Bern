@@ -43,7 +43,8 @@ data_combination <- suppressWarnings(function(){
            year = year(time))
   meteoswiss <- meteoswiss |>
     dplyr::group_by(hour, day, month, year) |>
-    dplyr::summarise(across(where(is.numeric), mean),.groups = 'drop')
+    dplyr::summarise(across(where(is.numeric), mean),.groups = 'drop') |>
+    mutate(rain = rain*6) # to get sum... was mean
 
   meteoswiss <- meteoswiss|>
     mutate(timestamp = ymd_h(paste(year,month,day,hour,sep = "-"))) |>

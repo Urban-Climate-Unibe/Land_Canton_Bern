@@ -57,7 +57,7 @@ classification <- tibble(
     "Open Space Agriculture", "Open Space Agriculture", "Open Space Agriculture", "Open Space Garden",
     "Did not appear", "Open Space Agriculture", "Open Space Water", "Open Space Water",
     "Open Space Water", "Open Space Forest", "Did not appear", "Did not appear", "Open Space Forest",
-    "Open Space Sealed", "Did not appear", "Open Space Sealed", "Open Space Sealed", NA
+    "Open Space Sealed", "Did not appear", "Open Space Sealed", "Open Space Sealed", "Open Space Sealed"
   )
 ) |> tidyr::drop_na()
 
@@ -146,6 +146,7 @@ tiff_focal(tiff = raster_BH,150,"BH_NA.tif")
 
 raster <- terra::rast("../data/Tiffs/BH_NA_150.tif")
 raster <- subst(raster, NA, 0)
+names(raster) <- "BH_150"
 writeRaster(raster, filename="../data/Tiffs/BH_150.tif",overwrite = T)
 file.remove("../data/Tiffs/BH_NA_150.tif")
 
