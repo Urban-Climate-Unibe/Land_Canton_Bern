@@ -87,24 +87,19 @@ name <- classification |>
   unlist() |>
   unique()
 
-terra::writeRaster(temp_raster,paste0("../data-raw/",name,".tif"),overwrite = T)
+terra::writeRaster(temp_raster,paste0("../AGDS_Bigler_Tinner/data-raw/",name,".tif"),overwrite = T)
 
 }
 
 
 
-
-
-
-
-
-source("../R/tiff_focal.R")
+source("../AGDS_Bigler_Tinner/R/tiff_focal.R")
 
 
 for (file in unique(classification$Variable)) {
 
 
-  raster_data <- rast(paste0("../data-raw/",file,".tif"))
+  raster_data <- rast(paste0("../AGDS_Bigler_Tinner/data-raw/",file,".tif"))
 
   print(paste0("Current file: ",file))
 
@@ -166,7 +161,7 @@ file.remove("../data/Tiffs/BH_NA_1000.tif")
 
 #DEM
 # Read the CSV file containing links
-file_data <- read.table("../data/ch.swisstopo.swissalti3d-TMP02zny.csv",header = F)
+file_data <- read.table("./data/ch.swisstopo.swissalti3d-TMP02zny.csv",header = F)
 
 # Function to download files
 download_files <- function(url, destination_folder) {

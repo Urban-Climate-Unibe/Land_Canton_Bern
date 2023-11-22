@@ -25,7 +25,8 @@ again.
 packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
               "dplyr","googledrive","caret","rgdal","keras","vip","parsnip",
               "workflows","tune","dials","stringr","terra","stars","sf","plyr",
-              "doParallel","terrainr","starsExtra", "pdp", "kableExtra", "recipes")
+              "doParallel","terrainr","starsExtra", "pdp", "kableExtra", "recipes",
+              "tidyterra")
 
 # Load the R script to install and load all the packages from above
 source("../R/load_packages.R")
@@ -111,7 +112,7 @@ are to be used or whether the hyperparameters are to be optimized.
 : **TABLE 1:** Overview of the function return of the evaluation function
 
 | Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|-----------------|---------------|---------------|---------------|---------------|
+|---------------|---------------|---------------|---------------|---------------|
 | Linear Regression | 0.14           | 1.01 °C         | 0.8 °C         | -0.04 °C        |
 | KNN               |                |                 |                |                 |
 | Random Forest     | 0.64           | 0.68 °C         | 0.51 °C        | -0.14 °C        |
@@ -289,8 +290,6 @@ predicted_values <- compute(nn, scaled_predictors)$net.result
 
 
 ```
-
-
 
 ```{r}
 
