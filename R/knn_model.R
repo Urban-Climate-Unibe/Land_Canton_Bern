@@ -6,10 +6,15 @@ KNN_Model <- function(pp, training_data, hyperpar.k = c(2) ){
   cl <- makeCluster(cores, type = 'FORK')
   registerDoParallel(cl)
 
+  # for reproducibility
+  set.seed(1982)
+  split <- rsample::initial_split(training_data, prop = 0.3)
+  new.data <- rsample::training(split)
+
   # We define a new training function to calculate our model faster by using foreach
   train_knn <- function(k) {
 
-    model <- caret::train(pp, data = training_data |> tidyr::drop_na(),
+    model <- caret::train(pp, data = new.data |> tidyr::drop_na(),
                    # We want a KNN model
                    method = "knn",
                    # we use cross validation as method
