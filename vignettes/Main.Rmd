@@ -26,7 +26,7 @@ packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
               "dplyr","googledrive","caret","rgdal","keras","vip","parsnip",
               "workflows","tune","dials","stringr","terra","stars","sf","plyr",
               "doParallel","terrainr","starsExtra", "pdp", "kableExtra", "recipes",
-              "tidyterra")
+              "tidyterra","shiny")
 
 # Load the R script to install and load all the packages from above
 source("../R/load_packages.R")
