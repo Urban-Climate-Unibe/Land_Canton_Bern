@@ -86,7 +86,7 @@ name <- classification |>
   unlist() |>
   unique()
 
-terra::writeRaster(temp_raster,paste0("./data-raw/",name,".tif"),overwrite = T)
+terra::writeRaster(temp_raster,paste0("../data-raw/",name,".tif"),overwrite = T)
 
 }
 
@@ -97,7 +97,7 @@ terra::writeRaster(temp_raster,paste0("./data-raw/",name,".tif"),overwrite = T)
 
 
 
-source("./R/tiff_focal.R")
+source("../R/tiff_focal.R")
 
 
 
@@ -105,7 +105,7 @@ source("./R/tiff_focal.R")
 for (file in unique(classification$Variable)) {
 
 
-  raster_data <- rast(paste0("./data-raw/",file,".tif"))
+  raster_data <- rast(paste0("../data-raw/",file,".tif"))
 
   print(file)
 
@@ -144,16 +144,12 @@ raster_BH <- raster_BH[[2]]
 
 tiff_focal(tiff = raster_BH,150,"BH_NA.tif")
 
-raster <- terra::rast("./data/Tiffs/BH_NA_150.tif")
+raster <- terra::rast("../data/Tiffs/BH_NA_150.tif")
 raster <- subst(raster, NA, 0)
-<<<<<<< Updated upstream
+
 names(raster) <- "BH_150"
 writeRaster(raster, filename="../data/Tiffs/BH_150.tif",overwrite = T)
 file.remove("../data/Tiffs/BH_NA_150.tif")
-=======
-writeRaster(raster, filename="./data/Tiffs/BH_150.tif",overwrite = T)
-file.remove("./data/Tiffs/BH_NA_150.tif")
->>>>>>> Stashed changes
 
 
 
@@ -161,7 +157,7 @@ file.remove("./data/Tiffs/BH_NA_150.tif")
 
 #DEM
 # Read the CSV file containing links
-file_data <- read.table("./data/ch.swisstopo.swissalti3d-TMP02zny.csv",header = F)
+file_data <- read.table("../data/ch.swisstopo.swissalti3d-TMP02zny.csv",header = F)
 
 # Function to download files
 download_files <- function(url, destination_folder) {
@@ -193,11 +189,11 @@ terrainr::merge_rasters(DEM_paths,output_raster = paste0(tempdir(),"/DEM/DEM.tif
 
 
 DEM <- terra::rast(paste0(tempdir(),"/DEM/DEM.tif"))
-ex <- terra::rast("./data/Tiffs/OS_AC_500.tif") #not very elegant, maybe improve?
+ex <- terra::rast("../data/Tiffs/OS_AC_500.tif") #not very elegant, maybe improve?
 
 DEM <- terra::resample(DEM,ex)
 
-terra::writeRaster(DEM, filename = "./data/Tiffs/DEM.tif",overwrite = T)
+terra::writeRaster(DEM, filename = "../data/Tiffs/DEM.tif",overwrite = T)
 
 
 #Slope and aspect(NOR from Burger)
