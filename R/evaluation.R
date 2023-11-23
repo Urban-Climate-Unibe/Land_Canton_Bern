@@ -1,23 +1,24 @@
-
+# This function evaluates and visualize the model
 evaluation_function <- function(data_evaluate = combined_test, train_data = combined_train, model){
 
-#prepping data
-data_evaluate$fitted <- unlist(predict(model, data_evaluate))
+###############################################################################
+# Data preparation
 
+data_evaluate$fitted <- unlist(predict(model, data_evaluate))
 train_data$fitted <- unlist(predict(model, train_data))
 
-###############################################################################
-# Metrics
-
-# -----------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Metrics Train (RMSE, MAE, RSQ, Bias)
-rmse_train <- model$results$RMSE
-mae_train <- model$results$MAE
-rsq_train <- model$results$Rsquared
 
+# RMSE
+rmse_train <- model$results$RMSE
+# MAE
+mae_train <- model$results$MAE
+# RSQ
+rsq_train <- model$results$Rsquared
+# Bias
 train_data <- train_data|>mutate(Bias = fitted - temperature)
 bias.train <- mean(train_data$Bias)
-
 
 # -----------------------------------------------------------------------------
 # Metrics Test (RMSE, MAE, RSQ, Bias)
@@ -25,28 +26,30 @@ bias.train <- mean(train_data$Bias)
 metrics_test <- data_evaluate |>
   yardstick::metrics(temperature, fitted)
 
+# RMSE
 rmse_test <- metrics_test |>
   filter(.metric == "rmse") |>
   pull(.estimate)
-
+# MAE
 mae_test <- metrics_test |>
   filter(.metric == "mae") |>
   pull(.estimate)
-
+#RSQ
 rsq_test <- metrics_test |>
   filter(.metric == "rsq") |>
   pull(.estimate)
 
-
-
-# We calculate the Bias
+# Bias
 # --> if the bias is negative, then the model underestimate the temperature
 # --> if the bias is positive, then the model overestimate the temperature
 data_evaluate <- data_evaluate|>mutate(Bias = fitted - temperature)
 bias.test <- mean(data_evaluate$Bias)
 
 ###############################################################################
-# data frame
+# We want a list as a return for our evaluations:
+
+#------------------------------------------------------------------------------
+# Position 1: Table which gives a overview about the metrics: RSQ, RMSE, MAE, Bias
 
 tabl <- tibble::tibble('Metric' = c('RSQ', ' RMSE', 'MAE', 'Bias'),
                        'Values of training set' = c(rsq_train, rmse_train, mae_train, bias.train),
@@ -54,9 +57,10 @@ tabl <- tibble::tibble('Metric' = c('RSQ', ' RMSE', 'MAE', 'Bias'),
   kableExtra::kbl(align = 'lcc')|>
   kableExtra::kable_classic_2(full_width = T, html_font = "Cambria")
 
-###############################################################################
-# Plots
+#------------------------------------------------------------------------------
+# Position 2: ggplot as a overview about the training set and test set
 
+# We create the plot for the training set
 p1 <- ggplot(data = train_data, aes(temperature, fitted)) +
   geom_point(alpha = 0.3) +
   geom_smooth(method = "lm", se = FALSE, color = "red", linewidth = 1) +
@@ -68,7 +72,7 @@ p1 <- ggplot(data = train_data, aes(temperature, fitted)) +
        title = "Train set") +
   theme_classic()
 
-
+# We create the plot for the test set
 p2 <- ggplot(data = data_evaluate, aes(temperature, fitted)) +
  geom_point(alpha = 0.3) +
  geom_smooth(method = "lm", se = TRUE, color = "red", linewidth = 1) +
@@ -79,17 +83,20 @@ p2 <- ggplot(data = data_evaluate, aes(temperature, fitted)) +
   title = "Test set") +
   theme_classic()
 
-
-
-
+# We put both plots together
 out <- cowplot::plot_grid(p1, p2)
 
+#------------------------------------------------------------------------------
+# Position 3: Boxplot for each logger station (where is the bias highest)
 
 boxplot_logger <- ggplot(data = train_data,
              aes(x = as.factor(Log_Nr), y = Bias))+
   geom_boxplot() +
-  theme_classic()
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
+#------------------------------------------------------------------------------
+# Position 4: Boxplot for each hour of the day (bias)
 
 boxplot_hour <- ggplot(data = train_data,
        aes(x = as.factor(hour), y = Bias))+
@@ -98,42 +105,22 @@ boxplot_hour <- ggplot(data = train_data,
   stat_boxplot(geom = "errorbar", size = 0.3, width = 0.3)+
   theme_classic()
 
+#------------------------------------------------------------------------------
+# Position 5: Partial dependence of the variables
 
-vip_plot <- vip::vip(model,                        # Model to use
-          train = model$trainingData,   # Training data used in the model
-          method = "permute",            # VIP method
-          target = "temperature",     # Target variable
-          nsim = 10,                      # Number of simulations
-          metric = "RMSE",               # Metric to assess quantify permutation
-          sample_frac = 0.01,             # Fraction of training data to use
-          pred_wrapper = predict ,
-          num_features = 20L)
+# The predictor variables are saved in our model's recipe
+#preds <- model$recipe$var_info |>
+  #dplyr::filter(role == "predictor") |>
+  #dplyr::pull(variable)
 
-return(list(tabl, out, vip_plot, boxplot_logger, boxplot_hour))
+#all_plots <- purrr::map(preds, ~pdp::partial(model,c('winds', 'windd'), plot = TRUE, plot.engine = "ggplot2"))
 
-#
-# preds <-
-#   model$recipe$var_info |>
-#   dplyr::filter(role == "predictor") |>
-#   dplyr::pull(variable)
-#
-#
-#
-# all_plots <- list()
-#
-# for (p in preds[1:6]) {
-#   all_plots[[p]] <-
-#     pdp::partial(
-#       model,       # Model to use
-#       p,            # Predictor to assess
-#       plot = TRUE   # Whether output should be a plot or dataframe
-#     )
-# }
-#
-# pdps <- cowplot::plot_grid(all_plots[[1]], all_plots[[2]], all_plots[[3]],
-#                            all_plots[[4]], all_plots[[5]], all_plots[[6]])
-#
-# pdps
+#pdps <- cowplot::plot_grid(all_plots[[1]], all_plots[[2]])
+
+###############################################################################
+# We define our list for the return:
+output <- list(tabl, out, boxplot_logger, boxplot_hour)
 
 
-}
+return(output)}
+

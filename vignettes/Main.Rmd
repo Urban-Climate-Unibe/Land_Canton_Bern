@@ -72,10 +72,6 @@ source("../R/Processing_Brain.R")
     filter((Log_Nr %in% loggers_test))
   combined_train <- combined |> 
     filter(!(Log_Nr %in% loggers_test))
-
-
-
-  
 ```
 
 # Models
@@ -121,21 +117,36 @@ are to be used or whether the hyperparameters are to be optimized.
 |---------------------|---------------------------------------------|
 | 1                   | A metric table (RSQ, RMSE, MAE and Bias)    |
 | 2                   | Model visualization (Training and Test set) |
-| 3                   |                                             |
-| 4                   |                                             |
+| 3                   | Boxplot for each logger station (24h)       |
+| 4                   | Boxplot for each hour of the day            |
+| 5                   | Partial dependence of the variables         |
 
 : **TABLE 1:** Overview of the function return of the evaluation function
 
+dedd
+
 | Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
 |---------------|---------------|---------------|---------------|---------------|
-| Linear Regression | 0.14           | 1.01 °C         | 0.8 °C         | -0.04 °C        |
+| Linear Regression |                |                 |                |                 |
 | KNN               |                |                 |                |                 |
-| Random Forest     | 0.64           | 0.68 °C         | 0.51 °C        | -0.14 °C        |
+| Random Forest     |                |                 |                |                 |
 | XGB Boost         |                |                 |                |                 |
 | Neuronal Network  |                |                 |                |                 |
 
-: **TABLE 2:** Overview of the evaluation of the models. The RMSE describes
-the precision and the bias describes accuracy.
+: **TABLE 2:** Overview of the evaluation of the models in the regular
+mode.
+
+dedferfef
+
+| Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
+|---------------|---------------|---------------|---------------|---------------|
+| Linear Regression | 0.25           | 0.96 °C         | 0.76 °C        | -0.07 °C        |
+| KNN               | 0.41           | 0.86 °C         | 0.66 °C        | 0.092 °C        |
+| Random Forest     | 0.61           | 0.7 °C          | 0.53 °C        | 0.086 °C        |
+| XGB Boost         |                |                 |                |                 |
+| Neuronal Network  |                |                 |                |                 |
+
+: **TABLE 3:** Overview of the evaluation of the models in the demo mode.
 
 ## LM Model
 
@@ -145,53 +156,43 @@ source("../R/lm_model.R")
 # The function needs the recipe and a dataset which can be used for model training
 lm_model <- LM_Model(pp, combined_train)
 
+
 source("../R/evaluation.R")
 # The function will return a list
 evaluation <- evaluation_function(combined_test, combined_train, lm_model)
-
-
 
 # If we want our metrics in table, we chose the first element of the list
 evaluation[[1]]
 # If we want a visualization of the training and test set
 evaluation[[2]]
-# VIP Plot
+# Boxplot for each logger station (24h)
 evaluation[[3]]
-
+# Boxplot for each hour of the day
 evaluation[[4]]
-
-evaluation[[5]]
-
-
 ```
 
 ## KNN Model
 
-The computational complexity is enormous and thus, KNN is not suitable for
-very large data sets. You will need a very good device. We recommend using
-our hyperparameter k = xx.
+hyperparamter = 10
 
 ```{r KNN Model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to calculate a KNN model
 source("../R/knn_model.R")
 
-hyperpar.k <- c(5)
-# knn_model <- KNN_Model(pp, combined_train, hyperpar.k)
-
 # The function needs the recipe and a dataset which can be used for model training
-knn_model <- KNN_Model(pp = pp, training_data =  combined_train, hyperpar.k = hyperpar.k)
-
-# Call the function
-result <- KNN_Model(pp = your_pp_value, 
-                    training_data = your_training_data, 
-                    hyperpar.k = hyperpar.k_values)
+knn_model <- KNN_Model(pp = pp, training_data =  combined_train, tuning = FALSE)
 
 source("../R/evaluation.R")
 evaluation <- evaluation_function(combined_test, combined_train, knn_model)
-combined_test$fitted <- predict(knn_model, combined_test)
-eval <- evaluate(combined_test,knn_model)
-eval[[1]]
-eval[[2]]
+
+# If we want our metrics in table, we chose the first element of the list
+evaluation[[1]]
+# If we want a visualization of the training and test set
+evaluation[[2]]
+# Boxplot for each logger station (24h)
+evaluation[[3]]
+# Boxplot for each hour of the day
+evaluation[[4]]
 ```
 
 ## Random Forest Model
@@ -200,19 +201,19 @@ Hyperparamater:
 
 ```{r Random Forest, echo=FALSE, message=FALSE, warning=FALSE}
 source("../R/random_forest.R")
-random_forest_model <- random_forest(pp,combined_train,tune = F)
-
-combined_test$fitted <- unlist(predict(random_forest_model, combined_test))
-combined_test |>
-  yardstick::metrics(temperature, fitted)
+random_forest_model <- random_forest(pp,combined_train,tuning = F)
 
 source("../R/evaluation.R")
 evaluation <- evaluation_function(combined_test, combined_train, random_forest_model)
 
-# If we want a table 
+# If we want our metrics in table, we chose the first element of the list
 evaluation[[1]]
-# Overview Training and Test
+# If we want a visualization of the training and test set
 evaluation[[2]]
+# Boxplot for each logger station (24h)
+evaluation[[3]]
+# Boxplot for each hour of the day
+evaluation[[4]]
 ```
 
 ## XGB Model
@@ -278,8 +279,6 @@ eval <- evaluate(combined_test,xgb_best_model)
 ```
 
 ## Neuronal Network
-
-
 
 ```{r}
  

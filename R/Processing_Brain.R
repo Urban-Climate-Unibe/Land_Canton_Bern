@@ -8,7 +8,7 @@ name.of.file <- "../data/Combined.csv"
 # If do not exists such a file, we create it
 if (file.exists(name.of.file)){
   repeat{
-  print("Basefile exist, data processing not required.")
+  print("Basefile exists, data processing not required.")
   processing = readline(prompt = "Would you still like to redo the processing? [y/n] ")
   if(processing %in% c("y","n")){break}
   }

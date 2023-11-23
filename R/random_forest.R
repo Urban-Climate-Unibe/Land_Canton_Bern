@@ -1,7 +1,7 @@
 
-random_forest <- function(pp,training_data,tune){
+random_forest <- function(pp,training_data,tuning = FALSE){
   pred_count <- length(pp$var_info$variable)
-  if (tune == F) {
+  if (tuning == FALSE) {
     grid <- expand.grid(
       .mtry = pred_count/3, #default p/3
       .min.node.size = 5,         # set to 5
