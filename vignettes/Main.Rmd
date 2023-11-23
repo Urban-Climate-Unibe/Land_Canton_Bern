@@ -49,9 +49,21 @@ geospatial layers)
 ```{r Data Wrangling, echo=FALSE, message=FALSE, warning=FALSE}
 
 source("../R/Processing_Brain.R")
+
+  repeat{ print("The normal version of model Training takes a while.")
+  model_demo = readline(prompt = "Would you like to run the model training in demo mode? [y/n] ")
+  if(model_demo %in% c("y","n")){break}
+  }
+
   combined <- read_csv("../data/Combined.csv") |>
     mutate(temperature = temperature-temp) |>
     drop_na()
+
+
+
+  if (model_demo == "y") {
+    combined <- dplyr::slice_sample(combined,prop = .05) 
+  }
   
   set.seed(123)
   loggers_test <- sample(unique(combined$Log_Nr), 10)
@@ -61,6 +73,9 @@ source("../R/Processing_Brain.R")
   combined_train <- combined |> 
     filter(!(Log_Nr %in% loggers_test))
 
+
+
+  
 ```
 
 # Models
@@ -270,13 +285,19 @@ eval <- evaluate(combined_test,xgb_best_model)
  
 
 
-devtools::install_github("rstudio/tensorflow")
-devtools::install_github("rstudio/keras")
+#devtools::install_github("rstudio/tensorflow")
+#devtools::install_github("rstudio/keras")
 #Python version 3.11 needed (not 3.12!)!!!!!!
-tensorflow::install_tensorflow()
+# tensorflow::install_tensorflow()
 tensorflow::tf_config()
 library(keras)
 library(dplyr)
+
+
+
+
+
+
 
 
 
@@ -308,22 +329,27 @@ test_labels <- test_data %>% pull(temperature)
 # Create a Keras sequential model (same as previous example)
 model <- keras_model_sequential()
 model %>%
-  layer_dense(units = 64, activation = 'relu', input_shape = ncol(train_features)) %>%
+layer_dense(units = 128, activation = 'relu', input_shape = ncol(train_features)) %>%
+  layer_dropout(rate = 0.2) %>%
+  layer_dense(units = 64, activation = 'relu') %>%
+  layer_dropout(rate = 0.2) %>%
   layer_dense(units = 32, activation = 'relu') %>%
+  layer_dropout(rate = 0.2) %>%
   layer_dense(units = 1)
+
 
 # Compile the model
 model %>% compile(
   loss = 'mean_squared_error',
-  optimizer = optimizer_adam(),
+  optimizer = keras$optimizers$legacy$Adam(learning_rate = 0.001),
   metrics = c('mean_absolute_error')
 )
 
 # Train the model
 history <- model %>% fit(
   as.matrix(train_features), train_labels,
-  epochs = 10,
-  batch_size = 128,
+  epochs = 25,
+  batch_size = 64,
   validation_data = list(as.matrix(test_features), test_labels)
 )
 
@@ -353,53 +379,16 @@ tiff_names <- str_sub(list.files("../data/Tiffs/"),end = -5)
 
 
 
-tiffs <- terra::rast(paste0("../data/Tiffs/",tiff_names,".tif"))
+tiffs_only <- terra::rast(paste0("../data/Tiffs/",tiff_names,".tif"))
 
-
-
-
-
-
-meteoswiss <- c(22,0,0,0,0,30,27,23,21,20,0,0,0,0,0)
-
-meteoswiss_selection <- paste(c("temp","precip","rad","wind","rain"), collapse = "|")
-names(meteoswiss) <- combined |>
-  dplyr::select(matches(meteoswiss_selection),
-                -temperature) |>
-  colnames()
-# Goes:""temp"                       "rad"                        "winds"                      "windd"                      "mean_temp_6_hours"    "mean_temp_12_hours"         "mean_temp_1_day"            "mean_temp_3_days"           "mean_temp_5_days"           "sum_precipitation_6_hours" "sum_precipitation_12_hours" "sum_precipitation_1_day"    "sum_precipitation_3_days"   "sum_precipitation_5_days"  
-
-
-
-
-
-
-for (name_var in names(meteoswiss)) {
-  temp <- terra::rast(ncol=293, nrow=247, xmin=2592670, xmax=2607320, ymin=1193202, ymax=1205552,names = name_var)
-  terra::values(temp) <- unname(meteoswiss[name_var])
-  print(unname(meteoswiss[name_var]))
-  temp <- crop(temp,tiffs)
-  temp <- resample(temp,tiffs)
-  tiffs <- c(tiffs,temp)
-
-
+if (model_demo == "y") {
+  source("../R/shiny_map.R")
+  shinyApp(ui = ui, server = server)
+}else{
+  source("../R/example_map.R")
 }
-
-
-
-
-
-
-
-  temperature <- terra::predict(tiffs,random_forest_model,na.rm = T)
   
-  
-  extent <- rgdal::readOGR("../data/Map/Extent_Bern.shp")
-  rivers <- rgdal::readOGR("../data/Map/Aare.shp")
-  color = colorRampPalette(c("blue","deepskyblue", "white","orange", "red"))(100)
-  terra::plot(temperature,color = color)
-  sp::plot(extent, add = T)
-  sp::plot(rivers, add = T)
-  points( 2601930.3,1204410.1 , pch = 16, cex = 1)
+
+
   
 ```
