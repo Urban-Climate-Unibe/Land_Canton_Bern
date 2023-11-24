@@ -1,5 +1,5 @@
 ---
-title: "main"
+title: "Main Workflow"
 author: "Nils Tinner, Patrick Bigler"
 date: "`r Sys.Date()`"
 output:
@@ -13,12 +13,34 @@ editor_options:
     wrap: 75
 ---
 
-## Preparation
+Welcome to our reproducible workflow to compare different machine learning
+techniques to a linear regression model. Furthermore, we want to explore if
+machine learning is superior to multivariate linear regression. For this
+purpose, the spatial temperature deviation of the city of Bern from the
+MeteoSwiss measuring station in Zollikofen is modeled (urban heat island
+effect). For the modeling temperature in the city of Bern, we use 5
+meteorological variables from the measuring station in Zollikofen (2m
+temperature, precipitation, global radiation, wind speed, and wind
+direction) between the time period 2019--2022 and 10 different geospatial
+data (6 land use classes and 4 geospatial layers). You can find an overview
+in our proposal. The computing time is very high as the workflow processes
+a large amount of data. We have therefore designed the workflow interface
+to be interactive. The interface is built according to the following graph:
+
+SCHEMATIC OF THE INTERFACE
+
+Because we want also show a possible application of such models the best
+model will be used to show spatial temperature distributions for a possible
+day as a map.
+
+# Preparation
+
+## Packages
 
 First, we need some R-Packages. This code chunk install and load all
 packages you need for reproduce this project. If you think you need another
 package as well, then write it into the vector 'packages' and run the code
-again.
+again. It will install and load your package automatically.
 
 ```{r Load the Packages needed, message=FALSE, warning=FALSE, include=FALSE}
 # Decide which packages you need. For this Project you need the following:
@@ -50,16 +72,14 @@ geospatial layers)
 
 source("../R/Processing_Brain.R")
 
-  repeat{ print("The normal version of model Training takes a while.")
-  model_demo = readline(prompt = "Would you like to run the model training in demo mode? [y/n] ")
+repeat{ print("The normal version of model Training takes a while.")
+model_demo = readline(prompt = "Would you like to run the model training in demo mode? [y/n] ")
   if(model_demo %in% c("y","n")){break}
   }
 
   combined <- read_csv("../data/Combined.csv") |>
     mutate(temperature = temperature-temp) |>
     drop_na()
-
-
 
   if (model_demo == "y") {
     combined <- dplyr::slice_sample(combined,prop = .05) 
@@ -80,11 +100,23 @@ In this section, we define our predictors
 
 ## Model Definitions and Recipe
 
-```{r Predictors and Recipe, message=FALSE, warning=FALSE, include=FALSE}
+We use all columns as a predictor except:
 
+| Variable which is not a predictor | Reason                      |
+|-----------------------------------|-----------------------------|
+| Log_Nr                            |                             |
+| temperature                       |  because this is the target |
+| timestamp, year, month, day, hour |                             |
+| NORD_CHTOP, OST_CHTOP             | Coordinates of              |
+| LV_03_E, LV_03_N                  | Coordinates of              |
+
+: **TABLE 4:** s
+
+```{r Predictors and Recipe, message=FALSE, warning=FALSE, include=FALSE}
 # Take all column-names you need as predictors from the combined file
 predictors <- combined |>
-  dplyr::select(-c(Log_Nr,temperature,timestamp,Name,NORD_CHTOP,OST_CHTOPO,year,month,day,hour,LV_03_E,LV_03_N)) |>
+  dplyr::select(-c(Log_Nr,temperature,timestamp,Name,NORD_CHTOP,OST_CHTOPO,
+                   year,month,day,hour,LV_03_E,LV_03_N)) |>
   colnames()
 
 # Define a formula in the following format: target ~ predictor_1 + ... + predictor_n
@@ -93,7 +125,7 @@ formula_local <- as.formula(paste("temperature","~", paste(predictors,collapse  
 # Make a recipe which can be used for the lm, KNN, and Random Forest model
 pp <- recipes::recipe(formula_local,
                       data = combined_train) |>
-    recipes::step_YeoJohnson(all_numeric(), -all_outcomes()) |> #extension of BoxCox? we will see wether that works...
+    recipes::step_YeoJohnson(all_numeric(), -all_outcomes()) |> 
     recipes::step_center(recipes::all_numeric(), -recipes::all_outcomes()) |>
     recipes::step_scale(recipes::all_numeric(), -recipes::all_outcomes())
 ```
