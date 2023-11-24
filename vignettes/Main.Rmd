@@ -102,15 +102,16 @@ In this section, we define our predictors
 
 We use all columns as a predictor except:
 
-| Variable which is not a predictor | Reason                      |
-|-----------------------------------|-----------------------------|
-| Log_Nr                            |                             |
-| temperature                       |  because this is the target |
-| timestamp, year, month, day, hour |                             |
-| NORD_CHTOP, OST_CHTOP             | Coordinates of              |
-| LV_03_E, LV_03_N                  | Coordinates of              |
+| Variable which is not a predictor | Reason                                                                          |
+|-----------------------------------|---------------------------------------------------------------------------------|
+| Log_Nr                            |                                                                                 |
+| temperature                       | because this is the target                                                      |
+| timestamp, year, month, day, hour | because it is controversial whether time and date should be used as predictors. |
+| NORD_CHTOP, OST_CHTOP             | Coordinates of                                                                  |
+| LV_03_E, LV_03_N                  | Coordinates of                                                                  |
 
-: **TABLE 4:** s
+: **TABLE 1:** Overview about the reasons why a variable/column were
+rejected as a predictor
 
 ```{r Predictors and Recipe, message=FALSE, warning=FALSE, include=FALSE}
 # Take all column-names you need as predictors from the combined file
@@ -153,7 +154,7 @@ are to be used or whether the hyperparameters are to be optimized.
 | 4                   | Boxplot for each hour of the day            |
 | 5                   | Partial dependence of the variables         |
 
-: **TABLE 1:** Overview of the function return of the evaluation function
+: **TABLE 2:** Overview of the function return of the evaluation function
 
 dedd
 
@@ -165,7 +166,7 @@ dedd
 | XGB Boost         |                |                 |                |                 |
 | Neuronal Network  |                |                 |                |                 |
 
-: **TABLE 2:** Overview of the evaluation of the models in the regular
+: **TABLE 3:** Overview of the evaluation of the models in the regular
 mode.
 
 dedferfef
@@ -178,17 +179,23 @@ dedferfef
 | XGB Boost         |                |                 |                |                 |
 | Neuronal Network  |                |                 |                |                 |
 
-: **TABLE 3:** Overview of the evaluation of the models in the demo mode.
+: **TABLE 4:** Overview of the evaluation of the models in the demo mode.
 
-## LM Model
+## Linear Regressions
+
+### Model
 
 ```{r Calculate a LM-Model, message=FALSE, warning=FALSE}
 # Load the R script to calculate a lm model
 source("../R/lm_model.R")
 # The function needs the recipe and a dataset which can be used for model training
 lm_model <- LM_Model(pp, combined_train)
+```
 
+### Evaluation
 
+```{r}
+# Load the R script to evaluate the model
 source("../R/evaluation.R")
 # The function will return a list
 evaluation <- evaluation_function(combined_test, combined_train, lm_model)
@@ -203,18 +210,26 @@ evaluation[[3]]
 evaluation[[4]]
 ```
 
-## KNN Model
+## KNN 
 
-hyperparamter = 10
+### Model
+
+hyperparameter = 10
 
 ```{r KNN Model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to calculate a KNN model
 source("../R/knn_model.R")
-
 # The function needs the recipe and a dataset which can be used for model training
 knn_model <- KNN_Model(pp = pp, training_data =  combined_train, tuning = FALSE)
+```
 
+### Evaluation
+
+```{r}
+# Load the R script to evaluate the model
 source("../R/evaluation.R")
+
+# Function call
 evaluation <- evaluation_function(combined_test, combined_train, knn_model)
 
 # If we want our metrics in table, we chose the first element of the list
@@ -227,15 +242,26 @@ evaluation[[3]]
 evaluation[[4]]
 ```
 
-## Random Forest Model
+## Random Forest 
+
+### Model
 
 Hyperparamater:
 
 ```{r Random Forest, echo=FALSE, message=FALSE, warning=FALSE}
+# Load the R script to calculate a random forest model
 source("../R/random_forest.R")
-random_forest_model <- random_forest(pp,combined_train,tuning = F)
+# The function needs the recipe and a dataset which can be used for model training
+random_forest_model <- random_forest(pp, combined_train, tuning = F)
+```
 
+### Evaluation
+
+```{r}
+# Load the R script to evaluate the model
 source("../R/evaluation.R")
+
+# Function call
 evaluation <- evaluation_function(combined_test, combined_train, random_forest_model)
 
 # If we want our metrics in table, we chose the first element of the list
@@ -248,7 +274,9 @@ evaluation[[3]]
 evaluation[[4]]
 ```
 
-## XGB Model
+## XGB
+
+### Model
 
 Hyperparamater:
 
@@ -291,26 +319,25 @@ xgb_best_hp <- tune::finalize_workflow(
   xgb_workflow,
   xgb_best
 )
-
-
-
-
-
-
 # train a final (best) model with optimal
 # hyper-parameters
 xgb_best_model <- fit(xgb_best_hp, combined_train)
 
+```
 
+### Evaluation
+
+```{r}
 source("../R/evaluation.R")
 eval <- evaluate(combined_test,xgb_best_model)
  eval[[1]]
  eval[[2]]
 
- 
 ```
 
 ## Neuronal Network
+
+### Model
 
 ```{r}
  
@@ -323,14 +350,6 @@ eval <- evaluate(combined_test,xgb_best_model)
 tensorflow::tf_config()
 library(keras)
 library(dplyr)
-
-
-
-
-
-
-
-
 
 # Split the dataset into predictors and target variable
 predictors_nn <- combined_train |>
@@ -393,22 +412,17 @@ plot(history)
 
 # Make predictions
 predictions <- model %>% predict(as.matrix(test_features))
-
-
-
-
-
-
 ```
+
+### Evaluation
+
+# Map
+
+# Shiny App
 
 ```{r}
 
-
-
-
 tiff_names <- str_sub(list.files("../data/Tiffs/"),end = -5)
-
-
 
 tiffs_only <- terra::rast(paste0("../data/Tiffs/",tiff_names,".tif"))
 
@@ -418,8 +432,4 @@ if (model_demo == "y") {
 }else{
   source("../R/example_map.R")
 }
-  
-
-
-  
 ```
