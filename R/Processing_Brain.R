@@ -23,8 +23,11 @@ if (file.exists(name.of.file)){
   if (processing == "y") {
 
     dir.create("../data-raw/", showWarnings = FALSE) #create data-raw if missing...
+    dir.create("../data/Tiffs/", showWarnings = FALSE) #create data-raw if missing...
+
     # List all files within Tiffs
     files <- list.files(path = "../data/Tiffs", full.names = TRUE)
+
 
     # Remove all Tiffs when processing
     if (length(files) > 0) {

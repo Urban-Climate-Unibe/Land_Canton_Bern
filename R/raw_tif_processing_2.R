@@ -221,7 +221,7 @@ aspect <- terra::resample(aspect,ex)
 for (meter in c(25,150,1000)) {
 
 
-  tiff_focal(tiff = slope,meter,"ASP.tif")
+  tiff_focal(tiff = aspect,meter,"ASP.tif")
 }
 
 
@@ -264,4 +264,11 @@ roughness <- terra::terrain(DSM,v = "roughness")
 roughness <- terra::resample(roughness,ex)
 for (meter in c(25,150,1000)) {
   tiff_focal(tiff = roughness,meter,"ROU.tif")
+}
+
+
+tpi <- terra::terrain(DSM,v = "TPI")
+tpi <- terra::resample(tpi,ex)
+for (meter in c(25,150,1000)) {
+  tiff_focal(tiff = tpi,meter,"TPI.tif")
 }

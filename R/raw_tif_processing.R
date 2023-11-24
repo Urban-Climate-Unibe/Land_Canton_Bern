@@ -208,7 +208,7 @@ tiff_focal(tiff = slope,100,"SLO.tif")
 
 aspect <- terra::terrain(DEM,v = "aspect")
 aspect <- terra::resample(aspect,ex)
-tiff_focal(tiff = slope,150,"ASP.tif")
+tiff_focal(tiff = aspect,150,"ASP.tif")
 
 #and Vegetation height
 
