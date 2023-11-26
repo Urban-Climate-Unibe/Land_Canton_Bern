@@ -13,42 +13,92 @@ editor_options:
     wrap: 75
 ---
 
-Welcome to our reproducible workflow to compare different machine learning
-techniques to a linear regression model. Furthermore, we want to explore if
-machine learning is superior to multivariate linear regression. For this
-purpose, the spatial temperature deviation of the city of Bern from the
+Course: Proseminar in Applied Geo-Data Science at the University of Bern
+(Institute of Geography)
+
+Supervisor: Prof. Dr. Benjamin Stocker
+
+Adviser: Dr. Koen Hufkens, Dr. Laura Marques, Pepa Aran
+
+Further information: <https://geco-bern.github.io/agds_proseminar/>
+
+[Do you have questions about the workflow? Contact the
+authors:]{.underline}
+
+Tinner Nils (nils.tinner\@students.unibe.ch)
+
+Bigler Patrick (patrick.bigler1\@students.unibe.ch)
+
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
+
+Welcome to our reproducible workflow for the proseminar in Applied Geodata
+Sciences project. This project aims to compare different machine learning
+techniques to a linear regression model and explores whether machine
+learning approaches are superior to linear regression models. For this
+purpose, the temperature deviation of the city of Bern compared to the
 MeteoSwiss measuring station in Zollikofen is modeled (urban heat island
-effect). For the modeling temperature in the city of Bern, we use 5
-meteorological variables from the measuring station in Zollikofen (2m
-temperature, precipitation, global radiation, wind speed, and wind
-direction) between the time period 2019--2022 and 10 different geospatial
-data (6 land use classes and 4 geospatial layers). You can find an overview
-in our proposal. The computing time is very high as the workflow processes
-a large amount of data. We have therefore designed the workflow interface
-to be interactive. The interface is built according to the following graph:
+effect). For modeling, we use 5 meteorological variables from the
+MeteoSchweiz measuring station in Zollikofen for the time period 2019-2022,
+6 land use classes and 4 geospatial layers. The land use classes and the
+geospatial layers covers the entire suburban area of the city of Bern.
 
-SCHEMATIC OF THE INTERFACE
+| Variable                      | Variable Typ     | Resolution / [used] |
+|-------------------------------|------------------|---------------------|
+| 2m Temperature [Zollikofen]   | Meteorological   | 15 minutes / [1h]   |
+| Precipitation [Zollikofen]    | Meteorological   | 15 minutes / [1h]   |
+| Radiation [Zollikofen]        | Meteorological   | 15 minutes / [1h]   |
+| Windspeed [Zollikofen]        | Meteorological   | 15 minutes / [1h]   |
+| Winddirection [Zollikofen]    | Meteorological   | 15 minutes / [1h]   |
+| Buildings                     | Land use class   |                     |
+| Open Space Forest             | Land use class   |                     |
+| Open Space Garden             | Land use class   |                     |
+| Open Space Sealed             | Land use class   |                     |
+| Open Space Agriculture        | Land use class   |                     |
+| Open Space Water              | Land use clas    |                     |
+| Vegetation Height             | Geospatial Layer |                     |
+| Mean Building Heights         | Geospatial Layer |                     |
+| Slope                         | Geospatial Layer |                     |
+| Digital Elevation Model (DEM) | Geospatial Layer |                     |
 
-Because we want also show a possible application of such models the best
-model will be used to show spatial temperature distributions for a possible
-day as a map.
+: **TABLE 1:** Overview of the predictors used for modeling. For more
+information please read the [project
+proposal](https://github.com/sundin01/AGDS_Bigler_Tinner/blob/main/proposal.pdf).
+
+To evaluate...LCDs...target?.......Because we also want to show a possible
+application of such models the best model will be used to show spatial
+temperature distributions for a possible day as a map.
+
+The computing time is very high because the workflow processes a large
+amount of data. We have therefore designed the workflow interface to be
+interactive. The interface is built according to the following graph:
+
+SCHEMATIC OF THE INTERFACE. We could do that with a GGPLOT geom_rect
+layers....
+
+Please note that the demo version is only guaranteed until the end of
+February 2024. After that, the layers must be regenerated, which takes
+several hours (depends on your device).
 
 # Preparation
 
+In this section, all preparations for modeling are performed. This first
+subsection ensures that you have all required packages. The second
+subsection aims to generate the basis data frame (Combined.csv) in a
+interactive way.
+
 ## Packages
 
-First, we need some R-Packages. This code chunk install and load all
-packages you need for reproduce this project. If you think you need another
-package as well, then write it into the vector 'packages' and run the code
-again. It will install and load your package automatically.
+This code chunk install and load all packages you need for reproduce this
+project. If you think you need another package as well, then write it into
+the vector 'packages' and run the code again.
 
 ```{r Load the Packages needed, message=FALSE, warning=FALSE, include=FALSE}
 # Decide which packages you need. For this Project you need the following:
 packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
               "dplyr","googledrive","caret","rgdal","keras","vip","parsnip",
               "workflows","tune","dials","stringr","terra","stars","sf","plyr",
-              "doParallel","terrainr","starsExtra", "pdp", "kableExtra", "recipes",
-              "tidyterra","shiny")
+              "doParallel", "foreach", "terrainr","starsExtra", "pdp",
+              "kableExtra", "recipes", "tidyterra","shiny")
 
 # Load the R script to install and load all the packages from above
 source("../R/load_packages.R")
@@ -56,17 +106,31 @@ source("../R/load_packages.R")
 
 ## Data Wrangling
 
-In this section, the data...
+This subsection generate your basic csv. file (Combined.csv) in a
+interactive way.
 
-### Raw TIF processing
+1.  You have a Combined.csv file already. Would you like to redo the
+    proceeding?
 
-What are we doing here and why?
+    If you answer with 'yes', then will guided through the following
+    questions and your Combined.csv file will be rewritten. If you answer
+    with 'no', then you will jump to the model section.
 
-### Data Combination
+2.  Do you want to generate all data by yourself? (It may takes up to 12
+    hours)
 
-This code chunk creates the 'combined.csv' file which is the basis of the
-whole project. It contains 10 geospatial data (6 land use classes and 4
-geospatial layers)
+    If you answer with 'yes', all data will be downloaded and processed
+    again. It may takes several hours. If you answer with 'no', then you
+    will be asked a second question:
+
+3.  Do you want to proceed in a demo version?
+
+    If you answer with 'yes', it will download all data from a dropbox
+    account and generate a .csv file which contains 5 % of the data. With
+    this option, all calculations can be done in max. 5 minutes. If you
+    answer with 'no', then it will download all data from a dropbox account
+    and generate a .csv file which contains all data. With this option, the
+    duration for some calculations can exceed 30'.
 
 ```{r Data Wrangling, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -85,22 +149,29 @@ model_demo = readline(prompt = "Would you like to run the model training in demo
     combined <- dplyr::slice_sample(combined,prop = .05) 
   }
   
-  set.seed(123)
-  loggers_test <- sample(unique(combined$Log_Nr), 10)
+set.seed(123)
+loggers_test <- sample(unique(combined$Log_Nr), 10)
 
-  combined_test <- combined |> 
-    filter((Log_Nr %in% loggers_test))
-  combined_train <- combined |> 
-    filter(!(Log_Nr %in% loggers_test))
+combined_test <- combined |> 
+  filter((Log_Nr %in% loggers_test))
+
+combined_train <- combined |> 
+  filter(!(Log_Nr %in% loggers_test))
 ```
 
-# Models
+# Preparations for Modelling
 
-In this section, we define our predictors
+This section provides information about the preparation for modelling. The
+first subsection gives a overview about the variable selection. The second
+subsection provides information about the model recipe.
 
-## Model Definitions and Recipe
+## Variable Selection
 
-We use all columns as a predictor except:
+First, a variable selection was carried out (R-script: Processing_Brain.R).
+Table two provides a brief overview of why certain variables were rejected.
+Further details can be found in the R-script mentioned above.Based on this
+selection, a formula is now generated, which is processed into a recipe.
+This is now the basis for creating the models.
 
 | Variable which is not a predictor | Reason                                                                          |
 |-----------------------------------|---------------------------------------------------------------------------------|
@@ -110,8 +181,10 @@ We use all columns as a predictor except:
 | NORD_CHTOP, OST_CHTOP             | Coordinates of                                                                  |
 | LV_03_E, LV_03_N                  | Coordinates of                                                                  |
 
-: **TABLE 1:** Overview about the reasons why a variable/column were
+: **TABLE 2:** Overview about the reasons why a variable/column were
 rejected as a predictor
+
+## Model Recipe
 
 ```{r Predictors and Recipe, message=FALSE, warning=FALSE, include=FALSE}
 # Take all column-names you need as predictors from the combined file
@@ -131,14 +204,14 @@ pp <- recipes::recipe(formula_local,
     recipes::step_scale(recipes::all_numeric(), -recipes::all_outcomes())
 ```
 
-# Different Models
+# Modelling
 
 Here, you can select the model that will be used to eventually estimate the
 map's spatial temperature distribution. You will find that the model with
 the random forest approach shows the best performance, which is why it was
 used for the map.
 
-## Evaluation of the models
+## Overview about the Evaluation of the Models
 
 To fully implement the Open Sciences approach, the models can be computed
 using the following code chunks. Further, for every model, a short synopsis
@@ -159,10 +232,10 @@ are to be used or whether the hyperparameters are to be optimized.
 dedd
 
 | Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|---------------|---------------|---------------|---------------|---------------|
-| Linear Regression |                |                 |                |                 |
+|-------------------|----------------|-----------------|----------------|-----------------|
+| Linear Regression | 0.47           | 0.86 °C         | 0.67 °C        | 0.02 °C         |
 | KNN               |                |                 |                |                 |
-| Random Forest     |                |                 |                |                 |
+| Random Forest     | 0.73           | 0.63 °C         | 0.46 °C        | 0.07 °C         |
 | XGB Boost         |                |                 |                |                 |
 | Neuronal Network  |                |                 |                |                 |
 
@@ -172,16 +245,16 @@ mode.
 dedferfef
 
 | Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|---------------|---------------|---------------|---------------|---------------|
-| Linear Regression | 0.25           | 0.96 °C         | 0.76 °C        | -0.07 °C        |
-| KNN               | 0.41           | 0.86 °C         | 0.66 °C        | 0.092 °C        |
-| Random Forest     | 0.61           | 0.7 °C          | 0.53 °C        | 0.086 °C        |
+|-------------------|----------------|-----------------|----------------|-----------------|
+| Linear Regression | 0.32           | 1.00 °C         | 0.79 °C        | 0.05 °C         |
+| KNN               | 0.45           | 0.91 °C         | 0.71 °C        | 0.1 °C          |
+| Random Forest     | 0.54           | 0.8 °C          | 0.6 °C         | 0.01 °C         |
 | XGB Boost         |                |                 |                |                 |
 | Neuronal Network  |                |                 |                |                 |
 
 : **TABLE 4:** Overview of the evaluation of the models in the demo mode.
 
-## Linear Regressions
+## Linear Regression Model
 
 ### Model
 
@@ -210,11 +283,18 @@ evaluation[[3]]
 evaluation[[4]]
 ```
 
-## KNN 
+## KNN Model
 
 ### Model
 
-hyperparameter = 10
+The KNN model uses the recipe (pp) and training data as inputs. Further,
+you have the option for tuning the hyperparameter k. Note that this can be
+very time intensive. We have done it already and the function will use k =
+10 as a default. If you change tuning = TRUE, the function will tune the
+model.
+
+Furthermore, a KNN model is not really suitable for large data sets. The
+computation time is very high. y
 
 ```{r KNN Model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to calculate a KNN model
@@ -242,7 +322,7 @@ evaluation[[3]]
 evaluation[[4]]
 ```
 
-## Random Forest 
+## Random Forest Model
 
 ### Model
 
@@ -274,7 +354,7 @@ evaluation[[3]]
 evaluation[[4]]
 ```
 
-## XGB
+## XGB Model
 
 ### Model
 

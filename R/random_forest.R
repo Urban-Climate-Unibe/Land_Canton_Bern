@@ -1,5 +1,8 @@
 
 random_forest <- function(pp,training_data,tuning = FALSE){
+  cores <- makeCluster(detectCores())
+  registerDoParallel(cores)
+
   pred_count <- length(pp$var_info$variable)
   if (tuning == FALSE) {
     grid <- expand.grid(
@@ -24,8 +27,8 @@ mod_cv <- caret::train(
     method = "cv",
     index = group_folds,
     number = 3,
-    savePredictions = "final"
-  ),
+    savePredictions = "final"),
+    parallel = 'foreach',
   tuneGrid = grid,
   # arguments specific to "ranger" method
   replace = FALSE,
@@ -34,5 +37,6 @@ mod_cv <- caret::train(
   seed = 1982
 )
 
+stopCluster(cores)
 return(mod_cv)
 }
