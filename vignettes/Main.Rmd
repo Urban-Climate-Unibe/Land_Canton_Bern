@@ -174,7 +174,7 @@ selection, a formula is now generated, which is processed into a recipe.
 This is now the basis for creating the models.
 
 | Variable which is not a predictor | Reason                                                                          |
-|-----------------------------------|---------------------------------------------------------------------------------|
+|-----------------------|----------------------------------------------------|
 | Log_Nr                            |                                                                                 |
 | temperature                       | because this is the target                                                      |
 | timestamp, year, month, day, hour | because it is controversial whether time and date should be used as predictors. |
@@ -231,13 +231,13 @@ are to be used or whether the hyperparameters are to be optimized.
 
 dedd
 
-| Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|-------------------|----------------|-----------------|----------------|-----------------|
-| Linear Regression | 0.47           | 0.86 °C         | 0.67 °C        | 0.02 °C         |
-| KNN               |                |                 |                |                 |
-| Random Forest     | 0.73           | 0.63 °C         | 0.46 °C        | 0.07 °C         |
-| XGB Boost         |                |                 |                |                 |
-| Neuronal Network  |                |                 |                |                 |
+| Model                | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
+|------------------|--------------|---------------|--------------|---------------|
+| Linear Regression    | 0.47           | 0.86 °C         | 0.67 °C        | 0.02 °C         |
+| KNN [reduced to 13%] | 0.51           | 0.84 °C         | 0.65 °C        | 0.07 °          |
+| Random Forest        | 0.73           | 0.63 °C         | 0.46 °C        | 0.07 °C         |
+| XGB Boost            |                |                 |                |                 |
+| Neuronal Network     |                |                 |                |                 |
 
 : **TABLE 3:** Overview of the evaluation of the models in the regular
 mode.
@@ -245,7 +245,7 @@ mode.
 dedferfef
 
 | Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|-------------------|----------------|-----------------|----------------|-----------------|
+|---------------|---------------|---------------|---------------|---------------|
 | Linear Regression | 0.32           | 1.00 °C         | 0.79 °C        | 0.05 °C         |
 | KNN               | 0.45           | 0.91 °C         | 0.71 °C        | 0.1 °C          |
 | Random Forest     | 0.54           | 0.8 °C          | 0.6 °C         | 0.01 °C         |
