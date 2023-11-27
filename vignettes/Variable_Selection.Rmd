@@ -19,13 +19,14 @@ source("../R/load_packages.R")
 
 
 ```{r Data Wrangling, echo=FALSE, message=FALSE, warning=FALSE}
+set.seed(123)
 # We want to know, if a certain file already exists
 name.of.file <- "../data/Combined.csv"
 
 # If do not exists such a file, we create it
 if (!file.exists(name.of.file)){
   # Load the R script to processing the raw tif files
-  source("../R/raw_tif_processing.R")
+  source("../R/raw_tif_processing_2.R")
   
   # Load the R script to create the data frame "combined" which is the basis of this project
   source("../R/data_combination.R")
@@ -37,7 +38,7 @@ if (!file.exists(name.of.file)){
     mutate(temperature = temperature-temp) |>
     drop_na()
   
-combined <- dplyr::slice_sample(combined,prop = .01) 
+combined <- dplyr::slice_sample(combined,prop = .03) #3% kept
 
 ```
 
@@ -125,29 +126,28 @@ pp <- recipes::recipe(formula_local,
     recipes::step_center(recipes::all_numeric(), -recipes::all_outcomes()) |>
     recipes::step_scale(recipes::all_numeric(), -recipes::all_outcomes())
 
-#!!!!!! here new implementation
-group_folds <- groupKFold(combined$Log_Nr, k = 10)
+
+
 
 random_forest <- caret::train(
-  pp,
+  pp, 
   data = combined,
   method = "ranger",
   metric = "RMSE",
   trControl = trainControl(
     method = "cv",
     number = 5,
-    index = group_folds,
     savePredictions = "final"
-  ),
+    ),
   tuneGrid = expand.grid(
-    .mtry = length(predictors_all)/3,       # default p/3
-    .min.node.size = 5,         # set to 5
+    .mtry = round(length(predictors_current)/3),       # default p/3
+    .min.node.size = 2,         # set to 5
     .splitrule = "variance"     # default variance
-  ),
+    ),
   # arguments specific to "ranger" method
   replace = FALSE,
   sample.fraction = 0.5,
-  num.trees = 100,
+  num.trees = 20,       
   seed = 1982
 )
 
@@ -176,25 +176,24 @@ pp <- recipes::recipe(formula_local,
     recipes::step_scale(recipes::all_numeric(), -recipes::all_outcomes())
 
   random_forest <- caret::train(
-  pp,
+  pp, 
   data = combined,
   method = "ranger",
   metric = "RMSE",
   trControl = trainControl(
     method = "cv",
     number = 5,
-    index = group_folds,
     savePredictions = "final"
-  ),
+    ),
   tuneGrid = expand.grid(
-    .mtry = length(predictors_all)/3,       # default p/3
-    .min.node.size = 5,         # set to 5
+    .mtry = round(length(predictors_current)/3),       # default p/3
+    .min.node.size = 2,         # set to 5
     .splitrule = "variance"     # default variance
-  ),
+    ),
   # arguments specific to "ranger" method
   replace = FALSE,
   sample.fraction = 0.5,
-  num.trees = 100,
+  num.trees = 20,       
   seed = 1982
 )
   
@@ -211,13 +210,28 @@ pp <- recipes::recipe(formula_local,
     dplyr::filter(RMSE == min(RMSE))|> #take away the minimal RMSE when model is missing that parameter then min RMSE
     dplyr::select(name) |>
     as.character()
-  
+  print("rejected now:")
+  print(highest_RMSE)
+  if(RMSE_OLD >= RMSE_NEW){
+    print("Model improved!!! Now overwriting predictors!")
   predictors_current <- predictors_current[! predictors_current %in% highest_RMSE]
   print("Current predictors")
   print(predictors_current)
+  }
 }
 
 
+
+correlation_matrix <-as.data.frame(cor(combined[predictors],method = "spearman")) |>
+  rownames_to_column("name") |>
+pivot_longer(cols = -name,names_to = "name_1",values_to = "correlation") |>
+  mutate(correlation = correlation^2)|>
+  filter(correlation >= 0.7,
+         name != name_1) |>
+  arrange(desc(correlation))
+
+  
+  
 
 
 

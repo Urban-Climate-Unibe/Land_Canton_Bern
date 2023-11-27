@@ -59,7 +59,8 @@ data_combination <- suppressWarnings(function(){
       sum_precipitation_12_hours = zoo::rollsum(rain, k = 12, fill = NA, align = "right"),
       sum_precipitation_1_day = zoo::rollsum(rain, k = 24 * 1, fill = NA, align = "right"),
       sum_precipitation_3_days = zoo::rollsum(rain, k = 24 * 3, fill = NA, align = "right"),
-      sum_precipitation_5_days = zoo::rollsum(rain, k = 24 * 5, fill = NA, align = "right")
+      sum_precipitation_5_days = zoo::rollsum(rain, k = 24 * 5, fill = NA, align = "right"),
+      sum_precipitation_10_days = zoo::rollsum(rain, k = 24 * 10, fill = NA, align = "right")
     ) |>
     mutate_at(vars(starts_with("sum_precip")), ~ ifelse(. < 0.1, 0, .))
 
