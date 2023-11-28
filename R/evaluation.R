@@ -1,8 +1,20 @@
+# Load the meta data of the climate network
+metadata.logger <- read_csv('../data/Metadata_19-22.csv')
+
 # This function evaluates and visualize the model
 evaluation_function <- function(data_evaluate = combined_test, train_data = combined_train, model){
 
 ###############################################################################
 # Data preparation
+
+if('Log_Nr' %in% colnames(train_data)){
+unique_numbers <- sort(unique(train_data$Log_Nr))
+print(paste('Your model contains:',length(unique_numbers),'Loggers'))
+logger.names <- metadata.logger|>
+  filter(Log_Nr %in% unique_numbers)|>
+  select(Name)|>
+  pull()}
+
 
 data_evaluate$fitted <- unlist(predict(model, data_evaluate))
 train_data$fitted <- unlist(predict(model, train_data))
@@ -91,31 +103,27 @@ out <- cowplot::plot_grid(p1, p2)
 
 boxplot_logger <- ggplot(data = train_data,
              aes(x = as.factor(Log_Nr), y = Bias))+
-  geom_boxplot() +
+  geom_boxplot(fill = "skyblue", alpha = 0.5, linewidth = 0.3, width = 0.5,
+               outlier.color = "red", outlier.shape = 20, outlier.size = 0.7) +
+  stat_boxplot(geom = "errorbar", linewidth = 0.3, width = 0.5)+
+  geom_hline(yintercept = 0,linewidth = 0.3) +
+  labs(x = "Name of the logger-station", y = 'Bias') +
   theme_classic() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 5)) +
+  scale_x_discrete(labels = logger.names)
+
 
 #------------------------------------------------------------------------------
 # Position 4: Boxplot for each hour of the day (bias)
 
 boxplot_hour <- ggplot(data = train_data,
        aes(x = as.factor(hour), y = Bias))+
-  geom_boxplot(fill = "skyblue", alpha = 0.5, lwd = 0.3, width = 0.5,
-               outlier.color = "red", outlier.shape = 17, outlier.size = 2) +
-  stat_boxplot(geom = "errorbar", size = 0.3, width = 0.3)+
+  geom_boxplot(fill = "skyblue", alpha = 0.5, linewidth = 0.3, width = 0.5,
+               outlier.color = "red", outlier.shape = 20, outlier.size = 0.7) +
+  geom_hline(yintercept = 0,linewidth = 0.3) +
+  stat_boxplot(geom = "errorbar", linewidth = 0.3, width = 0.5)+
+  labs(x = "Hour of the day", y = 'Bias') +
   theme_classic()
-
-#------------------------------------------------------------------------------
-# Position 5: Partial dependence of the variables
-
-# The predictor variables are saved in our model's recipe
-#preds <- model$recipe$var_info |>
-  #dplyr::filter(role == "predictor") |>
-  #dplyr::pull(variable)
-
-#all_plots <- purrr::map(preds, ~pdp::partial(model,c('winds', 'windd'), plot = TRUE, plot.engine = "ggplot2"))
-
-#pdps <- cowplot::plot_grid(all_plots[[1]], all_plots[[2]])
 
 ###############################################################################
 # We define our list for the return:

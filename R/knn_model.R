@@ -7,7 +7,7 @@ tuning.vector = (8:12)
 
 numbers.of.rows <- nrow(training_data)
 
-if(numbers.of.rows > 50000){
+if(numbers.of.rows > 100000){
   print('The data will be split because we assume high computational time!')
   split.percent <- as.numeric(round(100000/numbers.of.rows, digits = 3))
   percent <- as.numeric(round(100*split.percent, digits = 0))
@@ -18,11 +18,11 @@ if(numbers.of.rows > 50000){
   print(paste('Your data frame has been reduced from',numbers.of.rows,
               'rows to',new.numbers.of.rows,
               'rows which means you work now with',
-              percent,'% of your the original data'))
+              percent,'% of your original data'))
 }
 
 if(tuning == FALSE){
-  print('Your model will be calculatet with k = 10')
+  print('Your model will be calculated with k = 10')
   group_folds <- groupKFold(training_data$Log_Nr, k = 3)
   model <- caret::train(pp, data = training_data |> tidyr::drop_na(),
                         # We want a KNN model

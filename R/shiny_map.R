@@ -62,7 +62,7 @@ server <- function(input, output) {
 
     extent <- rgdal::readOGR("../data/Map/Extent_Bern.shp")
     rivers <- rgdal::readOGR("../data/Map/Aare.shp")
-    color = colorRampPalette(c("blue","deepskyblue", "white","orange", "red"))(100)
+    color = colorRampPalette(c("blue", "white", "red"))(20)
     terra::plot(temperature,color = color)
     sp::plot(extent, add = T)
     sp::plot(rivers, add = T)

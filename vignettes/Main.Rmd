@@ -32,7 +32,7 @@ Bigler Patrick (patrick.bigler1\@students.unibe.ch)
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
 
 Welcome to our reproducible workflow for the proseminar in Applied Geodata
-Sciences project. This project aims to compare different machine learning
+Sciences. This project aims to compare different machine learning
 techniques to a linear regression model and explores whether machine
 learning approaches are superior to linear regression models. For this
 purpose, the temperature deviation of the city of Bern compared to the
@@ -42,26 +42,27 @@ MeteoSchweiz measuring station in Zollikofen for the time period 2019-2022,
 6 land use classes and 4 geospatial layers. The land use classes and the
 geospatial layers covers the entire suburban area of the city of Bern.
 
-| Variable                      | Variable Typ     | Resolution / [used] |
-|-------------------------------|------------------|---------------------|
-| 2m Temperature [Zollikofen]   | Meteorological   | 15 minutes / [1h]   |
-| Precipitation [Zollikofen]    | Meteorological   | 15 minutes / [1h]   |
-| Radiation [Zollikofen]        | Meteorological   | 15 minutes / [1h]   |
-| Windspeed [Zollikofen]        | Meteorological   | 15 minutes / [1h]   |
-| Winddirection [Zollikofen]    | Meteorological   | 15 minutes / [1h]   |
-| Buildings                     | Land use class   |                     |
-| Open Space Forest             | Land use class   |                     |
-| Open Space Garden             | Land use class   |                     |
-| Open Space Sealed             | Land use class   |                     |
-| Open Space Agriculture        | Land use class   |                     |
-| Open Space Water              | Land use clas    |                     |
-| Vegetation Height             | Geospatial Layer |                     |
-| Mean Building Heights         | Geospatial Layer |                     |
-| Slope                         | Geospatial Layer |                     |
-| Digital Elevation Model (DEM) | Geospatial Layer |                     |
+| Variable                              | Variable Typ     | Resolution / [used]    |
+|-----------------------------------|-------------------|----------------------|
+| 2m Temperature [Zollikofen]           | Meteorological   | 15 minutes / [1h mean] |
+| Precipitation [Zollikofen]            | Meteorological   | 15 minutes / [1h mean] |
+| Radiation [Zollikofen]                | Meteorological   | 15 minutes / [1h mean] |
+| Windspeed [Zollikofen]                | Meteorological   | 15 minutes / [1h mean] |
+| Winddirection [Zollikofen]            | Meteorological   | 15 minutes / [1h mean] |
+| Buildings                             | Land use class   |                        |
+| Open Space Forest                     | Land use class   |                        |
+| Open Space Garden                     | Land use class   |                        |
+| Open Space Sealed                     | Land use class   |                        |
+| Open Space Agriculture                | Land use class   |                        |
+| Open Space Water                      | Land use clas    |                        |
+| Vegetation Height                     | Geospatial Layer |                        |
+| Mean Building Heights                 | Geospatial Layer |                        |
+| Slope                                 | Geospatial Layer |                        |
+| Digital Elevation Model (DEM)         | Geospatial Layer |                        |
+| Climate Network (xx low cost devices) | Meteorological   | 10 minutes / [1h mean] |
 
 : **TABLE 1:** Overview of the predictors used for modeling. For more
-information please read the [project
+information please read our [project
 proposal](https://github.com/sundin01/AGDS_Bigler_Tinner/blob/main/proposal.pdf).
 
 To evaluate...LCDs...target?.......Because we also want to show a possible
@@ -98,7 +99,7 @@ packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
               "dplyr","googledrive","caret","rgdal","keras","vip","parsnip",
               "workflows","tune","dials","stringr","terra","stars","sf","plyr",
               "doParallel", "foreach", "terrainr","starsExtra", "pdp",
-              "kableExtra", "recipes", "tidyterra","shiny")
+              "kableExtra", "recipes", "tidyterra","shiny", "xgboost")
 
 # Load the R script to install and load all the packages from above
 source("../R/load_packages.R")
@@ -106,15 +107,20 @@ source("../R/load_packages.R")
 
 ## Data Wrangling
 
-This subsection generate your basic csv. file (Combined.csv) in a
-interactive way.
+This subsection generate your basic .csv file (it is called 'Combined') in
+a interactive way. Therefore, you have to navigate through some questions.
+First, it will check whether a Combined.csv file already exists in the
+corresponding folder. If it, then it will read in. If not, then three
+questions will follow. Here, you can see those questions and an explanation
+what the answers mean for the further workflow:
 
 1.  You have a Combined.csv file already. Would you like to redo the
     proceeding?
 
     If you answer with 'yes', then will guided through the following
     questions and your Combined.csv file will be rewritten. If you answer
-    with 'no', then you will jump to the model section.
+    with 'no', then it will read your existing file and you will directly
+    jump to the model section.
 
 2.  Do you want to generate all data by yourself? (It may takes up to 12
     hours)
@@ -232,7 +238,7 @@ are to be used or whether the hyperparameters are to be optimized.
 dedd
 
 | Model                | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|------------------|--------------|---------------|--------------|---------------|
+|---------------|---------------|---------------|---------------|---------------|
 | Linear Regression    | 0.47           | 0.86 °C         | 0.67 °C        | 0.02 °C         |
 | KNN [reduced to 13%] | 0.51           | 0.84 °C         | 0.65 °C        | 0.07 °          |
 | Random Forest        | 0.73           | 0.63 °C         | 0.46 °C        | 0.07 °C         |
@@ -246,9 +252,9 @@ dedferfef
 
 | Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
 |---------------|---------------|---------------|---------------|---------------|
-| Linear Regression | 0.32           | 1.00 °C         | 0.79 °C        | 0.05 °C         |
-| KNN               | 0.45           | 0.91 °C         | 0.71 °C        | 0.1 °C          |
-| Random Forest     | 0.54           | 0.8 °C          | 0.6 °C         | 0.01 °C         |
+| Linear Regression | 0.47           | 0.96 °C         | 0.75 °C        | 0.09 °C         |
+| KNN               | 0.58           | 0.86 °C         | 0.63 °C        | 0.06 °C         |
+| Random Forest     | 0.64           | 0.84 °C         | 0.59 °C        | 0.21 °C         |
 | XGB Boost         |                |                 |                |                 |
 | Neuronal Network  |                |                 |                |                 |
 
@@ -258,7 +264,7 @@ dedferfef
 
 ### Model
 
-```{r Calculate a LM-Model, message=FALSE, warning=FALSE}
+```{r Calculate lm-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to calculate a lm model
 source("../R/lm_model.R")
 # The function needs the recipe and a dataset which can be used for model training
@@ -267,7 +273,7 @@ lm_model <- LM_Model(pp, combined_train)
 
 ### Evaluation
 
-```{r}
+```{r Evaluation of the lm-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to evaluate the model
 source("../R/evaluation.R")
 # The function will return a list
@@ -296,16 +302,17 @@ model.
 Furthermore, a KNN model is not really suitable for large data sets. The
 computation time is very high. y
 
-```{r KNN Model, echo=FALSE, message=FALSE, warning=FALSE}
+```{r Calculation of the knn-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to calculate a KNN model
 source("../R/knn_model.R")
 # The function needs the recipe and a dataset which can be used for model training
 knn_model <- KNN_Model(pp = pp, training_data =  combined_train, tuning = FALSE)
+
 ```
 
 ### Evaluation
 
-```{r}
+```{r Evaluation of the knn-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to evaluate the model
 source("../R/evaluation.R")
 
@@ -328,7 +335,7 @@ evaluation[[4]]
 
 Hyperparamater:
 
-```{r Random Forest, echo=FALSE, message=FALSE, warning=FALSE}
+```{r Calculation of the random forest-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to calculate a random forest model
 source("../R/random_forest.R")
 # The function needs the recipe and a dataset which can be used for model training
@@ -337,7 +344,7 @@ random_forest_model <- random_forest(pp, combined_train, tuning = F)
 
 ### Evaluation
 
-```{r}
+```{r Evaluation of the random forest-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to evaluate the model
 source("../R/evaluation.R")
 
@@ -498,7 +505,7 @@ predictions <- model %>% predict(as.matrix(test_features))
 
 # Map
 
-# Shiny App
+# Shiny Map
 
 ```{r}
 
