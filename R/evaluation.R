@@ -30,7 +30,7 @@ mae_train <- model$results$MAE
 rsq_train <- model$results$Rsquared
 # Bias
 train_data <- train_data|>mutate(Bias = fitted - temperature)
-bias.train <- mean(train_data$Bias)
+bias.train <- round(mean(train_data$Bias), digits = 3)
 
 # -----------------------------------------------------------------------------
 # Metrics Test (RMSE, MAE, RSQ, Bias)
@@ -55,7 +55,7 @@ rsq_test <- metrics_test |>
 # --> if the bias is negative, then the model underestimate the temperature
 # --> if the bias is positive, then the model overestimate the temperature
 data_evaluate <- data_evaluate|>mutate(Bias = fitted - temperature)
-bias.test <- mean(data_evaluate$Bias)
+bias.test <- round(mean(data_evaluate$Bias), digits = 3)
 
 ###############################################################################
 # We want a list as a return for our evaluations:
@@ -81,7 +81,8 @@ p1 <- ggplot(data = train_data, aes(temperature, fitted)) +
   labs(subtitle = bquote(italic(R)^2 == .(format(rsq_train, digits = 2)) ~~
                           RMSE == .(format(rmse_train, digits = 3)) ~~
                           Bias == .(format(bias.train, digits = 3))),
-       title = "Train set") +
+                         x = 'Measured temperature [°C]' , y = "Predicted temperature [°C]",
+       title = "Train set evaluation") +
   theme_classic()
 
 # We create the plot for the test set
@@ -92,7 +93,8 @@ p2 <- ggplot(data = data_evaluate, aes(temperature, fitted)) +
  labs(subtitle = bquote(italic(R)^2 == .(format(rsq_test, digits = 2)) ~~
                            RMSE == .(format(rmse_test, digits = 3)) ~~
                            Bias == .(format(bias.test, digits = 3))),
-  title = "Test set") +
+      x = 'Measured temperature [°C]' , y = "Predicted temperature [°C]",
+  title = "Test set evaluation") +
   theme_classic()
 
 # We put both plots together
@@ -107,10 +109,10 @@ boxplot_logger <- ggplot(data = train_data,
                outlier.color = "red", outlier.shape = 20, outlier.size = 0.7) +
   stat_boxplot(geom = "errorbar", linewidth = 0.3, width = 0.5)+
   geom_hline(yintercept = 0,linewidth = 0.3) +
-  labs(x = "Name of the logger-station", y = 'Bias') +
+  labs(x = "Name of the station and logger number", y = 'Bias [°C]') +
   theme_classic() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 5)) +
-  scale_x_discrete(labels = logger.names)
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 4)) +
+  scale_x_discrete(labels = paste(logger.names,'[Log Nr:',unique_numbers,']'))
 
 
 #------------------------------------------------------------------------------
@@ -122,7 +124,7 @@ boxplot_hour <- ggplot(data = train_data,
                outlier.color = "red", outlier.shape = 20, outlier.size = 0.7) +
   geom_hline(yintercept = 0,linewidth = 0.3) +
   stat_boxplot(geom = "errorbar", linewidth = 0.3, width = 0.5)+
-  labs(x = "Hour of the day", y = 'Bias') +
+  labs(x = "Hour of the day", y = 'Bias [°C]') +
   theme_classic()
 
 ###############################################################################

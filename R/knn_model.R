@@ -57,7 +57,7 @@ if(tuning == TRUE){
                         metric = "RMSE")
 
   best.tune <- knn_model$bestTune$k
-  print(paste('Your model has been optimized (k = 8, 9, 10, 11, 12) and k is now:',best.tune))
+  print(paste('Your model has been optimized with k = 8, 9, 10, 11, 12. The optimal k is now:',best.tune))
 
 }
 
