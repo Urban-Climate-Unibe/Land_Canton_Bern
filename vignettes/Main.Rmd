@@ -468,7 +468,7 @@ evaluation[[4]]
 if(advanced_models == "y"){
   source("../R/neural_network.R")
   #tensorflow::install_tensorflow() may need to be run...
-  neural_network(combined_train)
+  nn_model <- neural_network(combined_train)
 #preprocessing needed for test imput of nn
   predictors_nn <- combined_test |>
   dplyr::select(all_of(predictors))
@@ -494,11 +494,11 @@ test_labels <- test_data|> pull(temperature)
   
   
   # Evaluate the model
-evaluation <- model|> evaluate(as.matrix(test_features), test_labels)
+evaluation <- nn_model|> evaluate(as.matrix(test_features), test_labels)
 cat("Mean Absolute Error on Test Data:", evaluation, "\n")
 
 # Make predictions
-predictions <- model|> predict(as.matrix(test_features))
+predictions <- nn_model|> predict(as.matrix(test_features))
 
 
 
