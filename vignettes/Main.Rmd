@@ -46,7 +46,7 @@ use classes and the geospatial layers covers the entire suburban area of
 the city of Bern. Table 1 gives you an overview about the used data.
 
 | Variable                                       | Variable Typ     | Resolution / [used]    |
-|----------------------------------|-------------------|----------------------|
+|------------------------------------------------|------------------|------------------------|
 | 2m Temperature in °C [Zollikofen]              | Meteorological   | 15 minutes / [1h mean] |
 | Precipitation in mm [Zollikofen]               | Meteorological   | 15 minutes / [1h mean] |
 | Radiation in $W*m^{-2}$ [Zollikofen]           | Meteorological   | 15 minutes / [1h mean] |
@@ -190,7 +190,7 @@ selection, a formula is now generated, which is processed into a recipe.
 This is now the basis for creating the models.
 
 | Variable which is not a predictor | Reason                                                                          |
-|------------------------|---------------------------------------------------|
+|-----------------------------------|---------------------------------------------------------------------------------|
 | Log_Nr                            |                                                                                 |
 | temperature                       | because this is the target                                                      |
 | timestamp, year, month, day, hour | because it is controversial whether time and date should be used as predictors. |
@@ -240,7 +240,7 @@ before running the code chunk whether the hyperparameters determined by us
 are to be used or whether the hyperparameters are to be optimized.
 
 | Element of the list | What do you find                                                                               |
-|-----------------|----------------------------------------------------------|
+|---------------------|------------------------------------------------------------------------------------------------|
 | 1                   | returns a table with the main metrics (RSQ, RMSE, MAE and Bias)                                |
 | 2                   | retunrs a visualization of the model (Training and Test set) and shows RSQ, RMSE and the bias. |
 | 3                   | returns a boxplot for each logger station (24h)                                                |
@@ -268,7 +268,7 @@ that there are further techniques which could be explored. But those model
 we did not taken into account.
 
 | Model                | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|---------------|---------------|---------------|---------------|---------------|
+|----------------------|----------------|-----------------|----------------|-----------------|
 | Linear Regression    | 0.47           | 0.86 °C         | 0.67 °C        | 0.06 °C         |
 | KNN [reduced to 13%] | 0.51           | 0.84 °C         | 0.65 °C        | 0.07 °          |
 | Random Forest        | 0.73           | 0.63 °C         | 0.46 °C        | 0.07 °C         |
@@ -290,7 +290,7 @@ model perfoms worse. But we are not sure and more investigations are
 needed. But as a conclusion we can say, that more data improve the models.
 
 | Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|---------------|---------------|---------------|---------------|---------------|
+|-------------------|----------------|-----------------|----------------|-----------------|
 | Linear Regression | 0.47           | 0.96 °C         | 0.75 °C        | 0.09 °C         |
 | KNN               | 0.58           | 0.86 °C         | 0.63 °C        | 0.06 °C         |
 | Random Forest     | 0.64           | 0.84 °C         | 0.59 °C        | 0.21 °C         |

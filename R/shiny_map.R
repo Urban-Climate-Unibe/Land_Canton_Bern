@@ -12,8 +12,7 @@ input_vars <- c(
   "temp","rain", "rad", "winds", "windd", "mean_temp_6_hours", "mean_temp_12_hours",
   "mean_temp_1_day", "mean_temp_3_days", "mean_temp_5_days",
   "sum_precipitation_6_hours", "sum_precipitation_12_hours",
-  "sum_precipitation_1_day", "sum_precipitation_3_days", "sum_precipitation_5_days"
-)
+  "sum_precipitation_1_day", "sum_precipitation_3_days", "sum_precipitation_5_days")
 
 # UI portion of the Shiny app
 ui <- fluidPage(
