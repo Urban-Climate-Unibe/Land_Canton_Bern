@@ -1,5 +1,5 @@
 
-xgb <- function(xgb_workflow,train){
+xgb <- function(data_train,formula){
 
 
 
@@ -14,7 +14,19 @@ xgb <- function(xgb_workflow,train){
 # model settings with the desired
 # model structure (data / formula)
 
-
+  model_settings <- parsnip::boost_tree(
+    trees = tune(),
+    min_n = tune(),
+    tree_depth = tune(),
+    learn_rate = tune(),
+    loss_reduction = tune(),
+    stop_iter = 20,
+  ) |>
+    set_engine("xgboost",nthread = 15, verbose = T) |>
+    set_mode("regression")
+  xgb_workflow <- workflows::workflow() |>
+    add_formula(formula_local) |>
+    add_model(model_settings)
 
 
 
@@ -28,7 +40,7 @@ print(hp_settings)
 
 # set the folds (division into different)
 # cross-validation training datasets
-folds <- rsample::vfold_cv(train, v = 3)
+folds <- rsample::vfold_cv(data_train, v = 3)
 
 # optimize the model (hyper) parameters
 # using the:
@@ -43,9 +55,26 @@ xgb_results <- tune::tune_grid(
   control = tune::control_grid(save_pred = TRUE)
 )
 
+# select the best model based upon
+# the root mean squared error
+xgb_best <- tune::select_best(
+  xgb_results,
+  metric = "rmse"
+)
 
+# cook up a model using finalize_workflow
+# which takes workflow (model) specifications
+# and combines it with optimal model
+# parameters into a model workflow
+xgb_best_hp <- tune::finalize_workflow(
+  xgb_workflow,
+  xgb_best
+)
 
+# train a final (best) model with optimal
+# hyper-parameters
 
-return(xgb_results)
+xgb_best_model <- fit(xgb_best_hp, data_train)
+return(xgb_best_model)
 
 }

@@ -6,10 +6,10 @@ random_forest <- function(pp,training_data,tuning = FALSE){
   pred_count <- length(pp$var_info$variable)
   if (tuning == FALSE) {
     grid <- expand.grid(
-      .mtry = pred_count/3, #default p/3
-      .min.node.size = 5,         # set to 5
+      .mtry = pred_count/3.5, #default p/3.5
+      .min.node.size = 3,         # set to 3
       .splitrule = "variance"     # default variance
-    )
+    ) #Result of hyperparameter tuning
   }else{
     grid <- expand.grid(
       .mtry = c(pred_count/2,pred_count/2.5,pred_count/3,pred_count/3.5,pred_count/4),

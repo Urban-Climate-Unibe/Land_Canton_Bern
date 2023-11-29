@@ -146,11 +146,10 @@ what the answers mean for the further workflow:
 ```{r Data Wrangling, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to start the workflow
 source("../R/Processing_Brain.R")
+preprocessing()
 
-repeat{ print("The normal version of model Training takes a while.")
-model_demo = readline(prompt = "Would you like to run the model training in demo mode? [y/n] ")
-  if(model_demo %in% c("y","n")){break}
-  }
+source("../R/model_training_brain.R")
+model_training_brain()
 
   combined <- read_csv("../data/Combined.csv") |>
     mutate(temperature = temperature-temp) |>
@@ -416,19 +415,7 @@ evaluation we want access to (see table 2).
 
 ```{r Evaluation of the random forest-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to evaluate the model
-source("../R/evaluation.R")
 
-# Function call
-evaluation <- evaluation_function(combined_test, combined_train, random_forest_model)
-
-# If we want our metrics in table, we chose the first element of the list
-evaluation[[1]]
-# If we want a visualization of the training and test set
-evaluation[[2]]
-# Boxplot for each logger station (24h)
-evaluation[[3]]
-# Boxplot for each hour of the day
-evaluation[[4]]
 ```
 
 ## XGB Model
@@ -439,58 +426,37 @@ Hyperparamater:
 
 ```{r}
 
+
+if(advanced_models == "y"){
 source("../R/XGB.R")
 # type of task we want to evaluate
-model_settings <- parsnip::boost_tree(
-  trees = tune(),
-  min_n = tune(),
-  tree_depth = tune(),
-  learn_rate = tune(),
-  loss_reduction = tune(),
-  stop_iter = 20,
-) |>
-  set_engine("xgboost",nthread = 6, verbose = T) |>
-  set_mode("regression")
-xgb_workflow <- workflows::workflow() |>
-  add_formula(formula_local) |>
-  add_model(model_settings)
 
 
+xgb_model <- xgb(data_train = combined_train,formula = formula_local) #this model always tunes...
 
-xgb_results <- xgb(xgb_workflow,train = combined_train)
-
-
-
-# select the best model based upon
-# the root mean squared error
-xgb_best <- tune::select_best(
-  xgb_results,
-  metric = "rmse"
-)
-
-# cook up a model using finalize_workflow
-# which takes workflow (model) specifications
-# and combines it with optimal model
-# parameters into a model workflow
-xgb_best_hp <- tune::finalize_workflow(
-  xgb_workflow,
-  xgb_best
-)
-# train a final (best) model with optimal
-# hyper-parameters
-xgb_best_model <- fit(xgb_best_hp, combined_train)
-
-```
-
-### Evaluation
-
-```{r}
 source("../R/evaluation.R")
-eval <- evaluate(combined_test,xgb_best_model)
- eval[[1]]
- eval[[2]]
+
+# Function call
+evaluation <- evaluation_function(combined_test, combined_train, xgb_model)
+
+# If we want our metrics in table, we chose the first element of the list
+evaluation[[1]]
+# If we want a visualization of the training and test set
+evaluation[[2]]
+# Boxplot for each logger station (24h)
+evaluation[[3]]
+# Boxplot for each hour of the day
+evaluation[[4]]
+
+
+}
+
 
 ```
+
+
+
+
 
 ## Neuronal Network
 
@@ -499,76 +465,47 @@ eval <- evaluate(combined_test,xgb_best_model)
 ```{r}
  
 
-
-#devtools::install_github("rstudio/tensorflow")
-#devtools::install_github("rstudio/keras")
-#Python version 3.11 needed (not 3.12!)!!!!!!
-# tensorflow::install_tensorflow()
-tensorflow::tf_config()
-library(keras)
-library(dplyr)
-
-# Split the dataset into predictors and target variable
-predictors_nn <- combined_train |>
+if(advanced_models == "y"){
+  source("../R/neural_network.R")
+  #tensorflow::install_tensorflow() may need to be run...
+  neural_network(combined_train)
+#preprocessing needed for test imput of nn
+  predictors_nn <- combined_test |>
   dplyr::select(all_of(predictors))
-temperature <- combined_train |>
+temperature <- combined_test |>
   dplyr::select(temperature)
 
 # Normalize/Scale the predictors using dplyr
-scaled_predictors <- predictors_nn %>%
+scaled_predictors <- predictors_nn|>
   mutate(across(everything(), scale))
 
 # Combining the scaled predictors with the temperature into a single data frame
 processed_data <- cbind(scaled_predictors, temperature)
 
-# Splitting the data into training and testing sets
-set.seed(123)  # For reproducibility
-train_indices <- sample(1:nrow(combined_train), 0.8 * nrow(combined_train))  # 80% for training
-train_data <- processed_data[train_indices, ]
-test_data <- processed_data[-train_indices, ]
-
-# Separating predictors and target variable in training and testing sets
-train_features <- train_data %>% select(-temperature)
-train_labels <- train_data %>% pull(temperature)
-test_features <- test_data %>% select(-temperature)
-test_labels <- test_data %>% pull(temperature)
-
-# Create a Keras sequential model (same as previous example)
-model <- keras_model_sequential()
-model %>%
-layer_dense(units = 128, activation = 'relu', input_shape = ncol(train_features)) %>%
-  layer_dropout(rate = 0.2) %>%
-  layer_dense(units = 64, activation = 'relu') %>%
-  layer_dropout(rate = 0.2) %>%
-  layer_dense(units = 32, activation = 'relu') %>%
-  layer_dropout(rate = 0.2) %>%
-  layer_dense(units = 1)
 
 
-# Compile the model
-model %>% compile(
-  loss = 'mean_squared_error',
-  optimizer = keras$optimizers$legacy$Adam(learning_rate = 0.001),
-  metrics = c('mean_absolute_error')
-)
 
-# Train the model
-history <- model %>% fit(
-  as.matrix(train_features), train_labels,
-  epochs = 25,
-  batch_size = 64,
-  validation_data = list(as.matrix(test_features), test_labels)
-)
+test_data <- processed_data
 
-# Evaluate the model
-evaluation <- model %>% evaluate(as.matrix(test_features), test_labels)
+  
+test_features <- test_data|> select(-temperature)
+test_labels <- test_data|> pull(temperature)
+  
+  
+  
+  # Evaluate the model
+evaluation <- model|> evaluate(as.matrix(test_features), test_labels)
 cat("Mean Absolute Error on Test Data:", evaluation, "\n")
 
-# Plot training history
-plot(history)
-
 # Make predictions
-predictions <- model %>% predict(as.matrix(test_features))
+predictions <- model|> predict(as.matrix(test_features))
+
+
+
+  
+
+
+}
 ```
 
 ### Evaluation
