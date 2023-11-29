@@ -2,11 +2,12 @@
 xgb <- function(data_train,formula){
 
 
+  unregister_dopar <- function() {
+    env <- foreach:::.foreachGlobals
+    rm(list=ls(name=env), pos=env)
+  }
 
-
-
-
-
+unregister_dopar() #for do paralell
 
 
 # create a workflow compatible with
@@ -22,10 +23,10 @@ xgb <- function(data_train,formula){
     loss_reduction = tune(),
     stop_iter = 20,
   ) |>
-    set_engine("xgboost",nthread = 15, verbose = T) |>
+    set_engine("xgboost",nthread = 6, verbose = T) |>
     set_mode("regression")
   xgb_workflow <- workflows::workflow() |>
-    add_formula(formula_local) |>
+    add_formula(formula) |>
     add_model(model_settings)
 
 
@@ -38,9 +39,10 @@ hp_settings <- dials::grid_latin_hypercube(
 
 print(hp_settings)
 
+
 # set the folds (division into different)
 # cross-validation training datasets
-folds <- rsample::vfold_cv(data_train, v = 3)
+folds <- rsample::group_vfold_cv(data_train, v = 3,group = "Log_Nr")
 
 # optimize the model (hyper) parameters
 # using the:

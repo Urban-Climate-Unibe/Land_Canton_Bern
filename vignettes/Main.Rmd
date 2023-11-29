@@ -415,7 +415,19 @@ evaluation we want access to (see table 2).
 
 ```{r Evaluation of the random forest-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to evaluate the model
+source("../R/evaluation.R")
 
+# Function call
+evaluation <- evaluation_function(combined_test, combined_train, random_forest_model)
+
+# If we want our metrics in table, we chose the first element of the list
+evaluation[[1]]
+# If we want a visualization of the training and test set
+evaluation[[2]]
+# Boxplot for each logger station (24h)
+evaluation[[3]]
+# Boxplot for each hour of the day
+evaluation[[4]]
 ```
 
 ## XGB Model
@@ -498,10 +510,10 @@ evaluation <- nn_model|> evaluate(as.matrix(test_features), test_labels)
 cat("Mean Absolute Error on Test Data:", evaluation, "\n")
 
 # Make predictions
-predictions <- nn_model|> predict(as.matrix(test_features))
+combined_test$nn_prediction <- nn_model|> predict(as.matrix(test_features))
 
 
-
+cor(combined_test$nn_prediction,combined_test$temperature)
   
 
 

@@ -36,7 +36,7 @@ test_labels <- test_data|> pull(temperature)
 # Create a Keras sequential model (same as previous example)
 model <- keras_model_sequential()
 model|>
-  layer_dense(units = 128, activation = 'relu', input_shape = ncol(train_features))|>
+  layer_dense(units = 128, activation = 'relu')|>
   layer_dropout(rate = 0.2)|>
   layer_dense(units = 64, activation = 'relu')|>
   layer_dropout(rate = 0.2)|>
@@ -55,7 +55,7 @@ model|> compile(
 # Train the model
 history <- model|> fit(
   as.matrix(train_features), train_labels,
-  epochs = 25,
+  epochs = 75,
   batch_size = 64,
   validation_data = list(as.matrix(test_features), test_labels)
 )

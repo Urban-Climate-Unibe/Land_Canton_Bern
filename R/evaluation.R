@@ -21,13 +21,20 @@ train_data$fitted <- unlist(predict(model, train_data))
 
 #------------------------------------------------------------------------------
 # Metrics Train (RMSE, MAE, RSQ, Bias)
-
+metrics_train <- train_data |>
+  yardstick::metrics(temperature, fitted)
 # RMSE
-rmse_train <- model$results$RMSE
+rmse_train <- metrics_train |>
+  filter(.metric == "rmse") |>
+  pull(.estimate)
 # MAE
-mae_train <- model$results$MAE
+mae_train <- metrics_train |>
+  filter(.metric == "mae") |>
+  pull(.estimate)
 # RSQ
-rsq_train <- model$results$Rsquared
+rsq_train <- metrics_train |>
+  filter(.metric == "rsq") |>
+  pull(.estimate)
 # Bias
 train_data <- train_data|>mutate(Bias = fitted - temperature)
 bias.train <- round(mean(train_data$Bias), digits = 3)
