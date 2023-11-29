@@ -9,7 +9,7 @@ model_training_brain <- function(){
     print("Both models take a long time to run and are only recommended to run in demo mode!")
     print("To run the neural network, Python version 3.11 must be installed and also devtools must be installed (is not checked for!)")
     advanced_models <<- readline(prompt = "Would you like to run these advanced models? [y/n] ")
-    if(model_demo %in% c("y","n")){break}
+    if(advanced_models %in% c("y","n")){break}
   }
 
 

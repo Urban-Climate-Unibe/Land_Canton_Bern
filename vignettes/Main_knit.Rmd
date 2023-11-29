@@ -1,0 +1,452 @@
+---
+title: "Main Workflow"
+author: "Nils Tinner, Patrick Bigler"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+    number_sections: yes
+  '': default
+editor_options:
+  markdown:
+    wrap: 75
+---
+
+Course: Proseminar in Applied Geo-Data Science at the University of Bern
+(Institute of Geography)
+
+Supervisor: Prof. Dr. Benjamin Stocker
+
+Adviser: Dr. Koen Hufkens, Dr. Laura Marques, Pepa Aran
+
+Further information: <https://geco-bern.github.io/agds_proseminar/>
+
+[Do you have questions about the workflow? Contact the
+authors:]{.underline}
+
+Tinner Nils (nils.tinner\@students.unibe.ch)
+
+Bigler Patrick (patrick.bigler1\@students.unibe.ch)
+
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
+
+# Introduction
+
+Welcome to our reproducible workflow for the proseminar in Applied Geodata
+Sciences. This project aims to compare different machine learning
+techniques to a linear regression model and explores whether machine
+learning approaches are superior to linear regression models. For this
+purpose, the temperature deviation of the city of Bern compared to the
+MeteoSwiss measuring station in Zollikofen is modeled (urban heat island
+effect). For modeling, we use 5 meteorological variables from the
+MeteoSchweiz measuring station in Zollikofen for the time period 2019-2022,
+6 land use classes and 4 geospatial layers of the Canton of Bern. The land
+use classes and the geospatial layers covers the entire suburban area of
+the city of Bern. Table 1 gives you an overview about the used data.
+
+| Variable                                       | Variable Typ     | Resolution / [used]    |
+|--------------------------------------|------------------|-------------------|
+| 2m Temperature in °C [Zollikofen]              | Meteorological   | 15 minutes / [1h mean] |
+| Precipitation in mm [Zollikofen]               | Meteorological   | 15 minutes / [1h mean] |
+| Radiation in $W*m^{-2}$ [Zollikofen]           | Meteorological   | 15 minutes / [1h mean] |
+| Windspeed in $m*s^{-1}$ [Zollikofen]           | Meteorological   | 15 minutes / [1h mean] |
+| Winddirection in ° [Zollikofen]                | Meteorological   | 15 minutes / [1h mean] |
+| Buildings                                      | Land use class   | [25m / 150m / 1000m]   |
+| Open Space Forest                              | Land use class   | [25m / 150m / 1000m]   |
+| Open Space Garden                              | Land use class   | [25m / 150m / 1000m]   |
+| Open Space Sealed                              | Land use class   | [25m / 150m / 1000m]   |
+| Open Space Agriculture                         | Land use class   | [25m / 150m / 1000m]   |
+| Open Space Water                               | Land use clas    | [25m / 150m / 1000m]   |
+| Vegetation Height                              | Geospatial Layer | [25m / 150m / 1000m]   |
+| Mean Building Heights                          | Geospatial Layer | [25m / 150m / 1000m]   |
+| Slope                                          | Geospatial Layer | [25m / 150m / 1000m]   |
+| Digital Elevation Model (DEM)                  | Geospatial Layer | [25m / 150m / 1000m]   |
+| Climate Network in °C (\~120 low cost devices) | Meteorological   | 10 minutes / [1h mean] |
+
+: **TABLE 1:** Overview of the predictors used for modeling. For more
+information and access to the data, please consult our [project
+proposal](https://github.com/sundin01/AGDS_Bigler_Tinner/blob/main/proposal.pdf).
+
+To evaluate...LCDs...target?.......Because we also want to show a possible
+application of such models the best model will be used to show spatial
+temperature distributions for a possible day as a map.
+
+## How the workflow works
+
+The computing time is very high because the workflow processes a large
+amount of data. We have therefore designed the workflow interface to be
+interactive. The interface is built according to the following graph:
+
+SCHEMATIC OF THE INTERFACE. We could do that with a GGPLOT geom_rect
+layers....
+
+Please note that the demo version is only guaranteed until the end of
+February 2024. After that, the layers must be regenerated, which takes
+several hours (depends on your device).
+
+# Data Wrangling
+
+In this section, all preparations for modeling are performed. This first
+subsection ensures that you have all required packages. The second
+subsection aims to generate the basis data frame (Combined.csv) in a
+interactive way.
+
+## Packages
+
+This code chunk install and load all packages you need for reproduce this
+project. If you think you need another package as well, then write it into
+the vector 'packages' and run the code again.
+
+```{r Load the Packages needed, message=FALSE, warning=FALSE, include=FALSE}
+# Decide which packages you need. For this Project you need the following:
+packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
+              "dplyr","googledrive","caret","rgdal","keras","vip","parsnip",
+              "workflows","tune","dials","stringr","terra","stars","sf","plyr",
+              "doParallel", "foreach", "terrainr","starsExtra", "pdp",
+              "kableExtra", "recipes", "tidyterra","shiny", "xgboost")
+
+# Load the R script to install and load all the packages from above
+source("../R/load_packages.R")
+```
+
+## Choose your Workflow
+
+This subsection generate your basic .csv file (it is called 'sCombined') in
+a interactive way. Therefore, you have to navigate through some questions.
+First, it will check whether a Combined.csv file already exists in the
+corresponding folder. If it, then it will read in. If not, then three
+questions will follow. Here, you can see those questions and an explanation
+what the answers mean for the further workflow:
+
+1.  You have a Combined.csv file already. Would you like to redo the
+    proceeding?
+
+    If you answer with 'yes', then will guided through the following
+    questions and your Combined.csv file will be rewritten. If you answer
+    with 'no', then it will read your existing file and you will directly
+    jump to the model section.
+
+2.  Do you want to generate all data by yourself? (It may takes up to 12
+    hours)
+
+    If you answer with 'yes', all data will be downloaded and processed
+    again. It may takes several hours. If you answer with 'no', then you
+    will be asked a second question:
+
+3.  Do you want to proceed in a demo version?
+
+    If you answer with 'yes', it will download all data from a dropbox
+    account and generate a .csv file which contains 5 % of the data. With
+    this option, all calculations can be done in max. 5 minutes. If you
+    answer with 'no', then it will download all data from a dropbox account
+    and generate a .csv file which contains all data. With this option, the
+    duration for some calculations can exceed 30'.
+
+```{r Data Wrangling, echo=FALSE, message=FALSE, warning=FALSE}
+# Load the R script to start the workflow
+source("../R/demo_download.R")
+source("../R/data_combination.R")
+data_combination()
+
+
+  combined <- read_csv("../data/Combined.csv") |>
+    mutate(temperature = temperature-temp) |>
+    drop_na()
+
+
+    # choose 5% of the data randomly
+    combined <- dplyr::slice_sample(combined,prop = .05) 
+
+
+# Set seed for reproducibility
+set.seed(123)
+
+# (pseudo) random sample
+loggers_test <- sample(unique(combined$Log_Nr), 10)
+
+# Generate a test set
+combined_test <- combined |> 
+  filter((Log_Nr %in% loggers_test))
+
+# Generate a training set
+combined_train <- combined |> 
+  filter(!(Log_Nr %in% loggers_test))
+```
+
+# Preparations for Modelling
+
+This section provides information about the preparation for modelling. The
+first subsection gives a overview about the variable selection. The second
+subsection provides information about the model recipe.
+
+## Variable Selection
+
+First, a variable selection was carried out (R-script: Processing_Brain.R).
+Table two provides a brief overview of why certain variables were rejected.
+Further details can be found in the R-script mentioned above.Based on this
+selection, a formula is now generated, which is processed into a recipe.
+This is now the basis for creating the models.
+
+| Variable which is not a predictor | Reason                                                                          |
+|-----------------------|----------------------------------------------------|
+| Log_Nr                            |                                                                                 |
+| temperature                       | because this is the target                                                      |
+| timestamp, year, month, day, hour | because it is controversial whether time and date should be used as predictors. |
+| NORD_CHTOP, OST_CHTOP             | Coordinates of                                                                  |
+| LV_03_E, LV_03_N                  | Coordinates of                                                                  |
+
+: **TABLE 2:** Overview about the reasons why a variable/column were
+rejected as a predictor
+
+## Model Recipe
+
+```{r Predictors and Recipe, echo=FALSE, message=FALSE, warning=FALSE}
+# Take all column-names you need as predictors from the combined file
+predictors <- combined |>
+  # select our predictors (we want all columns except those in the select() function)
+  dplyr::select(-c(Log_Nr,temperature,timestamp,Name,NORD_CHTOP,OST_CHTOPO,
+                   year,month,day,hour,LV_03_E,LV_03_N)) |>
+  colnames()
+
+# Define a formula in the following format: target ~ predictor_1 + ... + predictor_n
+formula_local <- as.formula(paste("temperature","~", paste(predictors,collapse  = "+")))
+  
+# Make a recipe which can be used for the lm, KNN, and Random Forest model
+pp <- recipes::recipe(formula_local,
+                      data = combined_train) |>
+    # Yeo-Johnsen transformation (includes Box Cox and an extansion. Now it can handle x ≤ 0)
+    recipes::step_YeoJohnson(all_numeric(), -all_outcomes()) |> 
+    # subsracting the mean from each observation/measurement
+    recipes::step_center(recipes::all_numeric(), -recipes::all_outcomes()) |>
+    # transforming numeric variables to a similar scale
+    recipes::step_scale(recipes::all_numeric(), -recipes::all_outcomes())
+```
+
+# Modelling
+
+Here, you can select the model that will be used to eventually estimate the
+map's spatial temperature distribution. You will find that the model with
+the random forest approach shows the best performance, which is why it was
+used for the map.
+
+## Overview about the Evaluation of the Models
+
+| Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
+|---------------|---------------|---------------|---------------|---------------|
+| Linear Regression |                |                 |                |                 |
+| KNN               |                |                 |                |                 |
+| Random Forest     |                |                 |                |                 |
+| XGB Boost         | \-             | \-              | \-             | \-              |
+| Neuronal Network  | \-             | \-              | \-             | \-              |
+
+: **TABLE 4:** Overview of the evaluation of the models with data from
+Burger et al. (2019).
+
+To fully implement the Open Sciences approach, the models can be computed
+using the following code chunks. Further, for every model, a short synopsis
+of the optimized hyperparameters is given. It must therefore be decided
+before running the code chunk whether the hyperparameters determined by us
+are to be used or whether the hyperparameters are to be optimized.
+
+| Element of the list | What do you find                                                                               |
+|-----------------|----------------------------------------------------------|
+| 1                   | returns a table with the main metrics (RSQ, RMSE, MAE and Bias)                                |
+| 2                   | retunrs a visualization of the model (Training and Test set) and shows RSQ, RMSE and the bias. |
+| 3                   | returns a boxplot for each logger station (24h)                                                |
+| 4                   | returns a boxplot for each hour of the day                                                     |
+
+: **TABLE 2:** Overview of the returned list of the evaluation function
+
+The aim of this project is the comparison of machine learning techniques to
+a linear regression. Further, we want to explore the superior of machine
+learning compared to a linear regression. Table 3 gives you an overview
+about our results, if you use the entire 'combined' data set. You see, that
+both KNN and random forest are superior compared to the linear regression
+model.
+
+The random forest model explains about 73% of the variance. The RSME is
+about 0.63 °C. Note that the error of a single LCD in the climate network
+of the city of Bern is about 1.5°C (see Burger et all 2019). Further we can
+see, that data scattering is about 0.2°C lower than for a KNN- or lm-model
+(accuracy). The bias is for all models about 0.07°C (systematic error /
+precision). It is positive and therefore our models overestimate the
+temperature (see evaluation and access the second element of the list).
+
+The XGB Boost and the neuronal network are additional and should show you,
+that there are further techniques which could be explored. But those model
+we did not taken into account.
+
+| Model                | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
+|---------------|---------------|---------------|---------------|---------------|
+| Linear Regression    | 0.47           | 0.86 °C         | 0.67 °C        | 0.06 °C         |
+| KNN [reduced to 13%] | 0.51           | 0.84 °C         | 0.65 °C        | 0.07 °          |
+| Random Forest        | 0.73           | 0.63 °C         | 0.46 °C        | 0.07 °C         |
+| XGB Boost            | \-             | \-              | \-             | \-              |
+| Neuronal Network     | \-             | \-              | \-             | \-              |
+
+: **TABLE 3:** Overview of the evaluation of the models in the regular
+mode.
+
+As mentioned, the model calculation can be very time intensive. Table 4
+shows the results for approach with reduced data. Overall we can say, that
+the models perform less. All values are lesser than in table 3. Note the
+high bias for the random forest. The model highli overestimate the
+temperature. We do not have an explanation for this. May be there is a
+problem with the reducing process. If we only use 5% of our data, then we
+lose a lot of information. If we lose all information about a certain
+logger station but the model predict this station, the it could b that the
+model perfoms worse. But we are not sure and more investigations are
+needed. But as a conclusion we can say, that more data improve the models.
+
+| Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
+|---------------|---------------|---------------|--------------|---------------|
+| Linear Regression | 0.47           | 0.96 °C         | 0.75 °C        | 0.09 °C         |
+| KNN               | 0.58           | 0.86 °C         | 0.63 °C        | 0.06 °C         |
+| Random Forest     | 0.64           | 0.84 °C         | 0.59 °C        | 0.21 °C         |
+| XGB Boost         | \-             | \-              | \-             | \-              |
+| Neuronal Network  | \-             | \-              | \-             | \-              |
+
+: **TABLE 4:** Overview of the evaluation of the models in the demo mode.
+
+## Linear Regression Model
+
+### Model
+
+The lm-model is a classic multiple linear regression model. The function
+need a recipe (pp) and train data as inputs. There is no possibility for
+tuning the model.
+
+```{r Calculate lm-model, echo=FALSE, message=FALSE, warning=FALSE}
+# Load the R script to calculate a lm model
+source("../R/lm_model.R")
+
+# The function needs the recipe and a dataset which can be used for model training
+lm_model <- LM_Model(pp, combined_train)
+```
+
+### Evaluation
+
+Here we evaluate the lm-model. We use our evaluate_function(). The return
+will be a list; we can choose which part of the evaluation we want access
+to (see table 2).
+
+```{r Evaluation of the lm-model, echo=FALSE, message=FALSE, warning=FALSE}
+# Load the R script to evaluate the model
+source("../R/evaluation.R")
+# The function will return a list
+evaluation <- evaluation_function(combined_test, combined_train, lm_model)
+
+# If we want our metrics in table, we chose the first element of the list
+evaluation[[1]]
+# If we want a visualization of the training and test set
+evaluation[[2]]
+# Boxplot for each logger station (24h)
+evaluation[[3]]
+# Boxplot for each hour of the day
+evaluation[[4]]
+```
+
+## KNN Model
+
+The KNN-model can be very time intensive. We use the DoParallel Package for
+that. Please make sure, that your device do not anything else.
+
+### Model
+
+The KNN-model uses the recipe (pp) and training data as inputs. The
+function calculate a KNN-Model with the recipe and uses 3 cross validations
+by logger numbers. Further, you have the option for tuning the
+hyper-parameter k by using tuning=TRUE/FALSE. Note that this can be very
+time intensive. We have done it already and the function will use k = 10 as
+a default. If you want to do it again, change tuning = TRUE and the
+function will tune the model for k = c(8, 9, 10, 11, 12). Moreover, the
+function also has a safety feature implemented. Because the computing time
+for a KNN-model can be very high, the data input is limited to 100,000
+rows. The adjustment takes place automatically.
+
+```{r Calculation of the knn-model, echo=FALSE, message=FALSE, warning=FALSE}
+# Load the R script to calculate a KNN model
+source("../R/knn_model.R")
+
+# The function needs the recipe and a dataset which can be used for model training
+knn_model <- KNN_Model(pp = pp, training_data =  combined_train, tuning = FALSE)
+```
+
+### Evaluation
+
+Here we evaluate the KNN-model. We use our evaluate_function() again. The
+return will be a list; we can choose which part of the evaluation we want
+access to (see table 2).
+
+```{r Evaluation of the knn-model, echo=FALSE, message=FALSE, warning=FALSE}
+# Load the R script to evaluate the model
+source("../R/evaluation.R")
+
+# Function call
+evaluation <- evaluation_function(combined_test, combined_train, knn_model)
+
+# If we want our metrics in table, we chose the first element of the list
+evaluation[[1]]
+# If we want a visualization of the training and test set
+evaluation[[2]]
+# Boxplot for each logger station
+evaluation[[3]]
+# Boxplot for each hour of the day (24h)
+evaluation[[4]]
+```
+
+## Random Forest Model
+
+The random forest-model can be very time intensive. We use the DoParallel
+Package for that. Please make sure, that your device do not anything else.
+
+### Model
+
+The function calculate a random forest-model with the recipe and uses 3
+cross validations by logger numbers. Further, you have the option for
+tuning the hyper-parameters by using tuning=TRUE/FALSE. Note that this can
+be very time intensive. We have done it already and the function will use
+mtry = number of predictors/3 and min.node.size = 5 as default.
+
+```{r Calculation of the random forest-model, echo=FALSE, message=FALSE, warning=FALSE}
+# Load the R script to calculate a random forest model
+source("../R/random_forest.R")
+
+# The function needs the recipe and a dataset which can be used for model training
+random_forest_model <- random_forest(pp, combined_train, tuning = F)
+```
+
+### Evaluation
+
+Here we evaluate the random forest-model. We use our evaluate_function()
+again. The return will be a list; we can choose which part of the
+evaluation we want access to (see table 2).
+
+```{r Evaluation of the random forest-model, echo=FALSE, message=FALSE, warning=FALSE}
+# Load the R script to evaluate the model
+source("../R/evaluation.R")
+
+# Function call
+evaluation <- evaluation_function(combined_test, combined_train, random_forest_model)
+
+# If we want our metrics in table, we chose the first element of the list
+evaluation[[1]]
+# If we want a visualization of the training and test set
+evaluation[[2]]
+# Boxplot for each logger station (24h)
+evaluation[[3]]
+# Boxplot for each hour of the day
+evaluation[[4]]
+```
+
+
+
+# Map
+
+
+```{r}
+
+source("../R/example_map.R")
+
+```
