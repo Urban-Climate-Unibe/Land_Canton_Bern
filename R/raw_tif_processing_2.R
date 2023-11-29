@@ -1,3 +1,7 @@
+### Generates Tiffs with land use classes by Moritz Burger and distances 25-150-1000 meters zonal mean ###
+# Creates a tiff layer from scratch for each prediction layer of the study by Burger et al. 2019 with the distances 25, 150,1000 meters.
+# Creates three distances with zonal mean for each predictor.
+
 print("Downloading data MOPU")
 
 options(timeout=4000)
@@ -11,20 +15,13 @@ unzip(paste0(tempdir(),"mopu.zip"),exdir = paste0(tempdir(),"mopu"))
 
 
 
-#Todo:
-
-#DEM
-#slope
-#svf
-#VH
 
 library(dplyr)
 
 # Read in the shapefile
 shapefile <- st_read(paste0(tempdir(),"mopu/data/MOPUBE_BBF.shp"))
 
-# Define the extent you want to cut to
-# Replace these values with your desired extent (xmin, xmax, ymin, ymax)
+# Define the extent
 extent_to_cut <- st_bbox(c(xmin = 2594313, xmax = 2605813, ymin = 1194069, ymax = 1204804), crs = st_crs(shapefile))
 
 # Cut the shapefile to the specified extent
@@ -42,7 +39,7 @@ raster <- raster[[1]]
 
 
 
-
+#define classification by Burger et al.2019 for LU-classes in MPOU
 classification <- tibble(
   Number_raw_data = 0:25,
   Description_raw_data = c(
@@ -61,7 +58,7 @@ classification <- tibble(
     "Open Space Sealed", "Did not appear", "Open Space Sealed", "Open Space Sealed", "Open Space Sealed"
   )
 ) |> tidyr::drop_na()
-
+#define the meters according to Burger et al., will not be used here, just for abbreviation "Variable".
 meters <- tibble(
   Reclassified_category = c("Land Cover Building", "Open Space Sealed", "Open Space Forest", "Open Space Garden", "Open Space Water", "Open Space Agriculture"),
   Variable = c("LC_B", "OS_SE", "OS_FO", "OS_GA", "OS_WA", "OS_AC"),
@@ -70,9 +67,11 @@ meters <- tibble(
   Unit = rep("%", 6),
   Chosen_buffer_radiusm = c(250, 500, 250, 25, 150, 500)
 )
+#combine dataframes
 classification <- inner_join(classification,meters, by = "Reclassified_category")
 
 print("Processing MOPU raw layers")
+#write rasters according to LU-class in data-raw
 for (class in unique(classification$Variable)) {
 number_classes <- classification |>
     filter(Variable == class) |>
@@ -81,18 +80,14 @@ number_classes <- classification |>
 print(class)
 print(number_classes)
 temp_raster <- raster %in% number_classes*1
-name <- classification |>
-  dplyr::filter(Variable == class) |>
-  dplyr::select(Variable) |>
-  unlist() |>
-  unique()
 
-terra::writeRaster(temp_raster,paste0("../data-raw/",name,".tif"),overwrite = T)
+
+terra::writeRaster(temp_raster,paste0("../data-raw/",class,".tif"),overwrite = T)
 
 }
 
 
-
+#source focal function for zonal mean
 source("../R/tiff_focal.R")
 
 
@@ -107,7 +102,7 @@ for (file in unique(classification$Variable)) {
 for (meter in c(25,150,1000)) {
 
 
-  tiff_focal(raster_data,meter,paste0(file,".tif"))
+  tiff_focal(raster_data,meter,paste0(file,".tif")) #meters always 25,150,1000 for each class
 }
 
 }
@@ -120,19 +115,21 @@ unzip(paste0(tempdir(),"GEBHOEHE.zip"),exdir = paste0(tempdir(),"/GEBHOEH"))
 # Read in the shapefile
 shapefile <- st_read(paste0(tempdir(),"/GEBHOEH/GEBHOEHE/data/GEBHOEHE_GEBHOEHE.shp"))
 
-# Define the extent you want to cut to
-# Replace these values with your desired extent (xmin, xmax, ymin, ymax)
+# Define the extent, same as before
+
 extent_to_cut <- st_bbox(c(xmin = 2594313, xmax = 2605813, ymin = 1194069, ymax = 1204804), crs = st_crs(shapefile))
 
 # Cut the shapefile to the specified extent
 shapefile_cropped <- st_crop(shapefile, extent_to_cut)
 
 
-
+#now we rasterize the shapefile
 st_rasterize(shapefile_cropped,file = paste0(tempdir(),"/GEBHOEH/GEBHOEHE/data/GEBHOEHE_GEBHOEHE.shp"),dx = 5, dy = 5) #resolution of 5 meters
-
+#read in as raster
 raster_BH <- terra::rast(paste0(tempdir(),"/GEBHOEH/GEBHOEHE/data/GEBHOEHE_GEBHOEHE.shp"))
 raster_BH <- raster_BH[[2]]
+
+#again make zonal mean, with NA still in
 for (meter in c(25,150,1000)) {
 
 
@@ -168,14 +165,14 @@ download_files <- function(url, destination_folder) {
   # Extract the file name from the URL
   file_name <- basename(url)
 
-  # Create the destination file path
+  # Create destination file path
   destination_path <- file.path(destination_folder, file_name)
 
-  # Download the file
+  # Download  file
   download.file(url, destfile = destination_path, mode = "wb")
 }
 
-# Folder where you want to save the downloaded files
+# Folder where to save
 output_folder <- paste0(tempdir(),"/DEM")
 
 # Create the output folder if it doesn't exist
@@ -186,9 +183,10 @@ for (link in file_data$V1) {
   download_files(link, output_folder)
 }
 
-
+# Paths to DEMs
 DEM_paths <- paste0(paste0(tempdir(),"/DEM/"),list.files(paste0(tempdir(),"/DEM")))
 
+# Merge them
 terrainr::merge_rasters(DEM_paths,output_raster = paste0(tempdir(),"/DEM/DEM.tif"),options = "BIGTIFF=YES",overwrite = TRUE)
 
 
@@ -200,13 +198,13 @@ DEM <- terra::resample(DEM,ex)
 terra::writeRaster(DEM, filename = "../data/Tiffs/DEM.tif",overwrite = T)
 
 
-#Slope and aspect(NOR from Burger)
+#Slope and aspect(NOR from Burger replacement)
 
 
 slope <- terra::terrain(DEM,v = "slope")
 
 slope <- terra::resample(slope,ex)
-
+# Again for all distances
 for (meter in c(25,150,1000)) {
 
 
@@ -214,7 +212,7 @@ for (meter in c(25,150,1000)) {
 }
 
 
-
+#Now same for aspect
 
 aspect <- terra::terrain(DEM,v = "aspect")
 aspect <- terra::resample(aspect,ex)
@@ -231,17 +229,16 @@ download.file("https://www.dropbox.com/scl/fi/ywx8f4cufj0l43p9nh5ze/VH_WSL_21.ti
 VH <- terra::rast(paste0(tempdir(),"/VH.tif"))
 VH <- terra::resample(VH,ex)
 
+#and zonal mean again
 for (meter in c(25,150,1000)) {
-
-
 
   tiff_focal(tiff = VH,meter,"VH.tif")
 }
 
 
 
-#Flowacc based on DSM
- #needs to change! Read in from net...
+#Flowacc based on DSM, DSM by combinind DEM and VH and BH
+
 VH <- terra::resample(VH,ex)
 DSM <- terra::mosaic(DEM,raster_BH,fun = "sum")
 DSM <- terra::mosaic(DSM,VH,fun = "sum")
@@ -258,7 +255,7 @@ for (meter in c(25,150,1000)) {
 
 
 
-#sky view alternative: roughness? just the opposite? who knows
+#sky view alternative: roughness? just the opposite?
 
 roughness <- terra::terrain(DSM,v = "roughness")
 roughness <- terra::resample(roughness,ex)

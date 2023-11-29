@@ -4,6 +4,12 @@ author: "Nils Tinner"
 date: "`r Sys.Date()`"
 output: html_document
 ---
+# Variable selection
+
+## This File implements three methods to define the used variables in the model
+
+## First, a boruta algorithm is used to assess 
+
 
 ```{r Load the Packages needed, message=FALSE, warning=FALSE, include=FALSE}
 # Decide which packages you need. For this Project you need the following:
@@ -19,32 +25,35 @@ source("../R/load_packages.R")
 
 
 ```{r Data Wrangling, echo=FALSE, message=FALSE, warning=FALSE}
-set.seed(123)
+
+
+
+set.seed(123) #for reproducability
 # We want to know, if a certain file already exists
 name.of.file <- "../data/Combined.csv"
 
 # If do not exists such a file, we create it
-if (!file.exists(name.of.file)){
+
   # Load the R script to processing the raw tif files
-  source("../R/raw_tif_processing_2.R")
+  source("../R/demo_download.R")
   
   # Load the R script to create the data frame "combined" which is the basis of this project
   source("../R/data_combination.R")
   
   # We run the loaded function and drop all NAs
-  data_combination() 
-}#generate file
+  data_combination() #generate file
+
   combined <- read_csv("../data/Combined.csv") |>
     mutate(temperature = temperature-temp) |>
     drop_na()
   
-combined <- dplyr::slice_sample(combined,prop = .03) #3% kept
+combined <- dplyr::slice_sample(combined,prop = .03) #3% kept for performance
 
 ```
 
 ```{r Predictors and Recipe, message=FALSE, warning=FALSE, include=FALSE}
 
-# Take all column-names you need as predictors from the combined file
+# Take all column-names you need as predictors from the combined file except the defined
 predictors <- combined |>
   dplyr::select(-c(Log_Nr,temperature,timestamp,Name,NORD_CHTOP,OST_CHTOPO,year,month,day,hour,LV_03_E,LV_03_N)) |>
   colnames()
@@ -56,7 +65,7 @@ predictors <- combined |>
 
 ```{r Predictors and Recipe, message=FALSE, warning=FALSE, include=FALSE}
 
-set.seed(42)
+
 
 temperature <- combined$temperature
 
@@ -87,28 +96,13 @@ ggplot2::ggplot(ggplot2::aes(x = reorder(rowname, meanImp),
   ggplot2::coord_flip()
 
 
+```
 
 
 
-# 
-# library(glmnet)
-# 
-# # Fit LASSO regression with cross-validation
-# lasso_model_cv <- cv.glmnet(x = as.matrix(combined[, predictors]), y = temperature, alpha = 1, nfolds = 5)
-# 
-# # Determine the optimal lambda value based on cross-validation
-# optimal_lambda <- lasso_model_cv$lambda.min
-# 
-# # Fit the final LASSO model with the optimal lambda
-# final_lasso_model <- glmnet(x= as.matrix(combined[, predictors]), y = temperature, alpha = 1, lambda = optimal_lambda)
-# 
-# # Get coefficients of the final model
-# coefficients <- coef(final_lasso_model)
-# 
-# # Extract selected predictors based on the final model
-# selected_predictors <- as.data.frame(name = row.names(as.matrix(coefficients)),as.matrix(coefficients)) |>
-#   filter(s0 != 0)
-  
+```{r}
+
+
 
 
 predictors_all <- combined |>
@@ -219,16 +213,23 @@ pp <- recipes::recipe(formula_local,
   print(predictors_current)
   }
 }
+```
 
 
 
-correlation_matrix <-as.data.frame(cor(combined[predictors],method = "spearman")) |>
-  rownames_to_column("name") |>
+
+```{r}
+
+correlation_matrix<- cor(combined[predictors],method = "spearman")
+correlation_matrix[lower.tri(correlation_matrix)] <- NA
+
+correlation_matrix <-as.data.frame(correlation_matrix) |>
+  rownames_to_column("name")|>
 pivot_longer(cols = -name,names_to = "name_1",values_to = "correlation") |>
   mutate(correlation = correlation^2)|>
   filter(correlation >= 0.7,
          name != name_1) |>
-  arrange(desc(correlation))
+  arrange(desc(correlation)) 
 
   
   

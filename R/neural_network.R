@@ -55,7 +55,7 @@ model|> compile(
 # Train the model
 history <- model|> fit(
   as.matrix(train_features), train_labels,
-  epochs = 75,
+  epochs = 100,
   batch_size = 64,
   validation_data = list(as.matrix(test_features), test_labels)
 )
