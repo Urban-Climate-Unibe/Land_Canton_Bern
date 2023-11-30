@@ -616,6 +616,11 @@ cor(combined_test$nn_prediction,combined_test$temperature)
 
 # Map
 
+```{r}
+source('../R/example_map.R')
+
+```
+
 ## Shiny Map
 
 ```{r}
