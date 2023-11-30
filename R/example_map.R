@@ -1,6 +1,5 @@
+
 tiff_names <- str_sub(list.files("./data/Tiffs/"),end = -5)
-
-
 tiffs_only <- terra::rast(paste0("./data/Tiffs/",tiff_names,".tif"))
 
 meteoswiss <- c(22, 0, 0, 0, 0, 30, 27, 23, 21, 20, 0, 0, 0, 0, 0, 0)
@@ -27,15 +26,10 @@ for (name_var in names(meteoswiss)) {
 
 
 temperature <- terra::predict(tiffs_only, random_forest_model, na.rm = T)
-temperature_range <- range(values(temperature), na.rm = TRUE)
-mylevs <- max(max(temperature_range),abs(min(temperature_range)))*(c(0:16)-8)/8
-color_breaks <- c(seq(temperature_range[1], temperature_range[2], length.out = 5), seq(0, temperature_range[2], length.out = 5))
 my_palette <- colorRampPalette(c("blue", "white", "red"))
 
 extent <- rgdal::readOGR("./data/Map/Extent_Bern.shp")
 rivers <- rgdal::readOGR("./data/Map/Aare.shp")
-
-spplot(temperature, col.regions = my_palette, at = color_breaks, main = "Temperature Map")
 
 terra::plot(temperature,col = my_palette(20), at = mylevs)
 sp::plot(extent, add = T)

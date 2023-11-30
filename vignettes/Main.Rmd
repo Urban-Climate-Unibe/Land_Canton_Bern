@@ -1,16 +1,17 @@
 ---
-title: "Main Workflow"
+title: "Workflow to Model the Urban Heat Island Effect of the City of Bern"
 author: "Nils Tinner, Patrick Bigler"
-date: "`r Sys.Date()`"
+date: "12-01-2023"
 output:
   html_document:
     toc: yes
     toc_float: yes
     number_sections: yes
-  '': default
+    latex_engine: xelatex
 editor_options:
   markdown:
     wrap: 75
+bibliography: references.bib
 ---
 
 Course: Proseminar in Applied Geo-Data Science at the University of Bern
@@ -33,20 +34,108 @@ Bigler Patrick (patrick.bigler1\@students.unibe.ch)
 
 # Introduction
 
-Welcome to our reproducible workflow for the proseminar in Applied Geodata
-Sciences. This project aims to compare different machine learning
-techniques to a linear regression model and explores whether machine
-learning approaches are superior to linear regression models. For this
-purpose, the temperature deviation of the city of Bern compared to the
-MeteoSwiss measuring station in Zollikofen is modeled (urban heat island
-effect). For modeling, we use 5 meteorological variables from the
-MeteoSchweiz measuring station in Zollikofen for the time period 2019-2022,
-6 land use classes and 4 geospatial layers of the Canton of Bern. The land
-use classes and the geospatial layers covers the entire suburban area of
-the city of Bern. Table 1 gives you an overview about the used data.
+Anthropogenic climate change is expected to increase the amount, intensity,
+and duration of heat waves [@burger2021]. The urban heat island (UHI)
+effect further amplifies this trend in urban environments [@burger2021],
+[@gubler2021], [@wicki2018]. The UHI effect is expressed by higher air
+temperatures in urban areas compared to rural areas in the region (Oke et
+al. 2006). The effect is highest during night, as the emission of longwave
+radiation in urban environments is impaired and sensible heat fluxes are
+enhanced, whilst latent fluxes are reduced [@burger2021], [@gubler2021].
+People living in urban areas are thus highly affected by the UHI effect via
+thermal stress [@burger2021], [@wicki2018]). Given that more than 75% of
+the Central European population lives in urban areas, the increasing trend
+poses one of the major weather threats to people in urban environments
+[@wicki2018]. Studying spatial temperature variabilities in urban areas is
+therefore crucial to implement adaptation measures to minimize effects on
+human health and the environment [@burger2021].
+
+To capture small-scale temperature changes in these climatically complex
+areas, high spatial resolution measurement networks are needed. However,
+automated weather stations (AWS) are scarce due to their high costs. To
+tackle this problem, @gubler2021 developed a new type of low-cost
+measurement devices (LCDs). The LCD consists of a temperature logger and a
+custom-made radiation shield that is naturally ventilated. 79 LCDs were
+installed in the city of Bern, Switzerland in 2018 @gubler2021. In
+@gubler2021 reported an overestimation of hourly mean temperature
+measurements by the LCDs (0.61 °C - 0.93 °C) compared to the reference
+station (AWS) during daytime (06:00 -- 22:00). During night-time (22:00 --
+06:00), differences were much lower or even negative (between -0.12 °C and
+0.23 °C). But not only the LCD temperature and the anomaly between the LCDs
+and the AWS is interesting, but also the temperature distribution of the
+entire region of Bern, shown on a map.
+
+In spring 2023, Nils Tinner has the idea to generate a map of the
+distribution of temperatures in Bern for the current temperatures of the
+LCDs. He improved the map in June 2023 by using geospatial data from the
+study of @burger2021 . The map predicted the local temperature in the city
+of Bern based on those geospatial data and was based on @burger2021 . The
+approach was a classic multivariate linear regression model. As the model
+only knows the current temperature distribution, its scope and statistical
+power are limited. Both @burger2021 and @gubler2021 showed, that the city
+of Bern is affected by the urban heat island effect. This fact and the
+limited power of the first map from Nils Tinner motivated us to investigate
+the urban heat island once again.
+
+## Objectives and Research Questions
+
+Because @burger2021 and @gubler2021 only used a multiple linear regression
+approach to model the urban heat island effect in the city of Bern, this
+study aims to calculate our own models by using a classic approach
+(multiple linear regression model) and machine learning approaches
+(k-nearest neigbors (knn) and random forest). For model calculations, we
+use partial the same data as @burger2021 but note that this study is not a
+redoing of the study of @burger2021 . After the model calculation we
+compare our models with each other and use the best to model and
+investigate the Urban Heat Island effect of the city of Bern. At last, we
+want to visualize our findings in a map. This leads to our four research
+questions:
+
+1.  Are the two machine learning approaches (knn and random forest)
+    reasonable approaches for modeling the urban heat island effect in the
+    city of Bern in terms of explaining the variance ($R^2$), the precision
+    (RMSE) and the accuracy (bias)?
+2.  Are the machine learning approaches superior to a multiple regression
+    model in terms of explaining the variance ($R^2$), the precision (RMSE)
+    and the accuracy (bias)?
+3.  Can a meaningful map be generated from the best model that shows the
+    spatial distribution of the temperature anomaly?
+4.  What can be said from this modeling about the modeling of @burger2021
+    in terms of explaining the variance ($R^2$), the precision (RMSE) and
+    the accuracy (bias)?
+
+However, this study does not aim to provide a new and reliable method for
+modeling the UHI effect in the city of Bern. Nevertheless, it is intended
+to show that the machine learning approaches examined are promising and
+that the full potential has not yet been reached.
+
+## How this Workflow Works
+
+In the Data and Methodology section you will see that we work with a large
+amount of data. This means the computational time could be very high. In
+order to we implemented different workflows within this markdown. If you
+change the input of the functions in the first code chunk, you will run the
+workflow in a different mode. Figure 1 gives you a overview about the
+default mode and all other options you have:
+
+SCHEMATIC OF THE DIFFERENT WORKFLOWS
+
+Please note that the default version is only guaranteed until the end of
+February 2024. After that, you have to change the input ofl function xx
+from TRUE to FALSE.
+
+```{r Choose your workflow mode}
+
+
+
+```
+
+# Data and Methodology
+
+## Data
 
 | Variable                                       | Variable Typ     | Resolution / [used]    |
-|--------------------------------------|------------------|-------------------|
+|-----------------------------------|--------------------|--------------------|
 | 2m Temperature in °C [Zollikofen]              | Meteorological   | 15 minutes / [1h mean] |
 | Precipitation in mm [Zollikofen]               | Meteorological   | 15 minutes / [1h mean] |
 | Radiation in $W*m^{-2}$ [Zollikofen]           | Meteorological   | 15 minutes / [1h mean] |
@@ -64,26 +153,11 @@ the city of Bern. Table 1 gives you an overview about the used data.
 | Digital Elevation Model (DEM)                  | Geospatial Layer | [25m / 150m / 1000m]   |
 | Climate Network in °C (\~120 low cost devices) | Meteorological   | 10 minutes / [1h mean] |
 
-: **TABLE 1:** Overview of the predictors used for modeling. For more
-information and access to the data, please consult our [project
-proposal](https://github.com/sundin01/AGDS_Bigler_Tinner/blob/main/proposal.pdf).
+: **TABLE 1:** Overview of the predictors used for modeling.
 
 To evaluate...LCDs...target?.......Because we also want to show a possible
 application of such models the best model will be used to show spatial
 temperature distributions for a possible day as a map.
-
-## How the workflow works
-
-The computing time is very high because the workflow processes a large
-amount of data. We have therefore designed the workflow interface to be
-interactive. The interface is built according to the following graph:
-
-SCHEMATIC OF THE INTERFACE. We could do that with a GGPLOT geom_rect
-layers....
-
-Please note that the demo version is only guaranteed until the end of
-February 2024. After that, the layers must be regenerated, which takes
-several hours (depends on your device).
 
 # Data Wrangling
 
@@ -103,8 +177,8 @@ the vector 'packages' and run the code again.
 packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
               "dplyr","googledrive","caret","rgdal","keras","vip","parsnip",
               "workflows","tune","dials","stringr","terra","stars","sf","plyr",
-              "doParallel", "foreach", "terrainr","starsExtra", "pdp",
-              "kableExtra", "recipes", "tidyterra","shiny", "xgboost")
+              "doParallel", "foreach", "terrainr","starsExtra", "pdp", "recipes", 
+              "tidyterra","shiny", "xgboost", 'kableExtra')
 
 # Load the R script to install and load all the packages from above
 source("../R/load_packages.R")
@@ -144,7 +218,7 @@ what the answers mean for the further workflow:
     duration for some calculations can exceed 30'.
 
 ```{r Data Wrangling, echo=FALSE, message=FALSE, warning=FALSE}
-knit <- "y" #CHANGE HERE FOR EXPLORATION OF REPORT OIN R
+knit <- "y" #CHANGE HERE FOR EXPLORATION OF REPORT IN R
 
 if (knit == "y") {
   demo <- "y"
@@ -201,7 +275,7 @@ selection, a formula is now generated, which is processed into a recipe.
 This is now the basis for creating the models.
 
 | Variable which is not a predictor | Reason                                                                          |
-|-----------------------|----------------------------------------------------|
+|--------------------------|-------------------------------------------------|
 | Log_Nr                            |                                                                                 |
 | temperature                       | because this is the target                                                      |
 | timestamp, year, month, day, hour | because it is controversial whether time and date should be used as predictors. |
@@ -262,7 +336,7 @@ before running the code chunk whether the hyperparameters determined by us
 are to be used or whether the hyperparameters are to be optimized.
 
 | Element of the list | What do you find                                                                               |
-|-----------------|----------------------------------------------------------|
+|----------------------|-----------------------------------------------------|
 | 1                   | returns a table with the main metrics (RSQ, RMSE, MAE and Bias)                                |
 | 2                   | retunrs a visualization of the model (Training and Test set) and shows RSQ, RMSE and the bias. |
 | 3                   | returns a boxplot for each logger station (24h)                                                |
@@ -312,7 +386,7 @@ model perfoms worse. But we are not sure and more investigations are
 needed. But as a conclusion we can say, that more data improve the models.
 
 | Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|---------------|---------------|---------------|--------------|---------------|
+|---------------|---------------|---------------|---------------|---------------|
 | Linear Regression | 0.47           | 0.96 °C         | 0.75 °C        | 0.09 °C         |
 | KNN               | 0.58           | 0.86 °C         | 0.63 °C        | 0.06 °C         |
 | Random Forest     | 0.64           | 0.84 °C         | 0.59 °C        | 0.21 °C         |
@@ -545,15 +619,39 @@ cor(combined_test$nn_prediction,combined_test$temperature)
 ## Shiny Map
 
 ```{r}
-
-tiff_names <- str_sub(list.files("../data/Tiffs/"),end = -5)
-
-tiffs_only <- terra::rast(paste0("../data/Tiffs/",tiff_names,".tif"))
-
-if (model_demo == "y") {
-  source("../R/shiny_map.R")
-  shinyApp(ui = ui, server = server)
-}else{
-  source("../R/example_map.R")
-}
+# 
+# tiff_names <- str_sub(list.files("../data/Tiffs/"),end = -5)
+# 
+# tiffs_only <- terra::rast(paste0("../data/Tiffs/",tiff_names,".tif"))
+# 
+# if (model_demo == "y") {
+#   source("../R/shiny_map.R")
+#   shinyApp(ui = ui, server = server)
+# }else{
+#   source("../R/example_map.R")
+# }
 ```
+
+# Discussion
+
+# Bibliography
+
+[@burger2021]
+
+[@gubler2021]
+
+[@stocker2023]
+
+[@wicki2018]
+
+\
+Oke, T. (2006), Initial Guidance to Obtain Representative Meteorological
+Observations at\
+Urban Sites: Instruments and Observing Methods. IOM Report No. 81., Canada:
+World\
+Meteorological Organization
+
+\
+Oke, T. R., Mills, G., Christen, A. and Voogt, J. A. (2017), Concepts. In:
+Urban Climates,\
+Cambridge University Press, p. 14--43
