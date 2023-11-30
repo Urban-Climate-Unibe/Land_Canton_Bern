@@ -144,12 +144,23 @@ what the answers mean for the further workflow:
     duration for some calculations can exceed 30'.
 
 ```{r Data Wrangling, echo=FALSE, message=FALSE, warning=FALSE}
-# Load the R script to start the workflow
+knit <- "y" #CHANGE HERE FOR EXPLORATION OF REPORT OIN R
+
+if (knit == "y") {
+  demo <- "y"
+
+source("../R/demo_download.R") #directly download
+source("../R/data_combination.R") #and process
+data_combination()
+}else{
+  # Load the R script to start the workflow
 source("../R/Processing_Brain.R")
 preprocessing()
 
 source("../R/model_training_brain.R")
 model_training_brain()
+}
+
 
   combined <- read_csv("../data/Combined.csv") |>
     mutate(temperature = temperature-temp) |>

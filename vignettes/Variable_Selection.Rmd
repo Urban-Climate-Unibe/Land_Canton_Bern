@@ -8,7 +8,7 @@ output: html_document
 
 ## This File implements three methods to define the used variables in the model
 
-## First, a boruta algorithm is used to assess 
+First some data processing
 
 
 ```{r Load the Packages needed, message=FALSE, warning=FALSE, include=FALSE}
@@ -61,7 +61,7 @@ predictors <- combined |>
 
 ```
 
-
+Now, a boruta algorithm is used to assess variable importance
 
 ```{r Predictors and Recipe, message=FALSE, warning=FALSE, include=FALSE}
 
@@ -98,7 +98,8 @@ ggplot2::ggplot(ggplot2::aes(x = reorder(rowname, meanImp),
 
 ```
 
-
+The Boruta algorithm takes all variables as relevant. This does not help. 
+Next, a random forest stepwise backwards regression is implemented. The metric used is the RMSE with cross-validation.
 
 ```{r}
 
@@ -216,6 +217,7 @@ pp <- recipes::recipe(formula_local,
 ```
 
 
+At last, correlation between layers is checked for.
 
 
 ```{r}
@@ -230,11 +232,6 @@ pivot_longer(cols = -name,names_to = "name_1",values_to = "correlation") |>
   filter(correlation >= 0.7,
          name != name_1) |>
   arrange(desc(correlation)) 
-
-  
-  
-
-
 
 ```
 
