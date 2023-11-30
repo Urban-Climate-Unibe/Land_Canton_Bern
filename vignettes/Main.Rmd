@@ -221,7 +221,8 @@ what the answers mean for the further workflow:
 knit <- "y" #CHANGE HERE FOR EXPLORATION OF REPORT IN R
 
 if (knit == "y") {
-  demo <- "y"
+  model_demo <- "y"
+  advanced_models <- "n"
 
 source("../R/demo_download.R") #directly download
 source("../R/data_combination.R") #and process
@@ -621,21 +622,7 @@ source('../R/example_map.R')
 
 ```
 
-## Shiny Map
 
-```{r}
-# 
-# tiff_names <- str_sub(list.files("../data/Tiffs/"),end = -5)
-# 
-# tiffs_only <- terra::rast(paste0("../data/Tiffs/",tiff_names,".tif"))
-# 
-# if (model_demo == "y") {
-#   source("../R/shiny_map.R")
-#   shinyApp(ui = ui, server = server)
-# }else{
-#   source("../R/example_map.R")
-# }
-```
 
 # Discussion
 
