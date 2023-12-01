@@ -1,3 +1,7 @@
+### Combines data sources ###
+# Combines data from meteoswiss and the logger data, both aggregated to the hour, then also calculates rolling means
+# Later, Tiffs files are used to add layer data to each measurement point, (land use classes value sand other geolayers)
+
 data_combination <- suppressWarnings(function(){
 
   measurement_files <- list.files("../data/Measurements/")
@@ -76,31 +80,20 @@ data_combination <- suppressWarnings(function(){
 
   combined = inner_join(combined, measurement_metadata, by = "Log_Nr")
 
-
+  combined <- combined |>
+    mutate(ID = row_number())
 
 
   tiff_names <- list.files("../data/Tiffs/")
-  tiff_names_short <- tiff_names |>
-    str_sub(end = -5)
-  lentiff <- length(tiff_names)
-  k = 1
-  for (file in tiff_names) {
 
-    # Read the TIF file
-    raster_data <- raster::raster(paste("../data/Tiffs/",file,sep = ""))
+  tiff_paths <- paste0("../data/Tiffs/",tiff_names)
 
-    # Extract values at the points
-    points_values <- raster::extract(raster_data, combined[, c("LV_03_E", "LV_03_N")])
+  tiffs<-terra::rast(tiff_paths)
+  extracted <- terra::extract(tiffs, combined[, c("LV_03_E", "LV_03_N")])
 
-    # Add the extracted values to the points_table
-    combined[paste(str_sub(file,end = -5))] <- points_values
+  combined <- inner_join(combined,extracted,by = "ID") |>
+    select(-ID)
 
-    print(paste(k,"/",lentiff,"Tiffs processed"))
-    k = k+1
-    if(k%%10 == 0){
-      print("Keep patient, things will work out")
-    }
-  }
 
   write_csv(combined,"../data/Combined.csv")
   return(combined)
