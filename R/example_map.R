@@ -31,7 +31,7 @@ my_palette <- colorRampPalette(c("blue", "white", "red"))
 extent <- rgdal::readOGR("../data/Map/Extent_Bern.shp")
 rivers <- rgdal::readOGR("../data/Map/Aare.shp")
 
-terra::plot(temperature,col = my_palette(20), at = mylevs)
+terra::plot(temperature,col = my_palette(20))
 sp::plot(extent, add = T)
 sp::plot(rivers, add = T)
 points(2601930.3, 1204410.1, pch = 16, cex = 1)
