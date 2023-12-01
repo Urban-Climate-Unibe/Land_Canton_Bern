@@ -1,8 +1,8 @@
-
+map_generater <- function(model, inputs = c(22, 0, 0, 0, 0, 30, 27, 23, 21, 20, 0, 0, 0, 0, 0, 0)){
 tiff_names <- str_sub(list.files("../data/Tiffs/"),end = -5)
 tiffs_only <- terra::rast(paste0("../data/Tiffs/",tiff_names,".tif"))
 
-meteoswiss <- c(22, 0, 0, 0, 0, 30, 27, 23, 21, 20, 0, 0, 0, 0, 0, 0)
+meteoswiss <- inputs
 
 meteoswiss_selection <- paste(c("temp","precip","rad","wind","rain"), collapse = "|")
 names(meteoswiss) <- combined |>
@@ -25,7 +25,7 @@ for (name_var in names(meteoswiss)) {
 }
 
 
-temperature <- terra::predict(tiffs_only, random_forest_model, na.rm = T)
+temperature <- terra::predict(tiffs_only, model, na.rm = T)
 my_palette <- colorRampPalette(c("blue", "white", "red"))
 
 extent <- rgdal::readOGR("../data/Map/Extent_Bern.shp")
@@ -35,3 +35,4 @@ terra::plot(temperature,col = my_palette(20))
 sp::plot(extent, add = T)
 sp::plot(rivers, add = T)
 points(2601930.3, 1204410.1, pch = 16, cex = 1)
+}

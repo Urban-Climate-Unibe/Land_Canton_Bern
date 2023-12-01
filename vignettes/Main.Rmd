@@ -30,9 +30,9 @@ Tinner Nils (nils.tinner\@students.unibe.ch)
 
 -   Open Science and reproducibility
 
--   preprocessing the data
+-   Preprocessing the data
 
--   advanced models (XGB and neuronal network)
+-   Advanced models (XGB and neuronal network)
 
 Bigler Patrick (patrick.bigler1\@students.unibe.ch)
 
@@ -128,11 +128,11 @@ that the full potential has not yet been reached.
 ## How this Workflow Works
 
 In the Data and Methodology section you will see that we work with a large
-amount of data. This means the computational time could be very high. In
-order to we implemented different workflows within this markdown. If you
-change the input of the functions in the first code chunk, you will run the
-workflow in a different mode. Figure 1 gives you a overview about the
-default mode and all other options you have:
+amount of data. This means the computational time could be very high. To
+address this issue we implemented different workflows within this markdown.
+If you change the input of the functions in the first code chunk, you will
+run the workflow in a different mode. Figure 1 gives you a overview about
+the default mode and all other options you have:
 
 SCHEMATIC OF THE DIFFERENT WORKFLOWS
 
@@ -153,8 +153,6 @@ packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
               "workflows","tune","dials","stringr","terra","stars","sf","plyr",
               "doParallel", "foreach", "terrainr","starsExtra", "pdp", "recipes", 
               "tidyterra","shiny", "xgboost", 'kableExtra')
-
-
 ```
 
 ### Change the Workflow
@@ -190,7 +188,7 @@ what the answers mean for the further workflow:
     and generate a .csv file which contains all data. With this option, the
     duration for some calculations can exceed 30'.
 
-```{r Choose your workflow mode}
+```{r Choose your workflow mode, message=FALSE, warning=FALSE, include=FALSE}
 
 knit <- "y" #CHANGE HERE FOR EXPLORATION OF REPORT IN R
 
@@ -241,42 +239,56 @@ combined_train <- combined |>
 
 # Data and Methodology
 
+In this section, we will first introduce the data used. After that, we will
+present the methodology. For a better understanding, we have split the
+methodology section into two parts. The first one presents the preparation
+and (pre)processing of the data. The second part is dedicated to the
+implementation of the models.
+
 ## Data
 
-Temperature data for the years 2019-2022 from the network of the city of Bern is used. This
-is a numerical data set of the 3 m temperature in about 110 locations, with a temporal
-resolution of 10 minutes for all LCDs. This data is publicly available on BORIS. We
-use additional data from the AWS at Zollikofen, as it is the official meteorologic station
-of Bern. The three meteorological variables (2m temperature, precipitation, radiation and wind
-(direction and speed)) with a temporal resolution of 10 minutes for the years 2019-2022
-will be used as well as the timestamp. Data of temperature and precipitation of the previous six and twelve hours, and one, three and five days
-will also be fed into the model. This data is uploaded to the repository
-to ensure availability since the IDAWEB-data service is open for scientific use but not
-completely open access. To show small scale urban patterns of temperature distributions,
-geospatial data as shown in !!! Burger et al. (2021)!!! is used. These are cantonal land use
-classes as well as federal geospatial data. All of the data is spatially averaged to obtain
-the layers most effective as shown in Burger et al. (2021). The federal and cantonal data is 
-directly downloaded from the web into R. Table 1 provides a brief overview of the data
-we will use.
+Temperature data for the years 2019-2022 from the network of the city of
+Bern is used. This is a numerical data set of the 3 m temperature in 104
+locations, with a temporal resolution of 10 minutes for all LCDs. How many
+LCD are aktive depends on the year but 55 LCDs are active over the entiere
+time period. The network data is publicly available on BORIS. We use
+additional data from the AWS at Zollikofen, as it is the official
+meteorologic station of Bern. The five meteorological variables (2m
+temperature, precipitation, radiation and wind (direction and speed)) with
+a temporal resolution of 10 minutes for the years 2019-2022 will be used as
+well as the timestamp. Data of temperature and precipitation of the
+previous six and twelve hours, and one, three and five days will also be
+fed into the model. This data is uploaded to the repository to ensure
+availability since the IDAWEB-data service is open for scientific use but
+not completely open access. To show small scale urban patterns of
+temperature distributions, geospatial data as shown in @burger2021 is used.
+These are cantonal land use classes as well as federal geospatial data. All
+of the data is spatially averaged to obtain the layers most effective as
+shown in @burger2021. The federal and cantonal data is directly downloaded
+from the web into R. Table 1 provides a brief overview of the data we will
+use.
 
-| Variable                                       | Variable Typ     | Resolution / [used]    |
-|--------------------------------------|------------------|-------------------|
-| 2m Temperature in °C [Zollikofen]              | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean] |
-| Precipitation in mm [Zollikofen]               | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling sum] |
-| Radiation in $W*m^{-2}$ [Zollikofen]           | Meteorological   | 15 minutes / [1h mean] |
-| Windspeed in $m*s^{-1}$ [Zollikofen]           | Meteorological   | 15 minutes / [1h mean] |
-| Winddirection in ° [Zollikofen]                | Meteorological   | 15 minutes / [1h mean] |
-| Buildings                                      | Land use class   | [25m / 150m / 1000m]   |
-| Open Space Forest                              | Land use class   | [25m / 150m / 1000m]   |
-| Open Space Garden                              | Land use class   | [25m / 150m / 1000m]   |
-| Open Space Sealed                              | Land use class   | [25m / 150m / 1000m]   |
-| Open Space Agriculture                         | Land use class   | [25m / 150m / 1000m]   |
-| Open Space Water                               | Land use clas    | [25m / 150m / 1000m]   |
-| Vegetation Height                              | Geospatial Layer | [25m / 150m / 1000m]   |
-| Mean Building Heights                          | Geospatial Layer | [25m / 150m / 1000m]   |
-| Slope                                          | Geospatial Layer | [25m / 150m / 1000m]   |
-| Digital Elevation Model (DEM)                  | Geospatial Layer | [25m / 150m / 1000m]   |
-| Climate Network in °C (\~120 low cost devices) | Meteorological   | 10 minutes / [1h mean] |
+| Variable                                                             | Variable Typ     | Resolution / [used]                                       |
+|----------------------------------|-------------------|---------------------|
+| 2m Temperature in °C [Zollikofen] for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean] |
+| Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling sum]  |
+| Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                    |
+| Windspeed in $m*s^{-1}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                    |
+| Winddirection in ° [Zollikofen] for the time period 2019 - 2022      | Meteorological   | 15 minutes / [1h mean]                                    |
+| Buildings                                                            | Land use class   | [25m / 150m / 1000m]                                      |
+| Open Space Forest                                                    | Land use class   | [25m / 150m / 1000m]                                      |
+| Open Space Garden                                                    | Land use class   | [25m / 150m / 1000m]                                      |
+| Open Space Sealed                                                    | Land use class   | [25m / 150m / 1000m]                                      |
+| Open Space Agriculture                                               | Land use class   | [25m / 150m / 1000m]                                      |
+| Open Space Water                                                     | Land use clas    | [25m / 150m / 1000m]                                      |
+| Vegetation Height                                                    | Geospatial Layer | [25m / 150m / 1000m]                                      |
+| Mean Building Heights                                                | Geospatial Layer | [25m / 150m / 1000m]                                      |
+| Slope                                                                | Geospatial Layer | [25m / 150m / 1000m]                                      |
+| Digital Elevation Model (DEM)                                        | Geospatial Layer | [25m / 150m / 1000m]                                      |
+| Climate Network in °C [80 LCDs] in year 2019                         | Meteorological   | 10 minutes / [1h mean]                                    |
+| Climate Network in °C [67 LCDs] in year 2020                         | Meteorological   | 10 minutes / [1h mean]                                    |
+| Climate Network in °C [67 LCDs] in year 2021                         | Meteorological   | 10 minutes / [1h mean]                                    |
+| Climate Network in °C [81 LCDs] in year 2022                         | Meteorological   | 10 minutes / [1h mean]                                    |
 
 : **TABLE 1:** Overview of the predictors used for modeling.
 
@@ -286,27 +298,35 @@ temperature distributions for a possible day as a map.
 
 ## Methodology: Preparation
 
-In this section, all preparations for modeling are performed. This first
-subsection ensures that you have all required packages. The second
+In this section, all preparations for modeling are performed.The second
 subsection aims to generate the basis data frame (Combined.csv) in a
-interactive way when run with knit = "f". 
-First, tiff-files are generated. Either the files are downloaded directly from a remote repository, which is the case when knitting.
-Alternatively, the tiff files are generated by downloading and processing of the tiff files as raw data from open source.
-Processing can be performed with the layer resolutions by Burger et al. 2019 which corresponds to one predictor per variable in !!!table one!!!. Alternatively and preferably the tiffs are all processed by the resolutions in !!!Table 1!!!.
-This results in three predictors per variable in !!!table 1!!!.
+interactive way when run with knit = "f". First, tiff-files are generated.
+Either the files are downloaded directly from a remote repository, which is
+the case when knitting. Alternatively, the tiff files are generated by
+downloading and processing of the tiff files as raw data from open source.
+Processing can be performed with the layer resolutions by Burger et al.
+2019 which corresponds to one predictor per variable in !!!table one!!!.
+Alternatively and preferably the tiffs are all processed by the resolutions
+in !!!Table 1!!!. This results in three predictors per variable in !!!table
+1!!!.
 
 ### Variable Selection
 
-First, a variable selection was carried out (Markdown:: Variable_Selection.rmd). This was only expored for the predictors in TABLE.1!!! since layers by Burgeret al.2019!!! were already reduced and selected.
-The variable selection with Boruta resulted after removal of variable that should be removed not due to relevance reasons
-but other reasons (!!!Table 2!!!), that all variables are relevant. Further variable selection was explored, but no definitive answers were reached. For that reason, all generated predictors are used.
+First, a variable selection was carried out (Markdown::
+Variable_Selection.rmd). This was only expored for the predictors in
+TABLE.1!!! since layers by @burger2021 were already reduced and selected.
+The variable selection with Boruta resulted after removal of variable that
+should be removed not due to relevance reasons but other reasons (!!!Table
+2!!!), that all variables are relevant. Further variable selection was
+explored, but no definitive answers were reached. For that reason, all
+generated predictors are used.
 
 Table two provides a brief overview of why certain variables were rejected.
-Based on this selection, a formula is now generated, which is processed into a recipe.
-This is now the basis for creating the models.
+Based on this selection, a formula is now generated, which is processed
+into a recipe. This is now the basis for creating the models.
 
 | Variable which is not a predictor | Reason                                                                          |
-|-----------------------|----------------------------------------------------|
+|------------------------|---------------------------------------------------|
 | Log_Nr                            |                                                                                 |
 | temperature                       | because this is the target                                                      |
 | timestamp, year, month, day, hour | because it is controversial whether time and date should be used as predictors. |
@@ -591,7 +611,7 @@ before running the code chunk whether the hyperparameters determined by us
 are to be used or whether the hyperparameters are to be optimized.
 
 | Element of the list | What do you find                                                                               |
-|-----------------|----------------------------------------------------------|
+|-------------------|--------------------------------------------------------|
 | 1                   | returns a table with the main metrics (RSQ, RMSE, MAE and Bias)                                |
 | 2                   | retunrs a visualization of the model (Training and Test set) and shows RSQ, RMSE and the bias. |
 | 3                   | returns a boxplot for each logger station (24h)                                                |
