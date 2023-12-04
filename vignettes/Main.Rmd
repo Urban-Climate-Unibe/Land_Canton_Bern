@@ -289,7 +289,7 @@ directly downloaded from the web into R. Table 1 provides a brief overview
 of the data we will use.
 
 | Variable                                                             | Variable Typ     | Resolution / [used]                                       |
-|-------------------------------|------------------|--------------------------|
+|-------------------------------|-------------------|--------------------------|
 | 2m Temperature in °C [Zollikofen] for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean] |
 | Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling sum]  |
 | Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                    |
@@ -345,7 +345,7 @@ Based on this selection, a formula is now generated, which is processed
 into a recipe. This is now the basis for creating the models.
 
 | Variable which is not a predictor | Reason                                                                          |
-|------------------------|---------------------------------------------------|
+|-------------------------|--------------------------------------------------|
 | Log_Nr                            |                                                                                 |
 | temperature                       | because this is the target                                                      |
 | timestamp, year, month, day, hour | because it is controversial whether time and date should be used as predictors. |
@@ -423,7 +423,7 @@ rows. The adjustment takes place automatically.
 source("../R/knn_model.R")
 
 # The function needs the recipe and a dataset which can be used for model training
-knn_model <- KNN_Model(pp = pp, training_data =  combined_train, tuning = FALSE)
+knn_model <- KNN_Model(pp,combined_train, tuning = FALSE)
 ```
 
 #### Implementation of the Random Forest Model
@@ -635,7 +635,7 @@ before running the code chunk whether the hyperparameters determined by us
 are to be used or whether the hyperparameters are to be optimized.
 
 | Element of the list | What do you find                                                                               |
-|-------------------|--------------------------------------------------------|
+|--------------------|-------------------------------------------------------|
 | 1                   | returns a table with the main metrics (RSQ, RMSE, MAE and Bias)                                |
 | 2                   | retunrs a visualization of the model (Training and Test set) and shows RSQ, RMSE and the bias. |
 | 3                   | returns a boxplot for each logger station (24h)                                                |
@@ -709,7 +709,7 @@ it is unrealistic if you set your 6h temperature mean to 20°C and your 12h
 mean to -5°C. Please consider this if you play around.
 
 | Variable            | Default           | Interval                                             |
-|-------------------------|------------------|---------------------------------|
+|-------------------------|-------------------|--------------------------------|
 | Temperature         | 22 °C             | $x[°C] \in[-15 \leq x \leq 35]$                      |
 | Rain                | 5 mm              | $x[mm] \in[0 \leq x \leq 200]$                       |
 | Radiation           | 290 $W*m^{-2}$    | $x[W*m^{-2}] \in[0 \leq x \leq 300]$, for a 10' mean |
@@ -750,6 +750,11 @@ map_generater(model = random_forest_model, meteoswiss_input = default)
 ## Data
 
 ## Methodology
+
+More data quality
+
+KNN is not suitable for large data sets because of the high computational
+time
 
 ## Conclusion
 

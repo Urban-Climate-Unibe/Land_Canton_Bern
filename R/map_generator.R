@@ -7,6 +7,8 @@ print('read geopsatial data...')
 tiff_names <- str_sub(list.files("../data/Tiffs/"),end = -5)
 tiffs_only <- terra::rast(paste0("../data/Tiffs/",tiff_names,".tif"))
 
+#------------------------------------------------------------------------------
+# Extract the model name. We need it to label the map
 model_name <- deparse(substitute(model))
 
 if(model_name == 'random_forest_model'){
@@ -21,8 +23,10 @@ if(model_name == 'knn_model'){
   model_input <- 'knn model'
 }
 
-
 print('read meteorologic data...')
+
+#------------------------------------------------------------------------------
+# Read all column for which we want to use for our predictions
 meteoswiss_selection <- paste(c("temp","precip","rad","wind","rain"), collapse = "|")
 names(meteoswiss) <- combined |>
   dplyr::select(matches(meteoswiss_selection),
@@ -65,7 +69,7 @@ new_bbox <- st_bbox(c(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax))
 rivers <- st_crop(rivers, new_bbox)
 extent <- st_crop(extent, new_bbox)
 
-print('Generating the map is in progress...')
+print('Your card will now be generated')
 
 #------------------------------------------------------------------------------
 # Read out the absolute maximum value to generate leveles for the legend
@@ -73,11 +77,6 @@ max_value <- max(abs(temperature_df$lyr1), na.rm = TRUE)
 
 #------------------------------------------------------------------------------
 # Generate the map
-
-ggplot() +
-  geom_sf(data = rivers, color = 'blue', linewidth = .2) +
-  geom_sf(data = extent, linewidth = .2, color = 'grey')
-
 ggplot() +
   geom_raster(data = temperature_df, aes(x = x, y = y, fill = lyr1)) +
   geom_sf(data = rivers, color = 'blue', linewidth = .2) +
@@ -97,7 +96,7 @@ ggplot() +
        fill = expression(paste(Delta,'Temp [K]'))) +
   scale_fill_gradient2(low = "cyan3",
                        mid = "white",
-                       high = "red4",
+                       high = "magenta3",
                        midpoint = 0,
                        space = 'Lab',
                        guide = 'colourbar',
