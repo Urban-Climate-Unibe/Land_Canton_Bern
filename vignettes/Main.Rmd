@@ -130,15 +130,17 @@ that the full potential has not yet been reached.
 In the Data and Methodology section you will see that we work with a large
 amount of data. This means the computational time could be very high. To
 address this issue we implemented different workflows within this markdown.
-If you change the input of the functions in the first code chunk, you will
-run the workflow in a different mode. Figure 1 gives you a overview about
+The file runs automatically in the most performant mode when knitting.
+When run normally, the terminal will guide you through the decision steps about
+processing. Figure 1 gives you a overview about
 the default mode and all other options you have:
 
 SCHEMATIC OF THE DIFFERENT WORKFLOWS
 
 Please note that the default version is only guaranteed until the end of
-February 2024. After that, you have to change the input ofl function xx
-from TRUE to FALSE.
+February 2024. After that, tiff processing that is dependent on the VH of WSL
+will not be executed anymore and thus miss as predictor layers. 
+This will alter the results.
 
 ### Packages
 
@@ -152,15 +154,17 @@ packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
               "dplyr","googledrive","caret","rgdal","keras","vip","parsnip",
               "workflows","tune","dials","stringr","terra","stars","sf","plyr",
               "doParallel", "foreach", "terrainr","starsExtra", "pdp", "recipes", 
-              "tidyterra","shiny", "xgboost", 'kableExtra')
+              "tidyterra","shiny", "xgboost", 'kableExtra','rnaturalearth')
 ```
 
-### Change the Workflow
+### Change the Workflow EXPLAIN WORKFLOW? WHAT DO WE DO EXACTLY?
 
-This subsection generate your basic .csv file (it is called 'sCombined') in
+### NEEDS MAJOR REVISION!
+
+This subsection generate your basic .csv file (it is called 'Combined') in
 a interactive way. Therefore, you have to navigate through some questions.
 First, it will check whether a Combined.csv file already exists in the
-corresponding folder. If it, then it will read in. If not, then three
+corresponding folder. If it does, then it will read in. If not, then three
 questions will follow. Here, you can see those questions and an explanation
 what the answers mean for the further workflow:
 
@@ -172,17 +176,13 @@ what the answers mean for the further workflow:
     computational time can be very high. If you substitute "y" with "n",
     then you have several options to knit this workflow.
 
-    ```{r Demo mode: TRUE/FALSE?, message=FALSE, warning=FALSE, include=FALSE}
-    knit <- "y" #CHANGE HERE FOR EXPLORATION OF REPORT IN R
-    ```
+
 
 2.  If you changed knit from "y" to "n", then you can knit the workflow
     with all meteorologic data. The land use classes and the geospatial
     layers will be download the data from a dropbox account as well.
 
-    ```{r}
 
-    ```
 
 3.  
 
@@ -211,19 +211,22 @@ what the answers mean for the further workflow:
     duration for some calculations can exceed 30'.
 
 ```{r Choose your workflow mode, message=FALSE, warning=FALSE, include=FALSE}
+# Load the R script to start the workflow
+source("../R/load_packages.R")  
+load_packages(packages = packages)
 
-if (knit == "y") {
+if (isTRUE(getOption('knitr.in.progress'))) {
   model_demo <- "y"
   advanced_models <- "n"
 # Load the R script to install and load all the packages from above
-source("../R/load_packages.R")
+
 source("../R/demo_download.R") #directly download
 source("../R/data_combination.R") #and process
 data_combination()
 }else{
 # Load the R script to install and load all the packages from above
-source("../R/load_packages.R")  
-# Load the R script to start the workflow
+
+
 source("../R/Processing_Brain.R")
 preprocessing()
 
@@ -270,9 +273,10 @@ implementation of the models.
 Temperature data for the years 2019-2022 from the network of the city of
 Bern is used. This is a numerical data set of the 3 m temperature in 104
 locations, with a temporal resolution of 10 minutes for all LCDs. How many
-LCD are aktive depends on the year but 55 LCDs are active over the entiere
-time period. The network data is publicly available on BORIS. We use
-additional data from the AWS at Zollikofen, as it is the official
+LCD are active depends on the year but 55 LCDs are active over the entire
+time period. The network data is publicly available on BORIS, however since data
+on BORIS is faulty at the moment we uploaded the corrected .csv-files to the Git-
+Hub Repo. We use additional data from the AWS at Zollikofen, as it is the official
 meteorologic station of Bern. The five meteorological variables (2m
 temperature, precipitation, radiation and wind (direction and speed)) with
 a temporal resolution of 10 minutes for the years 2019-2022 will be used as
@@ -312,20 +316,20 @@ use.
 
 : **TABLE 1:** Overview of the predictors used for modeling.
 
-To evaluate...LCDs...target?.......Because we also want to show a possible
-application of such models the best model will be used to show spatial
-temperature distributions for a possible day as a map.
+To illustrate the model predictions, we also want to show a 
+spatial temperature distributions for a possible day as a map as a model output.
 
 ## Methodology: Preparation
 
 In this section, all preparations for modeling are performed.The second
 subsection aims to generate the basis data frame (Combined.csv) in a
-interactive way when run with knit = "f". First, tiff-files are generated.
+interactive way when run, not knitted. First, tiff-files are generated.
 Either the files are downloaded directly from a remote repository, which is
 the case when knitting. Alternatively, the tiff files are generated by
-downloading and processing of the tiff files as raw data from open source.
+downloading and processing of the tiff files as raw data from open sources.
 Processing can be performed with the layer resolutions by Burger et al.
 2019 which corresponds to one predictor per variable in !!!table one!!!.
+ADD TABLE BURGER 2019?.
 Alternatively and preferably the tiffs are all processed by the resolutions
 in !!!Table 1!!!. This results in three predictors per variable in !!!table
 1!!!.
@@ -333,7 +337,7 @@ in !!!Table 1!!!. This results in three predictors per variable in !!!table
 ### Variable Selection
 
 First, a variable selection was carried out (Markdown::
-Variable_Selection.rmd). This was only expored for the predictors in
+Variable_Selection.rmd). This was only explored for the predictors in
 TABLE.1!!! since layers by @burger2021 were already reduced and selected.
 The variable selection with Boruta resulted after removal of variable that
 should be removed not due to relevance reasons but other reasons (!!!Table
@@ -406,7 +410,7 @@ lm_model <- LM_Model(pp, combined_train)
 #### Implementation of the KNN Model
 
 The KNN-model can be very time intensive. We use the DoParallel Package for
-that. Please make sure, that your device do not anything else.
+that. Please make sure, that your device does nothing else.
 
 The KNN-model uses the recipe (pp) and training data as inputs. The
 function calculate a KNN-Model with the recipe and uses 3 cross validations
@@ -429,8 +433,8 @@ knn_model <- KNN_Model(pp = pp, training_data =  combined_train, tuning = FALSE)
 
 #### Implementation of the Random Forest Model
 
-The random forest-model can be very time intensive. We use the DoParallel
-Package for that. Please make sure, that your device do not anything else.
+The random forest-model can be time intensive. We use the DoParallel
+Package for that. Please make sure, that your device does nothing else.
 
 The function calculate a random forest-model with the recipe and uses 3
 cross validations by logger numbers. Further, you have the option for
@@ -450,7 +454,7 @@ random_forest_model <- random_forest(pp, combined_train, tuning = F)
 
 #### Implementation of the XGB Model
 
-Hyperparamater:
+Hyperparamater: all hyperparameters are tuned. 
 
 ```{r}
 
@@ -463,6 +467,7 @@ xgb_model <- xgb(data_train = combined_train,formula = formula_local) }
 ```
 
 #### Implementation of the neuronal network
+This se
 
 ```{r}
 
@@ -605,7 +610,10 @@ cat("Mean Absolute Error on Test Data:", evaluation, "\n")
 combined_test$nn_prediction <- nn_model|> predict(as.matrix(test_features))
 
 
-cor(combined_test$nn_prediction,combined_test$temperature)
+cor(combined_test$nn_prediction,combined_test$temperature)^2
+RMSE(combined_test$nn_prediction,combined_test$temperature)
+MAE(combined_test$nn_prediction,combined_test$temperature)
+mean(combined_test$nn_prediction-combined_test$temperature)
 }
 ```
 
@@ -615,14 +623,14 @@ cor(combined_test$nn_prediction,combined_test$temperature)
 
 | Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
 |---------------|---------------|---------------|---------------|---------------|
-| Linear Regression |                |                 |                |                 |
-| KNN               |                |                 |                |                 |
-| Random Forest     |                |                 |                |                 |
+| Linear Regression | 0.187          | 1.020           | 0.793          | 0.003           |
+| KNN               | 0.179          | 1.047           | 0.790          | -0.006          |
+| Random Forest     | 0.292          | 0.955           | 0.713          | -0.028          |
 | XGB Boost         | \-             | \-              | \-             | \-              |
-| Neuronal Network  | \-             | \-              | \-             | \-              |
+| Neuronal Network  | 0.099          | 1.143           | 0.890          | 0..0803         |
 
 : **TABLE 4:** Overview of the evaluation of the models with data from
-Burger et al. (2019).
+Burger et al. (2019) with 5% of the data.
 
 To fully implement the Open Sciences approach, the models can be computed
 using the following code chunks. Further, for every model, a short synopsis
@@ -688,7 +696,7 @@ needed. But as a conclusion we can say, that more data improve the models.
 | XGB Boost         | \-             | \-              | \-             | \-              |
 | Neuronal Network  | \-             | \-              | \-             | \-              |
 
-: **TABLE 4:** Overview of the evaluation of the models in the demo mode.
+: **TABLE 4:** Overview of the evaluation of the models with 5% of the data.
 
 ## Map
 

@@ -224,6 +224,7 @@ for (meter in c(25,150,1000)) {
 
 
 #and Vegetation height
+if (Sys.Date()>as.Date("2024-03-01")){return()} #ensure reproducability after march 2024
 
 download.file("https://www.dropbox.com/scl/fi/ywx8f4cufj0l43p9nh5ze/VH_WSL_21.tif?rlkey=swtvr5zw4sit9qtw5pu4ju5o3&dl=1", destfile = paste0(tempdir(),"/VH.tif"))
 VH <- terra::rast(paste0(tempdir(),"/VH.tif"))
