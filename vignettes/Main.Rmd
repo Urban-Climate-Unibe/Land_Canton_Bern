@@ -62,7 +62,7 @@ People living in urban areas are thus highly affected by the UHI effect via
 thermal stress [@burger2021], [@wicki2018]). Given that more than 75% of
 the Central European population lives in urban areas, the increasing trend
 poses one of the major weather threats to people in urban environments
-[@wicki2018]. Studying spatial temperature variabilities in urban areas is
+[@wicki2018]. Studying spatial temperature variability in urban areas is
 therefore crucial to implement adaptation measures to minimize effects on
 human health and the environment [@burger2021].
 
@@ -164,7 +164,29 @@ corresponding folder. If it, then it will read in. If not, then three
 questions will follow. Here, you can see those questions and an explanation
 what the answers mean for the further workflow:
 
-1.  You have a Combined.csv file already. Would you like to redo the
+1.  As a default, you can knit this workflow in a demo version. That means
+    we generated the land use classes and geospatial layer for you and
+    stored them in a dropbox account. The demo mode will download the data
+    from a dropbox account. The meteorologic data will be reduce to 5% of
+    the origin data (random choice). We recommend it because the
+    computational time can be very high. If you substitute "y" with "n",
+    then you have several options to knit this workflow.
+
+    ```{r Demo mode: TRUE/FALSE?, message=FALSE, warning=FALSE, include=FALSE}
+    knit <- "y" #CHANGE HERE FOR EXPLORATION OF REPORT IN R
+    ```
+
+2.  If you changed knit from "y" to "n", then you can knit the workflow
+    with all meteorologic data. The land use classes and the geospatial
+    layers will be download the data from a dropbox account as well.
+
+    ```{r}
+
+    ```
+
+3.  
+
+4.  You have a Combined.csv file already. Would you like to redo the
     proceeding?
 
     If you answer with 'yes', then will guided through the following
@@ -172,14 +194,14 @@ what the answers mean for the further workflow:
     with 'no', then it will read your existing file and you will directly
     jump to the model section.
 
-2.  Do you want to generate all data by yourself? (It may takes up to 12
+5.  Do you want to generate all data by yourself? (It may takes up to 12
     hours)
 
     If you answer with 'yes', all data will be downloaded and processed
     again. It may takes several hours. If you answer with 'no', then you
     will be asked a second question:
 
-3.  Do you want to proceed in a demo version?
+6.  Do you want to proceed in a demo version?
 
     If you answer with 'yes', it will download all data from a dropbox
     account and generate a .csv file which contains 5 % of the data. With
@@ -189,8 +211,6 @@ what the answers mean for the further workflow:
     duration for some calculations can exceed 30'.
 
 ```{r Choose your workflow mode, message=FALSE, warning=FALSE, include=FALSE}
-
-knit <- "y" #CHANGE HERE FOR EXPLORATION OF REPORT IN R
 
 if (knit == "y") {
   model_demo <- "y"
@@ -269,7 +289,7 @@ from the web into R. Table 1 provides a brief overview of the data we will
 use.
 
 | Variable                                                             | Variable Typ     | Resolution / [used]                                       |
-|----------------------------------|-------------------|---------------------|
+|--------------------------------|----------------|---------------------------|
 | 2m Temperature in °C [Zollikofen] for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean] |
 | Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling sum]  |
 | Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                    |
@@ -326,7 +346,7 @@ Based on this selection, a formula is now generated, which is processed
 into a recipe. This is now the basis for creating the models.
 
 | Variable which is not a predictor | Reason                                                                          |
-|------------------------|---------------------------------------------------|
+|-----------------------|----------------------------------------------------|
 | Log_Nr                            |                                                                                 |
 | temperature                       | because this is the target                                                      |
 | timestamp, year, month, day, hour | because it is controversial whether time and date should be used as predictors. |
@@ -552,7 +572,7 @@ evaluation[[4]]
 
 Achtung: If statement implementieren!
 
-```{r}
+```{r Evaluation of the XGB boost, echo=FALSE, message=FALSE, warning=FALSE}
 
 if(advanced_models == "y"){
 
@@ -574,7 +594,7 @@ evaluation[[4]]
 
 ### Evaluation of the neuronal network
 
-```{r}
+```{r Evaluation of the neuronal network, echo=FALSE, message=FALSE, warning=FALSE}
 
 if(advanced_models == "y"){  
   # Evaluate the model
@@ -611,7 +631,7 @@ before running the code chunk whether the hyperparameters determined by us
 are to be used or whether the hyperparameters are to be optimized.
 
 | Element of the list | What do you find                                                                               |
-|-------------------|--------------------------------------------------------|
+|-----------------|----------------------------------------------------------|
 | 1                   | returns a table with the main metrics (RSQ, RMSE, MAE and Bias)                                |
 | 2                   | retunrs a visualization of the model (Training and Test set) and shows RSQ, RMSE and the bias. |
 | 3                   | returns a boxplot for each logger station (24h)                                                |
@@ -670,10 +690,34 @@ needed. But as a conclusion we can say, that more data improve the models.
 
 : **TABLE 4:** Overview of the evaluation of the models in the demo mode.
 
-### Map
+## Map
 
 ```{r}
+# Download country boundaries (including Switzerland)
+world <- ne_countries(scale = "medium", returnclass = "sf")
+bern_data_transformed <- st_transform(tiffs_only, crs = "EPSG:4326")
+
+class(tiffs_only)
+
+temperature <- terra::predict(tiffs_only, random_forest_model, na.rm = T)
+extent <- rgdal::readOGR("../data/Map/Extent_Bern.shp")
+rivers <- rgdal::readOGR("../data/Map/Aare.shp")
+sp::plot(extent, add = T)
+sp::plot(rivers, add = T)
+
+# Extract Switzerland
+switzerland <- world[world$name == "Switzerland", ]
+ggplot() +
+  geom_sf(data = switzerland, fill = "white", color = "black") +
+  geom_sf(data = temperature, fill = "blue", color = "black") +
+  theme_minimal()
+```
+
+```{r Generate a map, echo=FALSE, message=FALSE, warning=FALSE}
 source('../R/example_map.R')
+
+map_generater(model = random_forest_model)
+
 
 ```
 
