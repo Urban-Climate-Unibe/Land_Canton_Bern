@@ -99,6 +99,7 @@ ggplot2::ggplot(ggplot2::aes(x = reorder(rowname, meanImp),
 ```
 
 The Boruta algorithm takes all variables as relevant. This does not help. 
+
 Next, a random forest stepwise backwards regression is implemented. The metric used is the RMSE with cross-validation.
 
 ```{r}
@@ -215,7 +216,7 @@ pp <- recipes::recipe(formula_local,
   }
 }
 ```
-
+We had several runs and usually different layers are kicked out based on small code changes such as numbers of trees or other tuning variables. Furthermore usually only one variable is kicked out. For this reason, no definitive variable selection is made in this part.
 
 At last, correlation between layers is checked for.
 
@@ -235,4 +236,4 @@ pivot_longer(cols = -name,names_to = "name_1",values_to = "correlation") |>
 
 ```
 
-
+Some variables do infact show a correlation higher than 0.7. Interestingly it is not between differently meaned layers but layers with the same distance but for different information: for example binary building present yes no and building height. Here, we also reach no definitive solution.
