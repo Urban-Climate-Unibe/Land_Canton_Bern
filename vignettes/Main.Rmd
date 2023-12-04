@@ -696,7 +696,7 @@ needed. But as a conclusion we can say, that more data improve the models.
 | XGB Boost         | \-             | \-              | \-             | \-              |
 | Neuronal Network  | \-             | \-              | \-             | \-              |
 
-: **TABLE 4:** Overview of the evaluation of the models with 5% of the data.
+: **TABLE 4:** Overview of the evaluation of the models with 5 % of the data.
 
 ## Map
 
