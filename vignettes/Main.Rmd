@@ -52,8 +52,8 @@ Bigler Patrick (patrick.bigler1\@students.unibe.ch)
 
 Anthropogenic climate change is expected to increase the amount, intensity,
 and duration of heat waves [@burger2021]. The urban heat island (UHI)
-effect further amplifies this trend in urban environments [@burger2021],
-[@gubler2021], [@wicki2018]. The UHI effect is expressed by higher air
+effect further amplifies this trend in urban environments [@burger2021];
+[@gubler2021]; [@wicki2018]. The UHI effect is expressed by higher air
 temperatures in urban areas compared to rural areas in the region (Oke et
 al. 2006). The effect is highest during night, as the emission of longwave
 radiation in urban environments is impaired and sensible heat fluxes are
@@ -130,17 +130,17 @@ that the full potential has not yet been reached.
 In the Data and Methodology section you will see that we work with a large
 amount of data. This means the computational time could be very high. To
 address this issue we implemented different workflows within this markdown.
-The file runs automatically in the most performant mode when knitting.
-When run normally, the terminal will guide you through the decision steps about
-processing. Figure 1 gives you a overview about
-the default mode and all other options you have:
+The file runs automatically in the most performant mode when knitting. When
+run normally, the terminal will guide you through the decision steps about
+processing. Figure 1 gives you a overview about the default mode and all
+other options you have:
 
 SCHEMATIC OF THE DIFFERENT WORKFLOWS
 
 Please note that the default version is only guaranteed until the end of
-February 2024. After that, tiff processing that is dependent on the VH of WSL
-will not be executed anymore and thus miss as predictor layers. 
-This will alter the results.
+February 2024. After that, tiff processing that is dependent on the VH of
+WSL will not be executed anymore and thus miss as predictor layers. This
+will alter the results.
 
 ### Packages
 
@@ -176,13 +176,9 @@ what the answers mean for the further workflow:
     computational time can be very high. If you substitute "y" with "n",
     then you have several options to knit this workflow.
 
-
-
 2.  If you changed knit from "y" to "n", then you can knit the workflow
     with all meteorologic data. The land use classes and the geospatial
     layers will be download the data from a dropbox account as well.
-
-
 
 3.  
 
@@ -274,26 +270,26 @@ Temperature data for the years 2019-2022 from the network of the city of
 Bern is used. This is a numerical data set of the 3 m temperature in 104
 locations, with a temporal resolution of 10 minutes for all LCDs. How many
 LCD are active depends on the year but 55 LCDs are active over the entire
-time period. The network data is publicly available on BORIS, however since data
-on BORIS is faulty at the moment we uploaded the corrected .csv-files to the Git-
-Hub Repo. We use additional data from the AWS at Zollikofen, as it is the official
-meteorologic station of Bern. The five meteorological variables (2m
-temperature, precipitation, radiation and wind (direction and speed)) with
-a temporal resolution of 10 minutes for the years 2019-2022 will be used as
-well as the timestamp. Data of temperature and precipitation of the
-previous six and twelve hours, and one, three and five days will also be
-fed into the model. This data is uploaded to the repository to ensure
-availability since the IDAWEB-data service is open for scientific use but
-not completely open access. To show small scale urban patterns of
-temperature distributions, geospatial data as shown in @burger2021 is used.
-These are cantonal land use classes as well as federal geospatial data. All
-of the data is spatially averaged to obtain the layers most effective as
-shown in @burger2021. The federal and cantonal data is directly downloaded
-from the web into R. Table 1 provides a brief overview of the data we will
-use.
+time period. The network data is publicly available on BORIS, however since
+data on BORIS is faulty at the moment we uploaded the corrected .csv-files
+to the Git- Hub Repo. We use additional data from the AWS at Zollikofen, as
+it is the official meteorologic station of Bern. The five meteorological
+variables (2m temperature, precipitation, radiation and wind (direction and
+speed)) with a temporal resolution of 10 minutes for the years 2019-2022
+will be used as well as the timestamp. Data of temperature and
+precipitation of the previous six and twelve hours, and one, three and five
+days will also be fed into the model. This data is uploaded to the
+repository to ensure availability since the IDAWEB-data service is open for
+scientific use but not completely open access. To show small scale urban
+patterns of temperature distributions, geospatial data as shown in
+@burger2021 is used. These are cantonal land use classes as well as federal
+geospatial data. All of the data is spatially averaged to obtain the layers
+most effective as shown in @burger2021. The federal and cantonal data is
+directly downloaded from the web into R. Table 1 provides a brief overview
+of the data we will use.
 
 | Variable                                                             | Variable Typ     | Resolution / [used]                                       |
-|--------------------------------|----------------|---------------------------|
+|-------------------------------|------------------|--------------------------|
 | 2m Temperature in °C [Zollikofen] for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean] |
 | Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling sum]  |
 | Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                    |
@@ -316,8 +312,8 @@ use.
 
 : **TABLE 1:** Overview of the predictors used for modeling.
 
-To illustrate the model predictions, we also want to show a 
-spatial temperature distributions for a possible day as a map as a model output.
+To illustrate the model predictions, we also want to show a spatial
+temperature distributions for a possible day as a map as a model output.
 
 ## Methodology: Preparation
 
@@ -329,10 +325,9 @@ the case when knitting. Alternatively, the tiff files are generated by
 downloading and processing of the tiff files as raw data from open sources.
 Processing can be performed with the layer resolutions by Burger et al.
 2019 which corresponds to one predictor per variable in !!!table one!!!.
-ADD TABLE BURGER 2019?.
-Alternatively and preferably the tiffs are all processed by the resolutions
-in !!!Table 1!!!. This results in three predictors per variable in !!!table
-1!!!.
+ADD TABLE BURGER 2019?. Alternatively and preferably the tiffs are all
+processed by the resolutions in !!!Table 1!!!. This results in three
+predictors per variable in !!!table 1!!!.
 
 ### Variable Selection
 
@@ -350,7 +345,7 @@ Based on this selection, a formula is now generated, which is processed
 into a recipe. This is now the basis for creating the models.
 
 | Variable which is not a predictor | Reason                                                                          |
-|-----------------------|----------------------------------------------------|
+|------------------------|---------------------------------------------------|
 | Log_Nr                            |                                                                                 |
 | temperature                       | because this is the target                                                      |
 | timestamp, year, month, day, hour | because it is controversial whether time and date should be used as predictors. |
@@ -454,7 +449,7 @@ random_forest_model <- random_forest(pp, combined_train, tuning = F)
 
 #### Implementation of the XGB Model
 
-Hyperparamater: all hyperparameters are tuned. 
+Hyperparamater: all hyperparameters are tuned.
 
 ```{r}
 
@@ -467,6 +462,7 @@ xgb_model <- xgb(data_train = combined_train,formula = formula_local) }
 ```
 
 #### Implementation of the neuronal network
+
 This se
 
 ```{r}
@@ -639,7 +635,7 @@ before running the code chunk whether the hyperparameters determined by us
 are to be used or whether the hyperparameters are to be optimized.
 
 | Element of the list | What do you find                                                                               |
-|-----------------|----------------------------------------------------------|
+|-------------------|--------------------------------------------------------|
 | 1                   | returns a table with the main metrics (RSQ, RMSE, MAE and Bias)                                |
 | 2                   | retunrs a visualization of the model (Training and Test set) and shows RSQ, RMSE and the bias. |
 | 3                   | returns a boxplot for each logger station (24h)                                                |
@@ -696,37 +692,57 @@ needed. But as a conclusion we can say, that more data improve the models.
 | XGB Boost         | \-             | \-              | \-             | \-              |
 | Neuronal Network  | \-             | \-              | \-             | \-              |
 
-: **TABLE 4:** Overview of the evaluation of the models with 5 % of the data.
+: **TABLE 4:** Overview of the evaluation of the models with 5 % of the
+data.
 
 ## Map
 
-```{r}
-# Download country boundaries (including Switzerland)
-world <- ne_countries(scale = "medium", returnclass = "sf")
-bern_data_transformed <- st_transform(tiffs_only, crs = "EPSG:4326")
+This subsections aims to generate maps to visualize our key findings. For
+this purpose we defined a default-vector. This vector shows the numeric
+default values for each variable (see table x). Further, we defined
+reasonable intervals for each variables. Because we did not train our
+models with extrem values (because we do not have a lot) the model perform
+worse with extreme values. That is why we took the hihest values from
+MeteoSchweiz and reduced it by about 10%. We recommend no to work with
+those extreme values. Moreover, the values should be realistic. For example
+it is unrealistic if you set your 6h temperature mean to 20°C and your 12h
+mean to -5°C. Please consider this if you play around.
 
-class(tiffs_only)
+| Variable            | Default           | Interval                                             |
+|-------------------------|------------------|---------------------------------|
+| Temperature         | 22 °C             | $x[°C] \in[-15 \leq x \leq 35]$                      |
+| Rain                | 5 mm              | $x[mm] \in[0 \leq x \leq 200]$                       |
+| Radiation           | 290 $W*m^{-2}$    | $x[W*m^{-2}] \in[0 \leq x \leq 300]$, for a 10' mean |
+| Windspeed           | 8 $m*s^{-1}$      | $x[m*s^{-1}] \in[0 \leq x \leq 20]$                  |
+| Winddirection       | 200 ° (west wind) | $x[°] \in[0 \leq x \leq 360]$, with 0° = N, 180° = S |
+| 6h mean temperature | 22                | $x[°C] \in[-15 \leq x \leq 35]$                      |
+| 12h mean temperture | 19                | $x[°C] \in[-15 \leq x \leq 35]$                      |
+| 1d mean temperature | 20                | $x[°C] \in[-15 \leq x \leq 35]$                      |
+| 3d mean temperature | 18                | $x[°C] \in[-15 \leq x \leq 35]$                      |
+| 5d temperature      | 17                | $x[°C] \in[-15 \leq x \leq 35]$                      |
+| 6h precipitaion     | 0                 | $x[mm] \in[0 \leq x \leq 100]$                       |
+| 12h precipitation   | 0                 | $x[mm] \in[0 \leq x \leq 200]$                       |
+| 1d precipitation    | 20 mm             | $x[mm] \in[0 \leq x \leq 400]$                       |
+| 3d precipitation    | 15 mm             | $x[mm] \in[0 \leq x \leq 600]$                       |
+| 5d precipitation    | 10 mm             | $x[mm] \in[0 \leq x \leq 600]$                       |
+| 10d precipitation   | 5 mm              | $x[mm] \in[0 \leq x \leq 600]$                       |
 
-temperature <- terra::predict(tiffs_only, random_forest_model, na.rm = T)
-extent <- rgdal::readOGR("../data/Map/Extent_Bern.shp")
-rivers <- rgdal::readOGR("../data/Map/Aare.shp")
-sp::plot(extent, add = T)
-sp::plot(rivers, add = T)
+: **Table x:** Overview about the default values for the variables used to
+predict the map. Further, it shows reasonable possible values for the
+variables (SOURCE: METEOSCHWEIZ).
 
-# Extract Switzerland
-switzerland <- world[world$name == "Switzerland", ]
-ggplot() +
-  geom_sf(data = switzerland, fill = "white", color = "black") +
-  geom_sf(data = temperature, fill = "blue", color = "black") +
-  theme_minimal()
-```
+If you
 
 ```{r Generate a map, echo=FALSE, message=FALSE, warning=FALSE}
-source('../R/example_map.R')
 
-map_generater(model = random_forest_model)
+# Load the function to generate the map
+source('../R/map_generator.R')
 
+# Define a vector with your inputs (here, we use a default as described in table x)
+default = c(22, 5, 290, 8, 200, 22, 19, 20, 18, 17, 0, 0, 20, 15, 10, 5)
 
+# Function call
+map_generater(model = random_forest_model, meteoswiss_input = default)
 ```
 
 # Discussion
@@ -738,14 +754,6 @@ map_generater(model = random_forest_model)
 ## Conclusion
 
 # Bibliography
-
-[@burger2021]
-
-[@gubler2021]
-
-[@stocker2023]
-
-[@wicki2018]
 
 \
 Oke, T. (2006), Initial Guidance to Obtain Representative Meteorological
