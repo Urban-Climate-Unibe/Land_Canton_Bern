@@ -11,18 +11,7 @@ tiffs_only <- terra::rast(paste0("../data/Tiffs/",tiff_names,".tif"))
 # Extract the model name. We need it to label the map
 model_name <- deparse(substitute(model))
 
-if(model_name == 'random_forest_model'){
-  model_input <- 'random forest model'
-}
-
-if(model_name == 'lm_model'){
-  model_input <- 'lm model'
-}
-
-if(model_name == 'knn_model'){
-  model_input <- 'knn model'
-}
-
+model_input <- str_replace_all(model_name, "_", " ")
 print('read meteorologic data...')
 
 #------------------------------------------------------------------------------

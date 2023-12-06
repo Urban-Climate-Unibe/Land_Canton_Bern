@@ -213,15 +213,15 @@ set.seed(123)
 source("../R/load_packages.R")  
 load_packages(packages = packages)
 
-if (isTRUE(getOption('knitr.in.progress'))) {
-  model_demo <- "y"
-  advanced_models <- "n"
+if (isTRUE(getOption('knitr.in.progress'))) { ### For knitting!!! adjust here:::
+  model_demo <- "y" #model_demo means, you only keep 5% of the data for training
+  advanced_models <- "n" #advanced models are run if set to "y"
 # Load the R script to install and load all the packages from above
 
 source("../R/demo_download.R") #directly download
 source("../R/data_combination.R") #and process
 data_combination()
-}else{
+}else{##runs as normal R-Script:
 # Load the R script to install and load all the packages from above
 
 
@@ -292,7 +292,7 @@ of the data we will use.
 | Variable                                                             | Variable Typ     | Resolution / [used]                                       |
 |-------------------------------|-------------------|--------------------------|
 | 2m Temperature in °C [Zollikofen] for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean] |
-| Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling sum]  |
+| Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120,240 hours rolling sum]  |
 | Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                    |
 | Windspeed in $m*s^{-1}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                    |
 | Winddirection in ° [Zollikofen] for the time period 2019 - 2022      | Meteorological   | 15 minutes / [1h mean]                                    |
@@ -347,7 +347,7 @@ into a recipe. This is now the basis for creating the models.
 
 | Variable which is not a predictor | Reason                                                                          |
 |-------------------------|--------------------------------------------------|
-| Log_Nr                            |                                                                                 |
+| Log_Nr                            | does not make sens for spatial upscaling                                        |
 | temperature                       | because this is the target                                                      |
 | timestamp, year, month, day, hour | because it is controversial whether time and date should be used as predictors. |
 | NORD_CHTOP, OST_CHTOP             | Coordinates are not used                                                        |
@@ -381,6 +381,8 @@ pp <- recipes::recipe(formula_local,
 ```
 
 ## Methodology: Modelling
+
+# here go back to basics: what do we do exactly
 
 Here, you can select the model that will be used to eventually estimate the
 map's spatial temperature distribution. You will find that the model with
