@@ -77,7 +77,7 @@ max_value <- max(abs(temperature_df$lyr1), na.rm = TRUE)
 
 #------------------------------------------------------------------------------
 # Generate the map
-ggplot() +
+p <- ggplot() +
   geom_raster(data = temperature_df, aes(x = x, y = y, fill = lyr1)) +
   geom_sf(data = rivers, color = 'blue', linewidth = .2) +
   geom_sf(data = extent, linewidth = .2, color = 'black') +
@@ -112,5 +112,6 @@ ggplot() +
     legend.text = element_text(size = 8),  # Legend labels text size
     plot.subtitle=element_text(size=8, face = 'plain'))
 
+print(p)
 print('Everything went fine!')
 }

@@ -207,6 +207,8 @@ what the answers mean for the further workflow:
     duration for some calculations can exceed 30'.
 
 ```{r Choose your workflow mode, message=FALSE, warning=FALSE, include=FALSE}
+# Set seed for reproducibility
+set.seed(123)
 # Load the R script to start the workflow
 source("../R/load_packages.R")  
 load_packages(packages = packages)
@@ -240,8 +242,7 @@ combined <- read_csv("../data/Combined.csv") |>
     combined <- dplyr::slice_sample(combined,prop = .05) 
   }
 
-# Set seed for reproducibility
-set.seed(123)
+
 
 # (pseudo) random sample
 loggers_test <- sample(unique(combined$Log_Nr), 10)
@@ -566,12 +567,44 @@ evaluation[[3]]
 # Boxplot for each hour of the day
 evaluation[[4]]
 ```
+since random forest performes the best, we now look at the impact of variables
+
+```{r Evaluation of the random forest-model, echo=FALSE, message=FALSE, warning=FALSE}
+
+if(model_demo == "y"){ #only when in demo model, to computational expensive
+# The predictor variables are saved in our model's recipe
+preds <- 
+  random_forest_model$recipe$var_info |> 
+  dplyr::filter(role == "predictor") |> 
+  filter(variable %in% c("rad","winds",
+         "OS_SE_150","OS_GA_150"))|>
+  dplyr::pull(variable) 
+
+# The partial() function can take n=3 predictors at max and will try to create
+# a n-dimensional visulaisation to show interactive effects. However, 
+# this is computational intensive, so we only look at the simple 
+# response-predictor plots
+all_plots <- purrr::map(
+  preds, #we take the 3 most important spatial layers and the 3 most important meteorologic layers from variable selection.
+  ~pdp::partial(
+      random_forest_model,       # Model to use
+      .,            # Predictor to assess
+      plot = TRUE,  # Whether output should be a plot or dataframe
+      plot.engine = "ggplot2"  # to return ggplot objects
+    ), .progress = T
+)
+
+cowplot::plot_grid(plotlist = all_plots, ncol = 2) 
+
+} 
+```
+
 
 ## Advanced Models
 
 ### Evaluation of the xgb-model
 
-Achtung: If statement implementieren!
+
 
 ```{r Evaluation of the XGB boost, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -738,11 +771,22 @@ If you
 # Load the function to generate the map
 source('../R/map_generator.R')
 
-# Define a vector with your inputs (here, we use a default as described in table x)
+
+
+#scenario default, rainy stormy day
 default = c(22, 5, 290, 8, 200, 22, 19, 20, 18, 17, 0, 0, 20, 15, 10, 5)
 
 # Function call
 map_generater(model = random_forest_model, meteoswiss_input = default)
+
+
+
+# Define a vector with your inputs (here, we use a default as described in table x)
+#scenario heat day evening
+heat_evening = c(26, 0, 0, 1, 180, 30, 28 , 24, 22, 22, 0, 0, 0, 0, 0, 0)
+
+# Function call
+map_generater(model = random_forest_model, meteoswiss_input = heat_evening)
 ```
 
 # Discussion

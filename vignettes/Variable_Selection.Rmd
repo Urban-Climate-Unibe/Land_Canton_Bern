@@ -20,6 +20,7 @@ packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
 
 # Load the R script to install and load all the packages from above
 source("../R/load_packages.R")
+load_packages(packages)
 ```
 
 
@@ -30,7 +31,7 @@ source("../R/load_packages.R")
 
 set.seed(123) #for reproducability
 # We want to know, if a certain file already exists
-name.of.file <- "../data/Combined.csv"
+
 
 # If do not exists such a file, we create it
 
@@ -73,7 +74,7 @@ temperature <- combined$temperature
 bor <- Boruta::Boruta(
     y = temperature, 
     x = combined[, predictors],
-    maxRuns = 50, # Number of iterations. Set to 30 or lower if it takes too long
+    maxRuns = 30, # Number of iterations. Set to 30 or lower if it takes too long
     num.threads = parallel::detectCores()-1)
 
 # obtain results: a data frame with all variables, ordered by their importance
