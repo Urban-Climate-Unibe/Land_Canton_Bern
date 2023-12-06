@@ -80,28 +80,26 @@ data_combination <- suppressWarnings(function(){
 
   combined = inner_join(combined, measurement_metadata, by = "Log_Nr")
 
+  combined <- combined |> ungroup()
+
+  combined <- combined |>
+    mutate(ID = row_number())
+
+
   tiff_names <- list.files("../data/Tiffs/")
-  tiff_names_short <- tiff_names |>
-    str_sub(end = -5)
-  lentiff <- length(tiff_names)
-  k = 1
-  for (file in tiff_names) {
 
-    # Read the TIF file
-    raster_data <- raster::raster(paste("../data/Tiffs/",file,sep = ""))
+  tiff_paths <- paste0("../data/Tiffs/",tiff_names)
 
-    # Extract values at the points
-    points_values <- raster::extract(raster_data, combined[, c("LV_03_E", "LV_03_N")])
+  tiffs<-terra::rast(tiff_paths)
 
-    # Add the extracted values to the points_table
-    combined[paste(str_sub(file,end = -5))] <- points_values
 
-    print(paste(k,"/",lentiff,"Tiffs processed"))
-    k = k+1
-    if(k%%10 == 0){
-      print("Keep patient, things will work out")
-    }
-  }
+
+  spat_points <- combined |> dplyr::select(c(LV_03_E,LV_03_N))
+
+  extracted <- terra::extract(tiffs,spat_points)
+#up to here works...
+  combined <- inner_join(combined,extracted,by = "ID")
+
 
   write_csv(combined,"../data/Combined.csv")
   return(combined)
