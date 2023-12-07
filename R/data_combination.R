@@ -100,6 +100,8 @@ data_combination <- suppressWarnings(function(){
 #up to here works...
   combined <- inner_join(combined,extracted,by = "ID")
 
+combined <- combined |>
+  select(-ID)
 
   write_csv(combined,"../data/Combined.csv")
   return(combined)
