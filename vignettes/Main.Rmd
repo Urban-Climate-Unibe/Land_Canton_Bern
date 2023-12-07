@@ -430,7 +430,7 @@ The function calculate a random forest-model with the recipe and uses 3
 cross validations by logger numbers. Further, you have the option for
 tuning the hyper-parameters by using tuning=TRUE/FALSE. Note that this can
 be very time intensive. We have done it already and the function will use
-mtry = number of predictors/3.5 and min.node.size = 3 as this is the result of the hyperparameter tuning.
+mtry = number of predictors/3.5 and min.node.size = 3 as this is the result of the hyperparameter tuning for the full dataframe.
 
 ```{r Calculation of the random forest-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to calculate a random forest model
