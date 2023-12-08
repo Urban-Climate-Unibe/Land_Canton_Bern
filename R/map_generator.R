@@ -68,7 +68,7 @@ max_value <- max(abs(temperature_df$lyr1), na.rm = TRUE)
 # Generate the map
 p <- ggplot() +
   geom_raster(data = temperature_df, aes(x = x, y = y, fill = lyr1)) +
-  geom_sf(data = rivers, color = 'blue', linewidth = .2) +
+  geom_sf(data = rivers, color = 'black', linewidth = .4) +
   geom_sf(data = extent, linewidth = .2, color = 'black') +
   geom_point(aes(x = 2601930.3, y = 1204410.1)) +
   annotate("text", x = 2602300, y = 1204410.1, label= "AWS Zollikofen", hjust = 0) +
@@ -83,9 +83,9 @@ p <- ggplot() +
                         '\nWindspeed [m/s] =',meteoswiss[4],', Winddirection [°] =',meteoswiss[5],
                         '\nRadiation [W/m^2*s] =',meteoswiss[3]), x = 'Longitude', y = 'Latitude',
        fill = expression(paste(Delta,'Temp [K]'))) +
-  scale_fill_gradient2(low = "cyan3",
+  scale_fill_gradient2(low = "blue4",
                        mid = "white",
-                       high = "magenta3",
+                       high = "red4",
                        midpoint = 0,
                        space = 'Lab',
                        guide = 'colourbar',

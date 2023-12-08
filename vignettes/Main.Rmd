@@ -95,11 +95,17 @@ to investigate the urban heat island once again.
 
 ## Objectives and Research Questions
 
-@burger2021  used a multiple linear regression approach to model the urban heat island effect in the city of Bern for a nighttime mean. In this
-study we aim to calculate our own models at an hourly rate all day. Furthermore, we will implement a classic approach
-(multiple linear regression model) and machine learning approaches
-(k-nearest neighbors (knn) and random forest). We use two sets of geospatial layers.
-First, we will use the same set as @burger2021 with the same zonal mean per predictor class, but since @burger2021 was selecting layers with nighttime mean modelling in mind this study also uses generated geospatial layers with several zonal mean distances per predictor class. These will be introduced later. Therefore, the following questions arise:
+@burger2021 used a multiple linear regression approach to model the urban
+heat island effect in the city of Bern for a nighttime mean. In this study
+we aim to calculate our own models at an hourly rate all day. Furthermore,
+we will implement a classic approach (multiple linear regression model) and
+machine learning approaches (k-nearest neighbors (knn) and random forest).
+We use two sets of geospatial layers. First, we will use the same set as
+@burger2021 with the same zonal mean per predictor class, but since
+@burger2021 was selecting layers with nighttime mean modelling in mind this
+study also uses generated geospatial layers with several zonal mean
+distances per predictor class. These will be introduced later. Therefore,
+the following questions arise:
 
 1.  Are the two machine learning approaches (knn and random forest)
     reasonable approaches for modeling the urban heat island effect in the
@@ -108,19 +114,17 @@ First, we will use the same set as @burger2021 with the same zonal mean per pred
 2.  Are the machine learning approaches superior to a multiple regression
     model in terms of explaining the variance ($R^2$), the precision (RMSE)
     and the accuracy (bias)?
-3.  How do models with the geospatial layers of @burger2021 compare to our models 
-    containing several zonal means per predictor class in terms of explaining the variance ($R^2$), the precision (RMSE) and
-    the accuracy (bias)?
-4. Can a meaningful map be generated from the best model that shows the
+3.  How do models with the geospatial layers of @burger2021 compare to our
+    models containing several zonal means per predictor class in terms of
+    explaining the variance ($R^2$), the precision (RMSE) and the accuracy
+    (bias)?
+4.  Can a meaningful map be generated from the best model that shows the
     spatial distribution of the temperature anomaly?
-
-
 
 # Data and Methodology
 
 In this section, we will first introduce the data used. After that, we will
-present the methodology. 
-
+present the methodology.
 
 ## Data
 
@@ -130,7 +134,7 @@ locations, with a temporal resolution of 10 minutes for all LCDs. How many
 LCD are active depends on the year but 55 LCDs are active over the entire
 time period. The network data is publicly available on BORIS, however since
 
-!!! SHOW SOURCE!!! BORIS, coordinates?! RIP -> discuss with Patrickone.
+!!! SHOW SOURCE!!! BORIS, coordinates?! RIP -\> discuss with Patrickone.
 
 data on BORIS is faulty at the moment we uploaded the corrected .csv-files
 to the Git- Hub Repo. We use additional data from the AWS at Zollikofen, as
@@ -149,30 +153,30 @@ most effective as shown in @burger2021. The federal and cantonal data is
 directly downloaded from the web into R. Table 1 provides a brief overview
 of the data we will use.
 
-| Predictor class                                                      | Variable Type     | Zonal Mean Resolution / [3 predictors per class] [@burger2021]           |   
+| Predictor class                                                      | Variable Type    | Zonal Mean Resolution / [3 predictors per class] [@burger2021] |
 |------------------------------|-------------------|--------------------------|
-| 2m Temperature in °C [Zollikofen] for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean]    |
-| Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120,240 hours rolling sum] |
-| Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                       |
-| Windspeed in $m*s^{-1}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                       |
-| Winddirection in ° [Zollikofen] for the time period 2019 - 2022      | Meteorological   | 15 minutes / [1h mean]                                       |
-| Land Cover Building [LC_B]                                           | Geospatial Layer  | [25m / 150m / 1000m] [250m]                                         |
-| Open Space Forest [OS_FO]                                            | Geospatial Layer  | [25m / 150m / 1000m] [250m]                                        |
-| Open Space Garden [OS_GA]                                            | Geospatial Layer  | [25m / 150m / 1000m] [25m]                                        |
-| Open Space Sealed [OS_SE]                                            | Geospatial Layer   | [25m / 150m / 1000m] [500m]                                        |
-| Open Space Agriculture [OS_AC]                                       | Geospatial Layer  | [25m / 150m / 1000m]  [500m]                                       |
-| Open Space Water [OS_WA]                                             | Geospatial Layer   | [25m / 150m / 1000m] [150m]                                        |
-| Vegetation Height [VH]                                               | Geospatial Layer | [25m / 150m / 1000m]  [150m]                                       |
-| Mean Building Heights [BH]                                           | Geospatial Layer | [25m / 150m / 1000m] [150m]                                       |
-| Slope [SLO]                                                          | Geospatial Layer | [25m / 150m / 1000m] [100m]                                        |
-| Digital Elevation Model (DEM)                                        | Geospatial Layer | No zonal mean                                        |
-| Aspect [ASP]                                                         | Geospatial Layer | [25m / 150m / 1000m] [150m]                            |
-| Flow accumulation [FLAC]                                             | Geospatial Layer | [25m / 150m / 1000m] [200m]                            |
-| Roughness [ROU]                                                      | Geospatial Layer | [25m / 150m / 1000m] [25m, replaces SVF]                            |
-| Climate Network in °C [80 LCDs] in year 2019                         | Meteorological   | 10 minutes / [1h mean]                                       |
-| Climate Network in °C [67 LCDs] in year 2020                         | Meteorological   | 10 minutes / [1h mean]                                       |
-| Climate Network in °C [67 LCDs] in year 2021                         | Meteorological   | 10 minutes / [1h mean]                                       |
-| Climate Network in °C [81 LCDs] in year 2022                         | Meteorological   | 10 minutes / [1h mean]                                       |
+| 2m Temperature in °C [Zollikofen] for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean]      |
+| Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120,240 hours rolling sum]   |
+| Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
+| Windspeed in $m*s^{-1}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
+| Winddirection in ° [Zollikofen] for the time period 2019 - 2022      | Meteorological   | 15 minutes / [1h mean]                                         |
+| Land Cover Building [LC_B]                                           | Geospatial Layer | [25m / 150m / 1000m] [250m]                                    |
+| Open Space Forest [OS_FO]                                            | Geospatial Layer | [25m / 150m / 1000m] [250m]                                    |
+| Open Space Garden [OS_GA]                                            | Geospatial Layer | [25m / 150m / 1000m] [25m]                                     |
+| Open Space Sealed [OS_SE]                                            | Geospatial Layer | [25m / 150m / 1000m] [500m]                                    |
+| Open Space Agriculture [OS_AC]                                       | Geospatial Layer | [25m / 150m / 1000m] [500m]                                    |
+| Open Space Water [OS_WA]                                             | Geospatial Layer | [25m / 150m / 1000m] [150m]                                    |
+| Vegetation Height [VH]                                               | Geospatial Layer | [25m / 150m / 1000m] [150m]                                    |
+| Mean Building Heights [BH]                                           | Geospatial Layer | [25m / 150m / 1000m] [150m]                                    |
+| Slope [SLO]                                                          | Geospatial Layer | [25m / 150m / 1000m] [100m]                                    |
+| Digital Elevation Model (DEM)                                        | Geospatial Layer | No zonal mean                                                  |
+| Aspect [ASP]                                                         | Geospatial Layer | [25m / 150m / 1000m] [150m]                                    |
+| Flow accumulation [FLAC]                                             | Geospatial Layer | [25m / 150m / 1000m] [200m]                                    |
+| Roughness [ROU]                                                      | Geospatial Layer | [25m / 150m / 1000m] [25m, replaces SVF]                       |
+| Climate Network in °C [80 LCDs] in year 2019                         | Meteorological   | 10 minutes / [1h mean]                                         |
+| Climate Network in °C [67 LCDs] in year 2020                         | Meteorological   | 10 minutes / [1h mean]                                         |
+| Climate Network in °C [67 LCDs] in year 2021                         | Meteorological   | 10 minutes / [1h mean]                                         |
+| Climate Network in °C [81 LCDs] in year 2022                         | Meteorological   | 10 minutes / [1h mean]                                         |
 
 : **TABLE 1:** Overview of the predictors used for modeling.
 
@@ -180,31 +184,46 @@ To illustrate the model predictions, we also want to show a spatial
 temperature distributions for a possible day as a map as a model output.
 
 ## Methodology: Main Goal/Structure
-This section is subdivided into preparation and modelling.
-Our goal is to predict the temperature difference of the on site location to the official measurement station in Zollikofen and thus the UHI.
-Therefore the target variable is the temperature and the predictor variables are a combination of the above stated meteorologic and geospatial layers.
-Models are generated later in the workflow and include a linear regression, a knn and a random forest. Aditionally a XGBoost and a neural network can be run.
 
+This section is subdivided into preparation and modelling. Our goal is to
+predict the temperature difference of the on site location to the official
+measurement station in Zollikofen and thus the UHI. Therefore the target
+variable is the temperature and the predictor variables are a combination
+of the above stated meteorologic and geospatial layers. Models are
+generated later in the workflow and include a linear regression, a knn and
+a random forest. Aditionally a XGBoost and a neural network can be run.
 
 ## Methodology: Preparation
-In this section, all preparations for modeling are performed.
-### Geospatial layers
 
-Either the geospatial layers are downloaded directly from a remote repository, which is
-the case when knitting. Alternatively, the geospatial layers are generated by
-downloading and processing of the geospatial layers as raw data from open sources.
-Processing can be performed with the layer resolutions by !!!Burger et al.
-2019 which corresponds to one predictor per predictor class in !!!table one!!!.
-Alternatively and preferably the geospatial layers are all
-processed by the resolutions in !!!Table 1!!!. This results in three
-geospatial layers per predictor class in !!!table 1!!!.
-The distances indicated correspond to the performed spatial meaning of the layer. see burger!!!
+In this section, all preparations for modeling are performed. \###
+Geospatial layers
+
+Either the geospatial layers are downloaded directly from a remote
+repository, which is the case when knitting. Alternatively, the geospatial
+layers are generated by downloading and processing of the geospatial layers
+as raw data from open sources. Processing can be performed with the layer
+resolutions by !!!Burger et al. 2019 which corresponds to one predictor per
+predictor class in !!!table one!!!. Alternatively and preferably the
+geospatial layers are all processed by the resolutions in !!!Table 1!!!.
+This results in three geospatial layers per predictor class in !!!table
+1!!!. The distances indicated correspond to the performed spatial meaning
+of the layer. see burger!!!
 
 ### Data combination
-Data from meteoswiss for the Zollikofen meteostation is averaged to 1 hour intervals for the variables radiation, windspeed wind direction temperature and precipitation(for precipitation it is summed). Then rolling means/sums for the 6,12,24 hours, 3,5 days are added for precipitation and temperature(in case of precipitation 10 days as well for moisture). This is then the processed version of the meteoswiss meteorologic data. 
-Then data from the loggers in the city (the LCD temperature loggers) are read in. This is then combined with the metadata, resulting in a tidy dataframe, where each row corresponds to a measurement of a single logger to a single point in time with its attributes such as its location as columns (from the metadata).
-Then, the values corresponding to each location of the loggers is read out of the geospatial predictors. This data is also added to the dataframe. This then is the finished Combined.csv with all data.
 
+Data from meteoswiss for the Zollikofen meteostation is averaged to 1 hour
+intervals for the variables radiation, windspeed wind direction temperature
+and precipitation (for precipitation it is summed). Then rolling means/sums
+for the 6, 12, 24 hours, 3 days, 5 days are added for precipitation and
+temperature(in case of precipitation 10 days as well for moisture). This is
+then the processed version of the meteoswiss meteorologic data. Then data
+from the loggers in the city (the LCD temperature loggers) are read in.
+This is then combined with the metadata, resulting in a tidy data frame,
+where each row corresponds to a measurement of a single logger to a single
+point in time with its attributes such as its location as columns (from the
+metadata). Then, the values corresponding to each location of the loggers
+is read out of the geospatial predictors. This data is also added to the
+data frame. This then is the finished Combined.csv with all data.
 
 ### Variable Selection
 
@@ -222,11 +241,11 @@ Based on this selection, a formula is now generated, which is processed
 into a recipe. This is now the basis for creating the models.
 
 | Variable which is not a predictor | Reason                                                                          |
-|-------------------------|-------------------------------------------------|
+|--------------------------|-------------------------------------------------|
 | Log_Nr, name                      | does not make sens for spatial upscaling                                        |
 | temperature                       | because this is the target                                                      |
 | timestamp, year, month, day, hour | because it is controversial whether time and date should be used as predictors. |
-| NORD_CHTOP, OST_CHTOP             | Coordinates are not used                                                        |
+| NORD_CHTOP, OST_CHTOP             | Coordinates are not used because                                                |
 | LV_03_E, LV_03_N                  | Coordinates are not used                                                        |
 
 : **TABLE 2:** Overview about the reasons why a variable/column were
@@ -256,34 +275,37 @@ This subsection generate your basic .csv file (it is called 'Combined') in
 a interactive way when not knitting. Therefore, you have to navigate
 through some questions. There are 3 main options when running the scrip:
 
-#### Geospatial layers 
-The geospatial layers vary in this script. As
-described above, this script can run either all geospatial layers with
-three different zonal mean values or with the zonal mean values as
-demonstrated by burger et al. 2019. (TABLE XY??)!!!. This can be chosen in
-the console when run normally. Because the generation of the zonal means of
-the geospatial layers is very time-intensive (20min-2h), when knitting, the
-files are always downloaded from an external source. When the files are
-downloaded. The version with all geospatial layers is downloaded. When run
-not knitted, the console will ask wether to download, or generate the
-geospatial means, as well as which geospatial means.
+#### Geospatial layers
 
-#### Data size 
-Computation of models is also very timeintensive. For
-this reason, there is the option to run the model in "demo mode", i.e. just
-using 5% of the data. This data is randomly picked and then the model is
-run. This will substantially worsen the models but is preferred for
-knitting because of processing time. This can be changed when knitting with
-setting the variable model_demo \<- "n". When run not knitted, the console
-will ask wether to run with 5% of the data or not.
+The geospatial layers vary in this script. As described above, this script
+can run either all geospatial layers with three different zonal mean values
+or with the zonal mean values as demonstrated by @burger. (TABLE XY??)!!!.
+This can be chosen in the console when run normally. Because the generation
+of the zonal means of the geospatial layers is very time-intensive (20min -
+2h), when knitting, the files are always downloaded from an external
+source. When the files are downloaded. The version with all geospatial
+layers is downloaded. When run not knitted, the console will ask wether to
+download, or generate the geospatial means, as well as which geospatial
+means.
 
-#### Advanced models 
-There are two advanced models: one is a xgBoost
-model and one a improvised neural network. These are were not part of the
-proposal and are thus considered secondary information. If these should be
-run while knitting, the variable advanced_models <- "y". When run not
-knitted, the console will ask whether to run them. It is strongly recommended
-to only run these with 5% of the data!
+#### Data size
+
+Computation of models is also very time-intensive. For this reason, there
+is the option to run the model in "demo mode", i.e. just using 5% of the
+data. This data is randomly picked and then the model is run. This will
+substantially worsen the models but is preferred for knitting because of
+processing time. This can be changed when knitting with setting the
+variable model_demo \<- "n". When run not knitted, the console will ask
+wether to run with 5% of the data or not.
+
+#### Advanced models
+
+There are two advanced models: one is a xgBoost model and one a improvised
+neural network. These are were not part of the proposal and are thus
+considered secondary information. If these should be run while knitting,
+the variable advanced_models \<- "y". When run not knitted, the console
+will ask whether to run them. It is strongly recommended to only run these
+with 5% of the data!
 
 ### Packages
 
@@ -353,8 +375,9 @@ combined_train <- combined |>
 
 ### Model Recipe
 
-The model recipe corresponds to the defined predictors minus the in table 2!!! mentioned removed variables.
-Furthermore a step_YeoJohnson,step_center,step_scale are preformed.
+The model recipe corresponds to the defined predictors minus the in table
+2!!! mentioned removed variables. Furthermore a step_YeoJohnson,
+step_center,step_scale are preformed.
 
 ```{r Predictors and Recipe, echo=FALSE, message=FALSE, warning=FALSE}
 # Take all column-names you need as predictors from the combined file
@@ -380,14 +403,21 @@ pp <- recipes::recipe(formula_local,
 
 ## Methodology: Modelling
 
+In this section we describe how the models are implemented and what
+hyperparameters should be used. Note that we did the the tuning of the
+hyperparameters was done for the whole data set. This means that the models
+are under- or overfitted in demo mode.
 
 ### Basic Models implementation
+
+The basic models are the linear regression model, the KNN model and the
+random forest model. These three models are
 
 #### Implementation of the Linear Regression Model
 
 The lm-model is a classic multiple linear regression model. The function
-need a recipe (pp) and train data as inputs. There is no possibility for
-tuning the model.
+need a recipe and train data as inputs. There is no possibility for tuning
+the model.
 
 ```{r Calculate lm-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to calculate a lm model
@@ -399,19 +429,19 @@ lm_model <- LM_Model(pp, combined_train)
 
 #### Implementation of the KNN Model
 
-The KNN-model can be very time intensive. We use the DoParallel Package for
+The KNN-model can be very time intensive. We use the DoParallel package for
 that. Please make sure, that your device does nothing else.
 
-The KNN-model uses the recipe (pp) and training data as inputs. The
-function calculate a KNN-Model with the recipe and uses 3 cross validations
-by logger numbers. Further, you have the option for tuning the
-hyper-parameter k by using tuning=TRUE/FALSE. Note that this can be very
+The KNN-model function uses the recipe and training data as inputs. The
+function calculates a KNN-Model with the recipe and uses 3 cross
+validations by logger numbers. Further, you have the option for tuning the
+hyperparameter k by using tuning=TRUE/FALSE. Note that this can be very
 time intensive. We have done it already and the function will use k = 10 as
 a default. If you want to do it again, change tuning = TRUE and the
 function will tune the model for k = c(8, 9, 10, 11, 12). Moreover, the
-function also has a safety feature implemented. Because the computing time
-for a KNN-model can be very high, the data input is limited to 100,000
-rows. The adjustment takes place automatically.
+function also has a safety feature implemented because the computing time
+for a KNN-model can be very high. The safety feature limits the data input
+to 100,000 rows. The adjustment takes place automatically.
 
 ```{r Calculation of the knn-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to calculate a KNN model
@@ -430,7 +460,8 @@ The function calculate a random forest-model with the recipe and uses 3
 cross validations by logger numbers. Further, you have the option for
 tuning the hyper-parameters by using tuning=TRUE/FALSE. Note that this can
 be very time intensive. We have done it already and the function will use
-mtry = number of predictors/3.5 and min.node.size = 3 as this is the result of the hyperparameter tuning for the full dataframe.
+mtry = number of predictors/3.5 and min.node.size = 3 as this is the result
+of the hyperparameter tuning for the full dataframe.
 
 ```{r Calculation of the random forest-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to calculate a random forest model
@@ -441,11 +472,13 @@ random_forest_model <- random_forest(pp, combined_train, tuning = F)
 ```
 
 ### Advanced Models implementation
-The XGBoost-model can be time intensive. We use the DoParallel
-Package for that. Please make sure, that your device does nothing else.
-#### Implementation of the XGB Model
 
-All hyperparameters are tuned, cross validation is performed for 3 folds by the logger ID.
+The XGBoost-model can be time intensive. We use the DoParallel Package for
+that. Please make sure, that your device does nothing else. \####
+Implementation of the XGB Model
+
+All hyperparameters are tuned, cross validation is performed for 3 folds by
+the logger ID.
 
 ```{r}
 
@@ -459,8 +492,9 @@ xgb_model <- xgb(data_train = combined_train,formula = formula_local) }
 
 #### Implementation of the neuronal network
 
-A neural network with 223 neurons is used. learning rate is set to 0.001 and a batch size of 64. These are some standard values for the data size of 5% of the data.
-
+A neural network with 223 neurons is used. learning rate is set to 0.001
+and a batch size of 64. These are some standard values for the data size of
+5% of the data.
 
 ```{r}
 
@@ -565,7 +599,9 @@ evaluation[[4]]
 ```
 
 Since random forest performes the best, we now look at the impact of
-variables. The generation of these plots takes very long even with little data. therefore only the two most important (based on boruta) meteorologic (top) and geospatial (bottom) variables are plotted.
+variables. The generation of these plots takes very long even with little
+data. therefore only the two most important (based on boruta) meteorologic
+(top) and geospatial (bottom) variables are plotted.
 
 ```{r Evaluation of the random forest-model, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -622,7 +658,9 @@ evaluation[[4]]
 ```
 
 ### Evaluation of the neuronal network
-The evaluation is done manually since the normal evaluation function is not compatible with the neural network.
+
+The evaluation is done manually since the normal evaluation function is not
+compatible with the neural network.
 
 ```{r Evaluation of the neuronal network, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -664,7 +702,7 @@ before running the code chunk whether the hyperparameters determined by us
 are to be used or whether the hyperparameters are to be optimized.
 
 | Element of the list | What do you find                                                                               |
-|---------------------|------------------------------------------------------|
+|-----------------------|----------------------------------------------------|
 | 1                   | returns a table with the main metrics (RSQ, RMSE, MAE and Bias)                                |
 | 2                   | retunrs a visualization of the model (Training and Test set) and shows RSQ, RMSE and the bias. |
 | 3                   | returns a boxplot for each logger station (24h)                                                |
