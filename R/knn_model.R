@@ -3,26 +3,27 @@ KNN_Model <- function(pp, training_data = combined_train, tuning = FALSE){
 
 cores <- makeCluster(detectCores())
 registerDoParallel(cores)
-tuning.vector = (8:12)
+tuning.vector = c(8:12, 31, 32, 33)
 
 numbers.of.rows <- nrow(training_data)
 
 if(numbers.of.rows > 100000){
-  print('The data will be split because we assume high computational time!')
+  print('The data is split, as we assume a high computing time!')
   split.percent <- as.numeric(round(100000/numbers.of.rows, digits = 3))
   percent <- as.numeric(round(100*split.percent, digits = 0))
   set.seed(123)  # for reproducibility
   split <- rsample::initial_split(training_data, prop = split.percent)
   training_data <- rsample::training(split)
   new.numbers.of.rows <- nrow(training_data)
-  print(paste('Your data frame has been reduced from',numbers.of.rows,
+  print(paste('Your data set has been reduced from',numbers.of.rows,
               'rows to',new.numbers.of.rows,
-              'rows which means you work now with',
+              'rows, you are now working with',
               percent,'% of your original data'))
 }
 
+
 if(tuning == FALSE){
-  print('Your model will be calculated with k = 10')
+  print('The model is currently being generated with k  10, and this process takes approximately 25 seconds. Please be patient...')
   group_folds <- groupKFold(training_data$Log_Nr, k = 3)
   model <- caret::train(pp, data = training_data |> tidyr::drop_na(),
                         # We want a KNN model
@@ -40,7 +41,7 @@ if(tuning == FALSE){
 }
 
 if(tuning == TRUE){
-  print('Your model will be tuned')
+  print('The model is now in the tuning process. It takes about 90 seconds. Please be patient...')
   group_folds <- groupKFold(training_data$Log_Nr, k = 3)
   model <- caret::train(pp, data = training_data |> tidyr::drop_na(),
                         # We want a KNN model
@@ -57,7 +58,7 @@ if(tuning == TRUE){
                         metric = "RMSE")
 
   best.tune <- knn_model$bestTune$k
-  print(paste('Your model has been optimized with k = 8, 9, 10, 11, 12. The optimal k is now:',best.tune))
+  print(paste('The model was fine-tuned with values of k = 8, 9, 10, 11, 12. The optimal k is now:',best.tune))
 
 }
 
