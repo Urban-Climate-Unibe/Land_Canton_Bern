@@ -19,7 +19,7 @@ Course: Proseminar in Applied Geo-Data Science at the University of Bern
 
 Supervisor: Prof. Dr. Benjamin Stocker
 
-Adviser: Dr. Laura Marques, Pepa Aran
+Adviser: Dr. Laura Marques, Pepa Arany
 
 Further information: <https://geco-bern.github.io/agds_proseminar/>
 
@@ -27,16 +27,18 @@ Further information: <https://geco-bern.github.io/agds_proseminar/>
 authors:]{.underline}
 
 Tinner Nils (nils.tinner\@students.unibe.ch) had the lead for the work
-package 1:
+package 1 (WP1):
 
--   Geopatial layer
+-   Data wrangling
 
--   
+-   Data (pre)processing
+
+-   Open sciences and reproducible workflow
 
 -   Advanced models (XGB and neuronal network)
 
 Bigler Patrick (patrick.bigler1\@students.unibe.ch) had the lead for the
-work package 2:
+work package 2 (WP2):
 
 -   Model implementation and calculations
 
@@ -50,7 +52,7 @@ work package 2:
 
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
 
-# Introduction^WP1,\ WP2^
+# Introduction^WP1, WP2^
 
 Anthropogenic climate change is expected to increase the amount, intensity,
 and duration of heat waves [@burger2021]. The urban heat island (UHI)
@@ -153,30 +155,30 @@ spatially averaged to obtain the layers most effective as shown in
 @burger2021. The federal and cantonal data is directly downloaded from the
 web into R. Table 1 provides a brief overview of the data we will use.
 
-| Predictor class                                                      | Variable Type    | Zonal Mean Resolution / [3 predictors per class] [@burger2021]           |
+| Predictor class                                                      | Variable Type    | Zonal Mean Resolution / [3 predictors per class] [@burger2021] |
 |------------------------------|-------------------|--------------------------|
-| 2m Temperature in °C [Zollikofen] for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean]                |
-| Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120,240 hours rolling sum]             |
-| Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                                   |
-| Windspeed in $m*s^{-1}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                                   |
-| Winddirection in ° [Zollikofen] for the time period 2019 - 2022      | Meteorological   | 15 minutes / [1h mean]                                                   |
-| Land Cover Building [LC_B]                                           | Geospatial Layer | [25m / 150m / 1000m], Burger used [250m]                                 |
-| Open Space Forest [OS_FO]                                            | Geospatial Layer | [[25m / 150m / 1000m], Burger used [250m]                                |
-| Open Space Garden [OS_GA]                                            | Geospatial Layer | [25m / 150m / 1000m], Burger used [25m]                                  |
-| Open Space Sealed [OS_SE]                                            | Geospatial Layer | [25m / 150m / 1000m], Burger used [500m]                                 |
-| Open Space Agriculture [OS_AC]                                       | Geospatial Layer | [25m / 150m / 1000m], Burger used [500m]                                 |
-| Open Space Water [OS_WA]                                             | Geospatial Layer | 25m / 150m / 1000m], Burger used [150m]                                  |
-| Vegetation Height [VH]                                               | Geospatial Layer | 25m / 150m / 1000m], Burger used [150m]                                  |
-| Mean Building Heights [BH]                                           | Geospatial Layer | 25m / 150m / 1000m], Burger used [150m]                                  |
-| Slope [SLO]                                                          | Geospatial Layer | 25m / 150m / 1000m], Burger used [100m]                                  |
-| Digital Elevation Model (DEM)                                        | Geospatial Layer | No zonal mean                                                            |
-| Aspect [ASP]                                                         | Geospatial Layer | 25m / 150m / 1000m], Burger used [150m]                                  |
-| Flow accumulation [FLAC]                                             | Geospatial Layer | 25m / 150m / 1000m], Burger used [200m]                                  |
-| Roughness [ROU]                                                      | Geospatial Layer | [25m / 150m / 1000m], Burger used [25m, replaces SVF]                    |
-| Climate Network in °C [80 LCDs, different sides] in year 2019        | Meteorological   | 10 minutes / [1h mean]                                                   |
-| Climate Network in °C [67 LCDs, different sides] in year 2020        | Meteorological   | 10 minutes / [1h mean]                                                   |
-| Climate Network in °C [67 LCDs, different sides] in year 2021        | Meteorological   | 10 minutes / [1h mean]                                                   |
-| Climate Network in °C [81 LCDs, different sides] in year 2022        | Meteorological   | 10 minutes / [1h mean]                                                   |
+| 2m Temperature in °C [Zollikofen] for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean]      |
+| Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120,240 hours rolling sum]   |
+| Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
+| Windspeed in $m*s^{-1}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
+| Winddirection in ° [Zollikofen] for the time period 2019 - 2022      | Meteorological   | 15 minutes / [1h mean]                                         |
+| Land Cover Building [LC_B]                                           | Geospatial Layer | [25m / 150m / 1000m], Burger used [250m]                       |
+| Open Space Forest [OS_FO]                                            | Geospatial Layer | [[25m / 150m / 1000m], Burger used [250m]                      |
+| Open Space Garden [OS_GA]                                            | Geospatial Layer | [25m / 150m / 1000m], Burger used [25m]                        |
+| Open Space Sealed [OS_SE]                                            | Geospatial Layer | [25m / 150m / 1000m], Burger used [500m]                       |
+| Open Space Agriculture [OS_AC]                                       | Geospatial Layer | [25m / 150m / 1000m], Burger used [500m]                       |
+| Open Space Water [OS_WA]                                             | Geospatial Layer | 25m / 150m / 1000m], Burger used [150m]                        |
+| Vegetation Height [VH]                                               | Geospatial Layer | 25m / 150m / 1000m], Burger used [150m]                        |
+| Mean Building Heights [BH]                                           | Geospatial Layer | 25m / 150m / 1000m], Burger used [150m]                        |
+| Slope [SLO]                                                          | Geospatial Layer | 25m / 150m / 1000m], Burger used [100m]                        |
+| Digital Elevation Model (DEM)                                        | Geospatial Layer | No zonal mean                                                  |
+| Aspect [ASP]                                                         | Geospatial Layer | 25m / 150m / 1000m], Burger used [150m]                        |
+| Flow accumulation [FLAC]                                             | Geospatial Layer | 25m / 150m / 1000m], Burger used [200m]                        |
+| Roughness [ROU]                                                      | Geospatial Layer | [25m / 150m / 1000m], Burger used [25m, replaces SVF]          |
+| Climate Network in °C [80 LCDs, different sides] in year 2019        | Meteorological   | 10 minutes / [1h mean]                                         |
+| Climate Network in °C [67 LCDs, different sides] in year 2020        | Meteorological   | 10 minutes / [1h mean]                                         |
+| Climate Network in °C [67 LCDs, different sides] in year 2021        | Meteorological   | 10 minutes / [1h mean]                                         |
+| Climate Network in °C [81 LCDs, different sides] in year 2022        | Meteorological   | 10 minutes / [1h mean]                                         |
 
 : **TABLE 1:** Overview of the predictors used for modeling.
 
@@ -198,7 +200,7 @@ network can be run.
 
 In this section, all preparations for modeling are performed.
 
-####  Geospatial layers
+#### Geospatial layers
 
 Either the geospatial layers are downloaded directly from a remote
 repository, which is the case when knitting (default). Alternatively, the
@@ -254,7 +256,7 @@ into a recipe. This is now the basis for creating the models.
 : **TABLE 2:** Overview about the reasons why a variable/column were
 rejected as a predictor
 
-## How this Workflow Works^WP1,\ WP2^
+## How this Workflow Works^WP1, WP2^
 
 In the Data and Methodology section you will see that we work with a large
 amount of data. This means the computational time could be very high. To
@@ -323,7 +325,8 @@ packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
               "dplyr","googledrive","caret","rgdal","keras","vip","parsnip",
               "workflows","tune","dials","stringr","terra","stars","sf","plyr",
               "doParallel", "foreach", "terrainr","starsExtra", "pdp", "recipes", 
-              "tidyterra","shiny", "xgboost", 'kableExtra','rnaturalearth','zoo')
+              "tidyterra","shiny", "xgboost", 'kableExtra','rnaturalearth','zoo',
+              'moments', 'tibble')
 ```
 
 ```{r Choose your workflow mode, message=FALSE, warning=FALSE, include=FALSE}
@@ -471,6 +474,8 @@ belongs to $k\in[9, 10, 11]$. In cases where "k" is either 8 or 12, we
 recommend accessing the corresponding R script and expanding the range of
 the "tuning_vector". The default setting is "k=10".
 
+coputationa time abou 5min
+
 ```{r Calculation of the knn-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to calculate a KNN model
 source("../R/knn_model.R")
@@ -505,10 +510,12 @@ seconds.
 source("../R/random_forest.R")
 
 # The function needs the recipe and a dataset which can be used for model training
-random_forest_model <- random_forest(pp, combined_train, tuning = FALSE)
+random_forest <- random_forest(pp, combined_train, tuning = FALSE)
 ```
 
 ### Advanced Models implementation^WP1^
+
+#### Implementation of the XGBoost
 
 The XGBoost-model can be time intensive. We use the DoParallel Package for
 that. Please make sure, that your device does nothing else. \####
@@ -563,13 +570,88 @@ test_labels <- test_data|> pull(temperature)
 
 # Results
 
+In this section, we present our findings in terms of the explanation of
+variance ($R^2$), precision (RMSE), and accuracy (bias). Once again, we
+distinguish between basic models (lm, knn, and random forest models) and
+advanced models (XGBoost and neural network). An overview of the results
+can be found in tables 3-5 in the Summary of Key Findings subsection.
+
 ## Basic Models^WP2^
+
+This subsection evaluates the basic models. To ensure comparability, the
+basic models are assessed using the same evaluation function. The function
+takes a training data set, a test data set, and the model as inputs. The
+mode in which the respective model was generated is irrelevant, as the
+function processes them identically. However, it should be noted that all
+hyperparameters were tuned for the regular mode during the implementation
+of the models. Consequently, the quality of the models varies significantly
+depending on the mode.
+
+The function returns a list containing four elements:
+
+1.  The first element is a table that provides an overview of the metrics
+    (R2R2, RMSE, MAE, and bias) for the model itself, including evaluations
+    on both the training set and the test set (which should be considered)
+
+2.  The second element
+
+3.  The thirdelement is a visualization of the model's performance on both
+    the training set and the test set. This includes key metrics, providing
+    an overview of how the model performed and where its performance is
+    optimal or suboptimal. The orange line represents the ideal
+    performance, and if all points lie on this line, the model predicts the
+    target perfectly. The red line depicts the actual regression, and the
+    closer it is to the orange line, the better the model.
+
+4.  The fourth element is a boxplot for the LCDs used for evaluation in the
+    test set. This allows you to see which LCDs are being used and how they
+    performed.
+
+5.  The fivth element is a boxplot for the hour of the day. This plot shows
+    you the deviation at different times of the day.
+
+Note that this study aims to find the best model with the available data.
+Therefore, the evaluation has been conducted in the regular mode. The
+results described in the evaluation subsections cannot be transferred to
+other modes. If you are interested in the findings of the demo mode or the
+\@burger2021 mode, please refer to Table 3 and 4, respectively.
 
 ### Evaluation of the lm-model
 
-Here we evaluate the lm-model. We use our evaluate_function(). The return
-will be a list; we can choose which part of the evaluation we want access
-to (see table 2).
+Here, we evaluate the lm-model using the evaluation function. Computational
+time should not be a concern, and we estimate it to be about 30 seconds.
+
+The first element is a table that shows the main metrics. The multiple
+linear regression model explains 45% of the variance. Furthermore, it
+exhibits a precision (RMSE) of approximately 0.88°C and an accuracy (bias)
+of around 0.09°C. The bias of the training data is zero, indicating a
+successful implementation of the evaluation function, as required by
+definition.
+
+The second element displays the main statistical parameters. This reveals a
+relatively high spread of about 12.5 °C. However, the IQR is approximately
+1.1°C, signifying that 50% of the data falls within this interval. The
+skewness is negative, indicating a longer right tail and an asymmetric
+distribution. We conclude that the model contains negative outliers (mean
+\< median). This conclusion is confirmed by boxplots (fifth element).
+
+The third element is the visualization, which reveals that the model does
+not perform well at high temperatures. The plot also displays negative
+outliers (note dots in the test set evaluation plot, bottom right).
+
+The fourth element comprises boxplots by logger side. All ten box-whiskers
+are within a ±2 °C range, but there are outliers, especially in Murifeld
+(LCD 58). Otherwise, the performance is relatively stable, even when
+different geospatial layers dominate (water (Egelsee, LCD 12), forest
+(Bremgartenwald, LCD 32), and old town (Bundesplatz, LCD 70)).
+
+The fifth element is the evaluation by the hour of the day. Between 21:00 -
+7:00 (night-time), the overestimation is relatively constant and
+corresponds to the findings of \@burger2021. Between 6:00 - 8:00 and
+18:00 - 20:00, there are two very similar peaks in overestimation. Between
+those peaks, the model underestimates the temperature in the city of Bern
+(day-time). The plot also indicates that outliers tend to be negative,
+which is explained by the negative skewness.
 
 ```{r Evaluation of the lm-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to evaluate the model
@@ -579,19 +661,49 @@ evaluation <- evaluation_function(combined_test, combined_train, lm_model)
 
 # If we want our metrics in table, we chose the first element of the list
 evaluation[[1]]
-# If we want a visualization of the training and test set
+# Overview about the main statistics
 evaluation[[2]]
-# Boxplot for each logger station (24h)
+# If we want a visualization of the training and test set
 evaluation[[3]]
-# Boxplot for each hour of the day
+# Boxplot for each logger station 
 evaluation[[4]]
+# Boxplot for each hour of the day (24h)
+evaluation[[5]]
 ```
 
 ### Evaluation of the knn-model
 
-Here we evaluate the KNN-model. We use our evaluate_function() again. The
-return will be a list; we can choose which part of the evaluation we want
-access to (see table 2).
+Here, we evaluate the knn-model using the evaluation function.
+Computational time can be a concern, and we estimate it to be about 5
+minutes.
+
+The first element is a table that displays the main metrics. The knn model
+explains 48% of the variance. Furthermore, it demonstrates a precision
+(RMSE) of approximately 0.86°C and an accuracy (bias) of around 0.04°C.
+
+The second element reveals the main statistical parameters. This shows a
+spread of about 12.1 °C. The IQR is approximately 1.01°C, containing 50% of
+the data. The skewness is slightly negative, indicating that the
+distribution is almost normal. We conclude that the model contains a
+balanced amount of negative and positive outliers (mean ≈ median). This
+conclusion is further supported by boxplots (fifth element).
+
+The third element is the visualization. It illustrates that the predicted
+values underestimate the real values.
+
+The fourth element consists of boxplots by logger side. It appears that the
+IQR for each box is relatively stable. However, the whiskers vary (small
+for Bremgartenwald and high for Weyermannshaus) but are within a ±3 °C
+range. Once again, Murifeld (LCD 58) exhibits the most outliers. Otherwise,
+the performance is relatively stable.
+
+The fifth element is the evaluation by the hour of the day. The first
+notable observation is the large spread, as described in the main
+statistical parameters. Between 22:00 - 8:00 (night-time), the
+overestimation is relatively constant, aligning with the findings of
+@burger2021. Between 10:00 and 17:00, the model underestimates the target.
+The plot also suggests that outliers tend to be balanced, indicating that
+the model does not prefer a specific direction.
 
 ```{r Evaluation of the knn-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to evaluate the model
@@ -602,36 +714,120 @@ evaluation <- evaluation_function(combined_test, combined_train, knn_model)
 
 # If we want our metrics in table, we chose the first element of the list
 evaluation[[1]]
-# If we want a visualization of the training and test set
+# Overview about the main statistics
 evaluation[[2]]
-# Boxplot for each logger station
+# If we want a visualization of the training and test set
 evaluation[[3]]
-# Boxplot for each hour of the day (24h)
+# Boxplot for each logger station 
 evaluation[[4]]
+# Boxplot for each hour of the day (24h)
+evaluation[[5]]
 ```
 
 ### Evaluation of the random forest-model
 
-Here we evaluate the random forest-model. We use our evaluate_function()
-again. The return will be a list; we can choose which part of the
-evaluation we want access to (see table 2).
+Here, we evaluate the knn-model using the evaluation function.
+Computational time can be a concern, and we estimate it to be about 60
+seconds.
+
+The first element is a table that shows the main metrics. The random forest
+model explains 73% of the variance. The RMSE (precision) is about 0.62°C,
+and the bias (accuracy) is about 0.08°C, indicating that, in general, the
+model slightly overestimates the target.
+
+The second element is a table which contains the main statistic parameters.
+The spread is about 7.4°C. The IQR is about 0.64°C. The skewness is
+positive which means the left tail is longer. This indicates that outliers
+are tend to be positive. This conclusion is further supported by boxplots
+(fifth element).
+
+The third element is the visualization, revealing that the model performs
+well at high temperatures but struggles to deal with low-temperature
+anomalies.
+
+The forth element consists of boxplots by logger side. All ten box-whiskers
+are within a ±2 °C range, but each one shows outliers, especially in
+Murifeld (LCD 58). Otherwise, the performance is relatively stable, even
+when different geospatial layers dominate (water (Egelsee, LCD 12), forest
+(Bremgartenwald, LCD 32), and old town (Bundesplatz, LCD 70)).
+
+The fifth element is the evaluation by the hour of the day. Between 21:00 -
+7:00 (night-time), the overestimation is relatively constant and
+corresponds with the findings of \@burger2021. During day-time (9:00 and
+18:00), the model underestimates the temperature in the city of Bern.
+Furthermore, the spread is about 7°C and tends to be larger in
+underestimating than in overestimating, especially during night-time.
 
 ```{r Evaluation of the random forest-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to evaluate the model
 source("../R/evaluation.R")
 
 # Function call
-evaluation <- evaluation_function(combined_test, combined_train, random_forest_model)
+evaluation <- evaluation_function(combined_test, combined_train, random_forest)
 
 # If we want our metrics in table, we chose the first element of the list
 evaluation[[1]]
-# If we want a visualization of the training and test set
+# Overview about the main statistics
 evaluation[[2]]
-# Boxplot for each logger station (24h)
+# If we want a visualization of the training and test set
 evaluation[[3]]
-# Boxplot for each hour of the day
+# Boxplot for each logger station 
 evaluation[[4]]
+# Boxplot for each hour of the day (24h)
+evaluation[[5]]
 ```
+
+
+## Advanced Models^WP1^
+
+### Evaluation of the xgb-model
+
+```{r Evaluation of the XGB boost, echo=FALSE, message=FALSE, warning=FALSE}
+
+if(advanced_models == "y"){
+
+source("../R/evaluation.R")
+
+# Function call
+evaluation <- evaluation_function(combined_test, combined_train, xgb_model)
+
+# If we want our metrics in table, we chose the first element of the list
+evaluation[[1]]
+# Overview about the main statistics
+evaluation[[2]]
+# If we want a visualization of the training and test set
+evaluation[[3]]
+# Boxplot for each logger station 
+evaluation[[4]]
+# Boxplot for each hour of the day (24h)
+evaluation[[5]]
+}
+```
+
+### Evaluation of the neuronal network
+
+The evaluation is done manually since the normal evaluation function is not
+compatible with the neural network.
+
+```{r Evaluation of the neuronal network, echo=FALSE, message=FALSE, warning=FALSE}
+
+if(advanced_models == "y"){  
+  # Evaluate the model
+evaluation <- nn_model|> evaluate(as.matrix(test_features), test_labels)
+cat("Mean Absolute Error on Test Data:", evaluation, "\n")
+
+# Make predictions
+combined_test$nn_prediction <- nn_model|> predict(as.matrix(test_features))
+
+
+print(paste0("RSQ: ",cor(combined_test$nn_prediction,combined_test$temperature)^2))
+print(paste0("RMSE:",RMSE(combined_test$nn_prediction,combined_test$temperature)))
+print(MAE(paste0("MAE: ",combined_test$nn_prediction,combined_test$temperature)))
+print(paste0("BIAS: ",mean(combined_test$nn_prediction-combined_test$temperature)))
+}
+```
+
+## NEW HEADER
 
 Since random forest performes the best, we now look at the impact of
 variables. The generation of these plots takes very long even with little
@@ -668,52 +864,6 @@ cowplot::plot_grid(plotlist = all_plots, ncol = 2)
 } 
 ```
 
-## Advanced Models^WP1^
-
-### Evaluation of the xgb-model
-
-```{r Evaluation of the XGB boost, echo=FALSE, message=FALSE, warning=FALSE}
-
-if(advanced_models == "y"){
-
-source("../R/evaluation.R")
-
-# Function call
-evaluation <- evaluation_function(combined_test, combined_train, xgb_model)
-
-# If we want our metrics in table, we chose the first element of the list
-evaluation[[1]]
-# If we want a visualization of the training and test set
-evaluation[[2]]
-# Boxplot for each logger station (24h)
-evaluation[[3]]
-# Boxplot for each hour of the day
-evaluation[[4]]
-}
-```
-
-### Evaluation of the neuronal network
-
-The evaluation is done manually since the normal evaluation function is not
-compatible with the neural network.
-
-```{r Evaluation of the neuronal network, echo=FALSE, message=FALSE, warning=FALSE}
-
-if(advanced_models == "y"){  
-  # Evaluate the model
-evaluation <- nn_model|> evaluate(as.matrix(test_features), test_labels)
-cat("Mean Absolute Error on Test Data:", evaluation, "\n")
-
-# Make predictions
-combined_test$nn_prediction <- nn_model|> predict(as.matrix(test_features))
-
-
-print(paste0("RSQ: ",cor(combined_test$nn_prediction,combined_test$temperature)^2))
-print(paste0("RMSE:",RMSE(combined_test$nn_prediction,combined_test$temperature)))
-print(MAE(paste0("MAE: ",combined_test$nn_prediction,combined_test$temperature)))
-print(paste0("BIAS: ",mean(combined_test$nn_prediction-combined_test$temperature)))
-}
-```
 
 ## Summary of the Key Findings^WP2^
 
@@ -727,8 +877,8 @@ print(paste0("BIAS: ",mean(combined_test$nn_prediction-combined_test$temperature
 | XGB Boost         | \-             | \-              | \-             | \-              |
 | Neuronal Network  | \-             | \-              | \-             | \-              |
 
-: **TABLE 4:** Overview of the evaluation of the models with data from
-Burger et al. (2019) with 5% of the data.
+: **TABLE 4:** Overview of the evaluation and results of the models with
+data from Burger et al. (2019) with 5% of the data.
 
 To fully implement the Open Sciences approach, the models can be computed
 using the following code chunks. Further, for every model, a short synopsis
@@ -737,7 +887,7 @@ before running the code chunk whether the hyperparameters determined by us
 are to be used or whether the hyperparameters are to be optimized.
 
 | Element of the list | What do you find                                                                               |
-|------------------------|---------------------------------------------------|
+|--------------------------|-------------------------------------------------|
 | 1                   | returns a table with the main metrics (RSQ, RMSE, MAE and Bias)                                |
 | 2                   | retunrs a visualization of the model (Training and Test set) and shows RSQ, RMSE and the bias. |
 | 3                   | returns a boxplot for each logger station (24h)                                                |
@@ -766,9 +916,9 @@ we did not taken into account.
 
 | Model                | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
 |---------------|---------------|---------------|---------------|---------------|
-| Linear Regression    | 0.47           | 0.86 °C         | 0.67 °C        | 0.06 °C         |
-| KNN [reduced to 13%] | 0.51           | 0.84 °C         | 0.65 °C        | 0.07 °          |
-| Random Forest        | 0.73           | 0.63 °C         | 0.46 °C        | 0.07 °C         |
+| Linear Regression    | 0.45           | 0.88 °C         | 0.69 °C        | 0.088 °C        |
+| KNN [reduced to 13%] | 0.48           | 0.86 °C         | 0.65 °C        | 0.04 C °        |
+| Random Forest        | 0.73           | 0.62 °C         | 0.46 °C        | 0.083 °C        |
 | XGB Boost            | \-             | \-              | \-             | \-              |
 | Neuronal Network     | \-             | \-              | \-             | \-              |
 
@@ -810,24 +960,24 @@ those extreme values. Moreover, the values should be realistic. For example
 it is unrealistic if you set your 6h temperature mean to 20°C and your 12h
 mean to -5°C. Please consider this if you play around.
 
-| Variable            | Default           | Interval                                             |
+| Variable                | Default           | Interval                                             |
 |-------------------------|-------------------|-------------------------------|
-| Temperature         | 22 °C             | $x[°C] \in[-15 \leq x \leq 35]$                      |
-| Rain                | 5 mm              | $x[mm] \in[0 \leq x \leq 200]$                       |
-| Radiation           | 290 $W*m^{-2}$    | $x[W*m^{-2}] \in[0 \leq x \leq 300]$, for a 10' mean |
-| Windspeed           | 8 $m*s^{-1}$      | $x[m*s^{-1}] \in[0 \leq x \leq 20]$                  |
-| Winddirection       | 200 ° (west wind) | $x[°] \in[0 \leq x \leq 360]$, with 0° = N, 180° = S |
-| 6h mean temperature | 22                | $x[°C] \in[-15 \leq x \leq 35]$                      |
-| 12h mean temperture | 19                | $x[°C] \in[-15 \leq x \leq 35]$                      |
-| 1d mean temperature | 20                | $x[°C] \in[-15 \leq x \leq 35]$                      |
-| 3d mean temperature | 18                | $x[°C] \in[-15 \leq x \leq 35]$                      |
-| 5d temperature      | 17                | $x[°C] \in[-15 \leq x \leq 35]$                      |
-| 6h precipitaion     | 0                 | $x[mm] \in[0 \leq x \leq 100]$                       |
-| 12h precipitation   | 0                 | $x[mm] \in[0 \leq x \leq 200]$                       |
-| 1d precipitation    | 20 mm             | $x[mm] \in[0 \leq x \leq 400]$                       |
-| 3d precipitation    | 15 mm             | $x[mm] \in[0 \leq x \leq 600]$                       |
-| 5d precipitation    | 10 mm             | $x[mm] \in[0 \leq x \leq 600]$                       |
-| 10d precipitation   | 5 mm              | $x[mm] \in[0 \leq x \leq 600]$                       |
+| Temperature             | 22 °C             | $x[°C] \in[-15 \leq x \leq 35]$                      |
+| Rain                    | 5 mm              | $x[mm] \in[0 \leq x \leq 200]$                       |
+| Radiation               | 290 $W*m^{-2}$    | $x[W*m^{-2}] \in[0 \leq x \leq 300]$, for a 10' mean |
+| Windspeed               | 8 $m*s^{-1}$      | $x[m*s^{-1}] \in[0 \leq x \leq 20]$                  |
+| Winddirection           | 200 ° (west wind) | $x[°] \in[0 \leq x \leq 360]$, with 0° = N, 180° = S |
+| 6h mean temperature     | 22                | $x[°C] \in[-15 \leq x \leq 35]$                      |
+| 12h mean temperature    | 19                | $x[°C] \in[-15 \leq x \leq 35]$                      |
+| 1d mean temperature     | 20                | $x[°C] \in[-15 \leq x \leq 35]$                      |
+| 3d mean temperature     | 18                | $x[°C] \in[-15 \leq x \leq 35]$                      |
+| 5d temperature          | 17                | $x[°C] \in[-15 \leq x \leq 35]$                      |
+| 6h precipitation [sum]  | 0                 | $x[mm] \in[0 \leq x \leq 100]$                       |
+| 12h precipitation [sum] | 0                 | $x[mm] \in[0 \leq x \leq 200]$                       |
+| 1d precipitation [sum]  | 20 mm             | $x[mm] \in[0 \leq x \leq 400]$                       |
+| 3d precipitation [sum]  | 15 mm             | $x[mm] \in[0 \leq x \leq 600]$                       |
+| 5d precipitation [sum]  | 10 mm             | $x[mm] \in[0 \leq x \leq 600]$                       |
+| 10d precipitation [sum] | 5 mm              | $x[mm] \in[0 \leq x \leq 600]$                       |
 
 : **Table x:** Overview about the default values for the variables used to
 predict the map. Further, it shows reasonable possible values for the
@@ -840,22 +990,19 @@ variables (SOURCE: METEOSCHWEIZ).
 # Load the function to generate the map
 source('../R/map_generator.R')
 
-
-
 #scenario default, rainy stormy day
 default = c(22, 5, 290, 8, 200, 22, 19, 20, 18, 17, 0, 0, 20, 15, 10, 5)
 
-# Function call
-map_generater(model = random_forest_model, meteoswiss_input = default)
-
-
-
 # Define a vector with your inputs (here, we use a default as described in table x)
 #scenario heat day evening
-heat_evening = c(26, 0, 0, 1, 180, 30, 28 , 24, 22, 22, 0, 0, 0, 0, 0, 0)
+normal_summarday = c(26, 0, 0, 1, 180, 30, 28 , 24, 22, 22, 0, 0, 0, 0, 0, 0)
+
+cold_rain = c(26, 0, 0, 1, 180, 30, 28 , 24, 22, 22, 0, 0, 0, 0, 0, 0)
+
+heat_cloudless = c(26, 0, 0, 1, 180, 30, 28 , 24, 22, 22, 0, 0, 0, 0, 0, 0)
 
 # Function call
-map_generater(model = random_forest_model, meteoswiss_input = heat_evening)
+map_generater(model = random_forest_model, meteoswiss_input = default)
 ```
 
 # Discussion
