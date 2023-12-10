@@ -5,6 +5,12 @@ metadata.logger <- read_csv('../data/Metadata_19-22.csv')
 evaluation_function <- function(data_evaluate = combined_test, train_data = combined_train, model,
                                 advanced_model = FALSE){
 
+#------------------------------------------------------------------------------
+# Extract the model name. We need it to label the map
+model_name <- deparse(substitute(model))
+
+model_input <- str_replace_all(model_name, "_", " ")
+
 ###############################################################################
 # Data preparation
 
@@ -49,7 +55,8 @@ mae_model <- round(model$results$MAE, digits = 3)
 # RSQ
 rsq_model <- round(model$results$Rsquared, digits = 3)
 # Bias
-train_data <- train_data|>mutate(Bias = fitted - temperature)
+train_data <- train_data|>
+  mutate(Bias = fitted - temperature)
 bias.train <- round(mean(train_data$Bias), digits = 3)
 
 # -----------------------------------------------------------------------------
@@ -75,7 +82,8 @@ rsq_test <- round(metrics_test |>
 # Bias
 # --> if the bias is negative, then the model underestimate the temperature
 # --> if the bias is positive, then the model overestimate the temperature
-data_evaluate <- data_evaluate|>mutate(Bias = fitted - temperature)
+data_evaluate <- data_evaluate|>
+  mutate(Bias = fitted - temperature)
 bias.test <- round(mean(data_evaluate$Bias), digits = 3)
 
 ###############################################################################
@@ -88,11 +96,32 @@ tabl <- tibble::tibble('Metric' = c('RSQ', ' RMSE', 'MAE', 'Bias'),
                        'Values of the model' =c(rsq_model, rmse_model, mae_model, NA),
                        'Values of training set' = c(rsq_train, rmse_train, mae_train, bias.train),
                        'Values of the test set' = c(rsq_test, rmse_test, mae_test, bias.test))|>
-  kableExtra::kbl(align = 'lccc')|>
+  kableExtra::kbl(align = 'lccc', caption = paste('Overview about the metrics of the',model_input))|>
   kableExtra::kable_classic_2(full_width = T, html_font = "Cambria")
 
 #------------------------------------------------------------------------------
-# Position 2: ggplot as a overview about the training set and test set
+# Position 2: Overview about the main statistics
+
+main_stats <- data_evaluate|>
+  mutate(Anomaly = fitted - temperature)|>
+  select(Anomaly)
+
+main_stats <- tibble(main_stats |>
+  summarise(Bias = round(mean(Anomaly), digits = 3),
+            Std = round(sd(Anomaly), digits = 3),
+            Max = round(max(Anomaly), digits = 3),
+            Min = round(min(Anomaly), digits = 3),
+            Spread = round((max(Anomaly)- min(Anomaly)), digits = 3),
+            IQR = round(IQR(Anomaly), digits = 3),
+            Q_25 = round(quantile(Anomaly, probs = .25,na.rm = TRUE), digits = 3),
+            Q_75 = round(quantile(Anomaly, probs = .75,na.rm = TRUE), digits = 3),
+            skewness = round(moments::skewness(Anomaly, na.rm = TRUE), digits = 3))) |>
+  kableExtra::kbl(align = 'lcccccccc', caption = paste('Overview about the main statistic parameters of the',model_input))|>
+  kableExtra::kable_classic_2(full_width = T, html_font = "Cambria")
+
+
+#------------------------------------------------------------------------------
+# Position 3: ggplot as a overview about the training set and test set
 
 # We create the plot for the training set
 p1 <- ggplot(data = train_data, aes(temperature, fitted)) +
@@ -104,7 +133,7 @@ p1 <- ggplot(data = train_data, aes(temperature, fitted)) +
                           RMSE == .(format(rmse_train, digits = 3)) ~~
                           Bias == .(format(bias.train, digits = 3))),
                          x = 'Measured temperature [°C]' , y = "Predicted temperature [°C]",
-       title = "Train set evaluation") +
+       title = paste("Train set evaluation [",model_input,"]")) +
   theme_classic()
 
 # We create the plot for the test set
@@ -116,14 +145,14 @@ p2 <- ggplot(data = data_evaluate, aes(temperature, fitted)) +
                            RMSE == .(format(rmse_test, digits = 3)) ~~
                            Bias == .(format(bias.test, digits = 3))),
       x = 'Measured temperature [°C]' , y = "Predicted temperature [°C]",
-  title = "Test set evaluation") +
+      title = paste("Test set evaluation [",model_input,"]")) +
   theme_classic()
 
 # We put both plots together
 out <- cowplot::plot_grid(p1, p2)
 
 #------------------------------------------------------------------------------
-# Position 3: Boxplot for each logger station (where is the bias highest)
+# Position 4: Boxplot for each logger station (where is the bias highest)
 
 boxplot_logger <- ggplot(data = data_evaluate,
              aes(x = as.factor(Log_Nr), y = Bias))+
@@ -131,14 +160,15 @@ boxplot_logger <- ggplot(data = data_evaluate,
                outlier.color = "red", outlier.shape = 20, outlier.size = 0.7) +
   stat_boxplot(geom = "errorbar", linewidth = 0.3, width = 0.5)+
   geom_hline(yintercept = 0,linewidth = 0.3) +
-  labs(x = "Name of the station and logger number", y = 'Bias [°C]') +
+  labs(x = "Name of the station and logger number", y = 'Bias [°C]',
+       title = paste("Boxplot by logger sides [",model_input,"]")) +
   theme_classic() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 8)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8)) +
   scale_x_discrete(labels = paste(logger.names,'[Log Nr:',unique_numbers,']'))
 
 
 #------------------------------------------------------------------------------
-# Position 4: Boxplot for each hour of the day (bias)
+# Position 5: Boxplot for each hour of the day (bias)
 
 boxplot_hour <- ggplot(data = data_evaluate,
        aes(x = as.factor(hour), y = Bias))+
@@ -146,12 +176,15 @@ boxplot_hour <- ggplot(data = data_evaluate,
                outlier.color = "red", outlier.shape = 20, outlier.size = 0.7) +
   geom_hline(yintercept = 0,linewidth = 0.3) +
   stat_boxplot(geom = "errorbar", linewidth = 0.3, width = 0.5)+
-  labs(x = "Hour of the day", y = 'Bias [°C]') +
+  labs(x = "Hour of the day", y = 'Bias [°C]',
+       title = paste("Boxplot by hours of the day [",model_input,"]")) +
   theme_classic()
+
+
 
 ###############################################################################
 # We define our list for the return:
-output <- list(tabl, out, boxplot_logger, boxplot_hour)
+output <- list(tabl, main_stats, out, boxplot_logger, boxplot_hour)
 
 
 return(output)}
