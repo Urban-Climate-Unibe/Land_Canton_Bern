@@ -156,7 +156,7 @@ spatially averaged to obtain the layers most effective as shown in
 web into R. Table 1 provides a brief overview of the data we will use.
 
 | Predictor class                                                      | Variable Type    | Zonal Mean Resolution / [3 predictors per class] [@burger2021] |
-|------------------------------|-------------------|--------------------------|
+|-------------------------------|----------------|----------------------------|
 | 2m Temperature in °C [Zollikofen] for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean]      |
 | Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120,240 hours rolling sum]   |
 | Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
@@ -246,7 +246,7 @@ Based on this selection, a formula is now generated, which is processed
 into a recipe. This is now the basis for creating the models.
 
 | Variable which is not a predictor | Reason                                                                                                                                                            |
-|--------------------------|-------------------------------------------------|
+|-----------------|----------------------------------------------------------|
 | Log_Nr, name                      | Does not make sens for spatial upscaling                                                                                                                          |
 | temperature                       | It is the target                                                                                                                                                  |
 | timestamp, year, month, day, hour | Because it is controversial whether time and date should be used as predictors. The model could simply learn the mean of the time and not the underlying pattern. |
@@ -777,7 +777,6 @@ evaluation[[4]]
 evaluation[[5]]
 ```
 
-
 ## Advanced Models^WP1^
 
 ### Evaluation of the xgb-model
@@ -861,19 +860,20 @@ all_plots <- purrr::map(
 
 cowplot::plot_grid(plotlist = all_plots, ncol = 2) 
 
-} 
+} y
 ```
-
 
 ## Summary of the Key Findings^WP2^
 
 ### Overview about the Evaluation of the Models
 
+VALUES ARE OK (11.12.2023)!!
+
 | Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
 |---------------|---------------|---------------|---------------|---------------|
-| Linear Regression | 0.455          | 0.898           | 0.710          | 0.097           |
-| KNN               | 0.542          | 0.824           | 0.628          | 0.094           |
-| Random Forest     | 0.521          | 0.847           | 0.643          | 0.115           |
+| Linear Regression | 0.455          | 0.899           | 0.711          | 0.102           |
+| KNN               | 0.542          | 0.824           | 0.628          | 0.093           |
+| Random Forest     | 0.522          | 0.846           | 0.642          | 0.48            |
 | XGB Boost         | \-             | \-              | \-             | \-              |
 | Neuronal Network  | \-             | \-              | \-             | \-              |
 
@@ -887,7 +887,7 @@ before running the code chunk whether the hyperparameters determined by us
 are to be used or whether the hyperparameters are to be optimized.
 
 | Element of the list | What do you find                                                                               |
-|--------------------------|-------------------------------------------------|
+|-----------------|----------------------------------------------------------|
 | 1                   | returns a table with the main metrics (RSQ, RMSE, MAE and Bias)                                |
 | 2                   | retunrs a visualization of the model (Training and Test set) and shows RSQ, RMSE and the bias. |
 | 3                   | returns a boxplot for each logger station (24h)                                                |
@@ -914,6 +914,8 @@ The XGB Boost and the neuronal network are additional and should show you,
 that there are further techniques which could be explored. But those model
 we did not taken into account.
 
+VALUES ARE OK (11.12.2023)!!
+
 | Model                | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
 |---------------|---------------|---------------|---------------|---------------|
 | Linear Regression    | 0.45           | 0.88 °C         | 0.69 °C        | 0.088 °C        |
@@ -936,11 +938,13 @@ logger station but the model predict this station, the it could b that the
 model perfoms worse. But we are not sure and more investigations are
 needed. But as a conclusion we can say, that more data improve the models.
 
+VALUES ARE OK (11.12.2023)!!
+
 | Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
 |---------------|---------------|---------------|---------------|---------------|
-| Linear Regression | 0.47           | 0.96 °C         | 0.75 °C        | 0.09 °C         |
-| KNN               | 0.58           | 0.86 °C         | 0.63 °C        | 0.06 °C         |
-| Random Forest     | 0.64           | 0.84 °C         | 0.59 °C        | 0.21 °C         |
+| Linear Regression | 0.422          | 0.93 °C         | 0.739 °C       | 0.125 °C        |
+| KNN               | 0.457          | 0.91 °C         | 0.704 °C       | 0.05 °C         |
+| Random Forest     | 0.477          | 0.899 °C        | 0.661 °C       | 0.184 °C        |
 | XGB Boost         | \-             | \-              | \-             | \-              |
 | Neuronal Network  | \-             | \-              | \-             | \-              |
 
@@ -961,7 +965,7 @@ it is unrealistic if you set your 6h temperature mean to 20°C and your 12h
 mean to -5°C. Please consider this if you play around.
 
 | Variable                | Default           | Interval                                             |
-|-------------------------|-------------------|-------------------------------|
+|------------------|------------------|---------------------------------------|
 | Temperature             | 22 °C             | $x[°C] \in[-15 \leq x \leq 35]$                      |
 | Rain                    | 5 mm              | $x[mm] \in[0 \leq x \leq 200]$                       |
 | Radiation               | 290 $W*m^{-2}$    | $x[W*m^{-2}] \in[0 \leq x \leq 300]$, for a 10' mean |
