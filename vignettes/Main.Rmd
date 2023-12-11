@@ -107,8 +107,7 @@ machine learning approaches (k-nearest neighbors (knn) and random forest).
 We use two sets of geospatial layers. First, we will use the same set as
 @burger2021 with the same zonal mean per predictor class. The predictor class 
 represents the original layer without processing, for example the vegetation height.
-These are cut to the extent of the city and its surrounding lands as well as a spatial resolution of 5 meters.
-
+These are cut to the extent of the city and its surrounding lands as well as a spatial resolution of 5 meters and will be in the raw-data folder.
 But since @burger2021 was selecting layers with nighttime mean modelling in mind this
 study also uses generated geospatial layers with several zonal mean
 distances per predictor class (these will be introduced in the data
@@ -133,6 +132,8 @@ section). Therefore, the following questions arise:
 
 ## Data^WP1^
 
+Before starting this subchapter a brief clarification. This project uses cantonal land use data and federal geospatial data. These in their raw form are called predictor classes. These are then spatially averaged to obtain the actual predictors which are called geospatial layers or just predictors.
+
 Temperature data for the years 2019-2022 from the network of the city of
 Bern is used. This is a numerical data set of the 3 m temperature in 104
 locations, with a temporal resolution of 10 minutes for all LCDs. How many
@@ -150,9 +151,9 @@ and one, three and five days and ten days (precipitation only) will also be
 fed into the model. This data is uploaded to the repository to ensure
 availability since the IDAWEB-data service is open for scientific use but
 not completely open access. To show small scale urban patterns of
-temperature distributions, geospatial data as shown in @burger2021 is used.
+temperature distributions, zonally meaned geospatial data as shown in @burger2021 is used.
 These are cantonal land use classes as well as federal geospatial data. All
-of the data is spatially averaged to obtain the layers most effective as
+of the data is spatially averaged/meaned to obtain the layers most effective as
 shown in @burger2021 as well as our own take: generate three different geospatial
 layers per predictor class. The federal and cantonal data is directly downloaded
 from the web into R and processed. 
@@ -161,30 +162,30 @@ Table 1 provides a brief overview of the data we will
 use. Zonal mean resolution is indicated with our owns first and then the distance used by @burger2021.
 
 
-| Predictor class                                                      | Variable Type    | Zonal Mean Resolution / [3 predictors per class] [@burger2021] |
+| Predictor class                                                      | Variable Type    | Zonal Mean Resolution / [3 predictors per class] [abbreviation] |
 |------------------------------|-------------------|---------------------------|
-| 2m Temperature in °C [Zollikofen] for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean]      |
-| Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120,240 hours rolling sum]   |
-| Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
-| Windspeed in $m*s^{-1}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
-| Winddirection in ° [Zollikofen] for the time period 2019 - 2022      | Meteorological   | 15 minutes / [1h mean]                                         |
+| 2m Temperature in °C (Zollikofen) for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean]      |
+| Precipitation in mm (Zollikofen) for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120,240 hours rolling sum]   |
+| Radiation in $W*m^{-2}$ (Zollikofen) for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
+| Windspeed in $m*s^{-1}$ (Zollikofen) for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
+| Winddirection in ° (Zollikofen) for the time period 2019 - 2022      | Meteorological   | 15 minutes / [1h mean]                                         |
 | Land Cover Building [LC_B]                                           | Geospatial Layer | [25m / 150m / 1000m], Burger used [250m]                       |
 | Open Space Forest [OS_FO]                                            | Geospatial Layer | [[25m / 150m / 1000m], Burger used [250m]                      |
 | Open Space Garden [OS_GA]                                            | Geospatial Layer | [25m / 150m / 1000m], Burger used [25m]                        |
 | Open Space Sealed [OS_SE]                                            | Geospatial Layer | [25m / 150m / 1000m], Burger used [500m]                       |
 | Open Space Agriculture [OS_AC]                                       | Geospatial Layer | [25m / 150m / 1000m], Burger used [500m]                       |
-| Open Space Water [OS_WA]                                             | Geospatial Layer | 25m / 150m / 1000m], Burger used [150m]                        |
-| Vegetation Height [VH]                                               | Geospatial Layer | 25m / 150m / 1000m], Burger used [150m]                        |
-| Mean Building Heights [BH]                                           | Geospatial Layer | 25m / 150m / 1000m], Burger used [150m]                        |
-| Slope [SLO]                                                          | Geospatial Layer | 25m / 150m / 1000m], Burger used [100m]                        |
+| Open Space Water [OS_WA]                                             | Geospatial Layer | [25m / 150m / 1000m], Burger used [150m]                        |
+| Vegetation Height [VH]                                               | Geospatial Layer | [25m / 150m / 1000m], Burger used [150m]                        |
+| Mean Building Heights [BH]                                           | Geospatial Layer | [25m / 150m / 1000m], Burger used [150m]                        |
+| Slope [SLO]                                                          | Geospatial Layer | [25m / 150m / 1000m], Burger used [100m]                        |
 | Digital Elevation Model (DEM)                                        | Geospatial Layer | No zonal mean                                                  |
-| Aspect [ASP]                                                         | Geospatial Layer | 25m / 150m / 1000m], Burger used [150m]                        |
-| Flow accumulation [FLAC]                                             | Geospatial Layer | 25m / 150m / 1000m], Burger used [200m]                        |
+| Aspect [ASP]                                                         | Geospatial Layer | [25m / 150m / 1000m], Burger used [150m]                        |
+| Flow accumulation [FLAC]                                             | Geospatial Layer | [25m / 150m / 1000m], Burger used [200m]                        |
 | Roughness [ROU]                                                      | Geospatial Layer | [25m / 150m / 1000m], Burger used [25m, replaces SVF]          |
-| Climate Network in °C [80 LCDs, different sides] in year 2019        | Meteorological   | 10 minutes / [1h mean]                                         |
-| Climate Network in °C [67 LCDs, different sides] in year 2020        | Meteorological   | 10 minutes / [1h mean]                                         |
-| Climate Network in °C [67 LCDs, different sides] in year 2021        | Meteorological   | 10 minutes / [1h mean]                                         |
-| Climate Network in °C [81 LCDs, different sides] in year 2022        | Meteorological   | 10 minutes / [1h mean]                                         |
+| Climate Network in °C (80 LCDs, different sides) in year 2019        | Meteorological   | 10 minutes / [1h mean]                                         |
+| Climate Network in °C (67 LCDs, different sides) in year 2020        | Meteorological   | 10 minutes / [1h mean]                                         |
+| Climate Network in °C (67 LCDs, different sides) in year 2021        | Meteorological   | 10 minutes / [1h mean]                                         |
+| Climate Network in °C (81 LCDs, different sides) in year 2022        | Meteorological   | 10 minutes / [1h mean]                                         |
 
 : **TABLE 1:** Overview of the predictors used for modeling.
 
@@ -208,16 +209,24 @@ In this section, all preparations for modeling are performed.
 
 #### Geospatial layers
 
+
 Either the geospatial layers are downloaded directly from a remote
 repository, which is the case when knitting (default). Alternatively, the
 geospatial layers are generated by downloading and processing of the
-geospatial layers as raw data from open sources. Processing can be
-performed with the layer resolutions by @burger2021 which corresponds to
-one predictor per predictor class in table 1. Alternatively and preferably
-the geospatial layers are all processed by the resolutions in table 1. This
-results in three geospatial layers per predictor class in table 1. The
-distances indicated correspond to the performed spatial meaning of the
-layer (see @burger2021).
+geospatial layers as raw data from open sources. 
+First the files are downloaded from either cantonal or federal swiss websites.
+Then, the processing goes as follows:
+1) The predictor classes layers are formatted to be separate files.
+This means that for each land use class as defined by @burger2021 and for each 
+geospatial layer from swisstopo there is a raster file which is the predictor class.
+2) Then spatial extent and resolution are all standardized to 5 meters and the extent of the city and the surrounding lands.
+3) Each layer then is zonally meaned. This can be performed with the layer resolutions 
+by @burger2021 which corresponds to one predictor per predictor class in table 1.
+Alternatively the geospatial layers are all meaned by the resolutions in table 1 (3 mean layers per predictor class).
+This then finally results in three (or one in case of @burger2021) geospatial layers per predictor class in table 1. 
+The data of the predictor classes which corresponds to the raw layers can be 
+found in the data-raw subfolder of this project for the land use classes.
+The processed files can be found in the data folder in the subdirectory Tiffs.
 
 #### Data combination
 
@@ -415,6 +424,7 @@ pp <- recipes::recipe(formula_local,
 ```
 
 ## Methodology: Modelling^WP2^
+
 
 In this methodology subsection, we describe how the models are implemented
 and specify the hyperparameters that should be used. It is important to
@@ -835,7 +845,7 @@ print(paste0("BIAS: ",mean(combined_test$nn_prediction-combined_test$temperature
 }
 ```
 
-## NEW HEADER
+## Partial Dependency Plots
 
 Since random forest performes the best, we now look at the impact of
 variables. The generation of these plots takes very long even with little
@@ -871,6 +881,9 @@ cowplot::plot_grid(plotlist = all_plots, ncol = 2)
 
 } 
 ```
+radiation behaves roughly as expected. A higher temperature in the logger/predicted data with higher radiation. This was known and has something to do with the bias of the logger. Interestingly the temperature prediction also increases when approaching zero radiation. A possible explanation is that because most loggers are placed in the city and the nighttime UHI-Effect is highest, the temperature then also increases in most loggers. Also for the windspeed this effect applies. Because most loggers are in the city, when the wind is lowest, the UHI is highest and therefore the predicted temperature increases. 
+For the geospatial predictors, the garden 150 meters geospatial layers behaves as expected: the higher the value, the lower the predicted local temperature. For the seals surfaces (SE) 150 meters geospatial predictor makes the temperature increase with higher values. This is also expected.
+
 
 ## Summary of the Key Findings^WP2^
 
