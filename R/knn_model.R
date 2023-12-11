@@ -23,7 +23,7 @@ if(numbers.of.rows > 100000){
 
 
 if(tuning == FALSE){
-  print('The model is currently being generated with k  10, and this process takes approximately 25 seconds. Please be patient...')
+  print('The model is currently being generated with k = 10. Please be patient...')
   group_folds <- groupKFold(training_data$Log_Nr, k = 3)
   model <- caret::train(pp, data = training_data |> tidyr::drop_na(),
                         # We want a KNN model
@@ -41,7 +41,7 @@ if(tuning == FALSE){
 }
 
 if(tuning == TRUE){
-  print('The model is now in the tuning process. It takes about 90 seconds. Please be patient...')
+  print('The model is now in the tuning process. Please be patient...')
   group_folds <- groupKFold(training_data$Log_Nr, k = 3)
   model <- caret::train(pp, data = training_data |> tidyr::drop_na(),
                         # We want a KNN model
