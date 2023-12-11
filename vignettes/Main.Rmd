@@ -105,8 +105,11 @@ we aim to calculate our own models at an hourly rate all day. Furthermore,
 we will implement a classic approach (multiple linear regression model) and
 machine learning approaches (k-nearest neighbors (knn) and random forest).
 We use two sets of geospatial layers. First, we will use the same set as
-@burger2021 with the same zonal mean per predictor class, but since
-@burger2021 was selecting layers with nighttime mean modelling in mind this
+@burger2021 with the same zonal mean per predictor class. The predictor class 
+represents the original layer without processing, for example the vegetation height.
+These are cut to the extent of the city and its surrounding lands as well as a spatial resolution of 5 meters.
+
+But since @burger2021 was selecting layers with nighttime mean modelling in mind this
 study also uses generated geospatial layers with several zonal mean
 distances per predictor class (these will be introduced in the data
 section). Therefore, the following questions arise:
@@ -135,28 +138,31 @@ Bern is used. This is a numerical data set of the 3 m temperature in 104
 locations, with a temporal resolution of 10 minutes for all LCDs. How many
 LCD are active depends on the year but 55 LCDs are active over the entire
 time period. The network data is publicly available on BORIS, however since
-
-!!! SHOW SOURCE!!! BORIS, coordinates?! RIP -\> discuss with Patrickone.
-
 data on BORIS is faulty at the moment we uploaded the corrected .csv-files
-to the Git- Hub Repo. We use additional data from the AWS at Zollikofen, as
-it is the official meteorologic station of Bern. The five meteorological
-variables (2m temperature, precipitation, radiation and winddirection and
-windspeed) with a temporal resolution of 10 minutes for the years 2019-2022
-will be used as well as the timestamp. Data of temperature and
-precipitation of the previous six hours and twelve hours, and one, three
-and five days and ten days (precipitation only) will also be fed into the
-model. This data is uploaded to the repository to ensure availability since
-the IDAWEB-data service is open for scientific use but not completely open
-access. To show small scale urban patterns of temperature distributions,
-geospatial data as shown in @burger2021 is used. These are cantonal land
-use classes as well as federal geospatial data. All of the data is
-spatially averaged to obtain the layers most effective as shown in
-@burger2021. The federal and cantonal data is directly downloaded from the
-web into R. Table 1 provides a brief overview of the data we will use.
+to the Git- Hub Repo. The original files can be found here:
+<https://boris.unibe.ch/161882/> We use additional data from the AWS at
+Zollikofen, as it is the official meteorologic station of Bern. The five
+meteorological variables (2m temperature, precipitation, radiation and
+winddirection and windspeed) with a temporal resolution of 10 minutes for
+the years 2019-2022 will be used as well as the timestamp. Data of
+temperature and precipitation of the previous six hours and twelve hours,
+and one, three and five days and ten days (precipitation only) will also be
+fed into the model. This data is uploaded to the repository to ensure
+availability since the IDAWEB-data service is open for scientific use but
+not completely open access. To show small scale urban patterns of
+temperature distributions, geospatial data as shown in @burger2021 is used.
+These are cantonal land use classes as well as federal geospatial data. All
+of the data is spatially averaged to obtain the layers most effective as
+shown in @burger2021 as well as our own take: generate three different geospatial
+layers per predictor class. The federal and cantonal data is directly downloaded
+from the web into R and processed. 
+
+Table 1 provides a brief overview of the data we will
+use. Zonal mean resolution is indicated with our owns first and then the distance used by @burger2021.
+
 
 | Predictor class                                                      | Variable Type    | Zonal Mean Resolution / [3 predictors per class] [@burger2021] |
-|-------------------------------|----------------|----------------------------|
+|------------------------------|-------------------|---------------------------|
 | 2m Temperature in °C [Zollikofen] for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean]      |
 | Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120,240 hours rolling sum]   |
 | Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
@@ -246,7 +252,7 @@ Based on this selection, a formula is now generated, which is processed
 into a recipe. This is now the basis for creating the models.
 
 | Variable which is not a predictor | Reason                                                                                                                                                            |
-|-----------------|----------------------------------------------------------|
+|--------------------|-------------------------------------------------------|
 | Log_Nr, name                      | Does not make sens for spatial upscaling                                                                                                                          |
 | temperature                       | It is the target                                                                                                                                                  |
 | timestamp, year, month, day, hour | Because it is controversial whether time and date should be used as predictors. The model could simply learn the mean of the time and not the underlying pattern. |
@@ -423,11 +429,12 @@ and our advanced models.
 The basic models include linear regression, k-nearest neighbors (knn), and
 the random forest model. We will compare their performance based on their
 ability to explain variance, accuracy, and precision in predicting the
-target. In the following subsections, we will introduce you to these
-models. Please note that we utilize DoParallel due to the extensive size of
-our data set. Additionally, the models are designed and tuned to deliver
-optimal performance in regular mode. Consequently, significant deviations
-are inevitable when operating in demo mode exclusively.
+target (local temperature). In the following subsections, we will introduce
+you to these models. Please note that we utilize DoParallel due to the
+extensive size of our data set. Additionally, the models are designed and
+tuned to deliver optimal performance in regular mode. Consequently,
+significant deviations are inevitable when operating in demo mode
+exclusively.
 
 #### Implementation of the Linear Regression Model
 
@@ -510,7 +517,7 @@ seconds.
 source("../R/random_forest.R")
 
 # The function needs the recipe and a dataset which can be used for model training
-random_forest <- random_forest(pp, combined_train, tuning = FALSE)
+random_forest <- random_forest(pp, combined_train, tuning = F)
 ```
 
 ### Advanced Models implementation^WP1^
@@ -518,7 +525,7 @@ random_forest <- random_forest(pp, combined_train, tuning = FALSE)
 #### Implementation of the XGBoost
 
 The XGBoost-model can be time intensive. We use the DoParallel Package for
-that. Please make sure, that your device does nothing else. \####
+that. Please make sure, that your device does nothing else. 
 Implementation of the XGB Model
 
 All hyperparameters are tuned, cross validation is performed for 3 folds by
@@ -788,7 +795,7 @@ if(advanced_models == "y"){
 source("../R/evaluation.R")
 
 # Function call
-evaluation <- evaluation_function(combined_test, combined_train, xgb_model)
+evaluation <- evaluation_function(data_evaluate = combined_test, train_data = combined_train, xgb_model,advanced_model = T)
 
 # If we want our metrics in table, we chose the first element of the list
 evaluation[[1]]
@@ -802,6 +809,8 @@ evaluation[[4]]
 evaluation[[5]]
 }
 ```
+
+
 
 ### Evaluation of the neuronal network
 
@@ -821,7 +830,7 @@ combined_test$nn_prediction <- nn_model|> predict(as.matrix(test_features))
 
 print(paste0("RSQ: ",cor(combined_test$nn_prediction,combined_test$temperature)^2))
 print(paste0("RMSE:",RMSE(combined_test$nn_prediction,combined_test$temperature)))
-print(MAE(paste0("MAE: ",combined_test$nn_prediction,combined_test$temperature)))
+print((paste0("MAE: ",MAE(combined_test$nn_prediction,combined_test$temperature))))
 print(paste0("BIAS: ",mean(combined_test$nn_prediction-combined_test$temperature)))
 }
 ```
@@ -833,12 +842,12 @@ variables. The generation of these plots takes very long even with little
 data. therefore only the two most important (based on boruta) meteorologic
 (top) and geospatial (bottom) variables are plotted.
 
-```{r Evaluation of the random forest-model, echo=FALSE, message=FALSE, warning=FALSE}
+```{r Evaluation of the random forest-model variable partial dependency plot, echo=FALSE, message=FALSE, warning=FALSE}
 
 if(model_demo == "y"){ #only when in demo model, to computational expensive
 # The predictor variables are saved in our model's recipe
 preds <- 
-  random_forest_model$recipe$var_info |> 
+  random_forest$recipe$var_info |> 
   dplyr::filter(role == "predictor") |> 
   filter(variable %in% c("rad","winds",
          "OS_SE_150","OS_GA_150"))|>
@@ -851,7 +860,7 @@ preds <-
 all_plots <- purrr::map(
   preds, #we take the 3 most important spatial layers and the 3 most important meteorologic layers from variable selection.
   ~pdp::partial(
-      random_forest_model,       # Model to use
+      random_forest,       # Model to use
       .,            # Predictor to assess
       plot = TRUE,  # Whether output should be a plot or dataframe
       plot.engine = "ggplot2"  # to return ggplot objects
@@ -860,7 +869,7 @@ all_plots <- purrr::map(
 
 cowplot::plot_grid(plotlist = all_plots, ncol = 2) 
 
-} y
+} 
 ```
 
 ## Summary of the Key Findings^WP2^
@@ -887,7 +896,7 @@ before running the code chunk whether the hyperparameters determined by us
 are to be used or whether the hyperparameters are to be optimized.
 
 | Element of the list | What do you find                                                                               |
-|-----------------|----------------------------------------------------------|
+|--------------------|-------------------------------------------------------|
 | 1                   | returns a table with the main metrics (RSQ, RMSE, MAE and Bias)                                |
 | 2                   | retunrs a visualization of the model (Training and Test set) and shows RSQ, RMSE and the bias. |
 | 3                   | returns a boxplot for each logger station (24h)                                                |
@@ -965,7 +974,7 @@ it is unrealistic if you set your 6h temperature mean to 20°C and your 12h
 mean to -5°C. Please consider this if you play around.
 
 | Variable                | Default           | Interval                                             |
-|------------------|------------------|---------------------------------------|
+|-------------------|-------------------|-------------------------------------|
 | Temperature             | 22 °C             | $x[°C] \in[-15 \leq x \leq 35]$                      |
 | Rain                    | 5 mm              | $x[mm] \in[0 \leq x \leq 200]$                       |
 | Radiation               | 290 $W*m^{-2}$    | $x[W*m^{-2}] \in[0 \leq x \leq 300]$, for a 10' mean |
@@ -999,14 +1008,14 @@ default = c(22, 5, 290, 8, 200, 22, 19, 20, 18, 17, 0, 0, 20, 15, 10, 5)
 
 # Define a vector with your inputs (here, we use a default as described in table x)
 #scenario heat day evening
-normal_summarday = c(26, 0, 0, 1, 180, 30, 28 , 24, 22, 22, 0, 0, 0, 0, 0, 0)
+normal_summarevening = c(26, 0, 0, 1, 180, 30, 28 , 24, 22, 22, 0, 0, 0, 0, 0, 0)
 
 cold_rain = c(26, 0, 0, 1, 180, 30, 28 , 24, 22, 22, 0, 0, 0, 0, 0, 0)
 
 heat_cloudless = c(26, 0, 0, 1, 180, 30, 28 , 24, 22, 22, 0, 0, 0, 0, 0, 0)
 
 # Function call
-map_generater(model = random_forest_model, meteoswiss_input = default)
+map_generater(model = random_forest, meteoswiss_input = normal_summarevening)
 ```
 
 # Discussion

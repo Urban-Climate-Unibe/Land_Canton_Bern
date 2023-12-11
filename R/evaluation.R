@@ -29,7 +29,7 @@ logger.names <- metadata.logger|>
 
 train_data <- train_data |>
   drop_na()
-train_data$fitted <- predict(model, newdata = train_data)
+train_data$fitted <- unlist(predict(model, train_data))
 
 metrics_train <- train_data |>
   yardstick::metrics(temperature, fitted)
@@ -47,7 +47,7 @@ rsq_train <- round(metrics_train |>
   filter(.metric == "rsq") |>
   pull(.estimate), digits = 3)
 
-
+if(advanced_model == F){
 # RMSE
 rmse_model <- round(model$results$RMSE, digits = 3)
 # MAE
@@ -58,10 +58,17 @@ rsq_model <- round(model$results$Rsquared, digits = 3)
 train_data <- train_data|>
   mutate(Bias = fitted - temperature)
 bias.train <- round(mean(train_data$Bias), digits = 3)
+}else{
+  rmse_model <- model$fit$fit$fit$best_msg
+  mae_model <- NA
+  rsq_model <- NA
+  bias.train <- NA
+}
+
 
 # -----------------------------------------------------------------------------
 # Metrics Test (RMSE, MAE, RSQ, Bias)
-data_evaluate$fitted <- predict(model, newdata = data_evaluate)
+data_evaluate$fitted <- unlist(predict(model, data_evaluate))
 
 metrics_test <- data_evaluate |>
   yardstick::metrics(temperature, fitted)
