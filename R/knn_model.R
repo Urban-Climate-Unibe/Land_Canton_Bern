@@ -7,6 +7,7 @@ tuning.vector = c(8:12, 31, 32, 33)
 
 numbers.of.rows <- nrow(training_data)
 
+# Reduce train data set
 if(numbers.of.rows > 100000){
   print('The data is split, as we assume a high computing time!')
   split.percent <- as.numeric(round(100000/numbers.of.rows, digits = 3))
@@ -20,7 +21,6 @@ if(numbers.of.rows > 100000){
               'rows, you are now working with',
               percent,'% of your original data'))
 }
-
 
 if(tuning == FALSE){
   print('The model is currently being generated with k = 10. Please be patient...')

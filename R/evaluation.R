@@ -16,13 +16,50 @@ model_input <- str_replace_all(model_name, "_", " ")
 
 if('Log_Nr' %in% colnames(data_evaluate)){
 unique_numbers <- sort(unique(data_evaluate$Log_Nr))
-print(paste('Your model contains:',length(unique_numbers),'Loggers'))
+print(paste('Your model contains:',length(unique_numbers),'lCDs'))
 logger.names <- metadata.logger|>
   filter(Log_Nr %in% unique_numbers)|>
   select(Name)|>
   pull()}
 
+#------------------------------------------------------------------------------
+# Check whether a KNN model is used. If so, then reduce
 
+# Reduce train data set
+if(grepl("knn", model_input)){
+  numbers.of.row.train <- nrow(train_data)
+  if(numbers.of.row.train > 100000){
+  print('The function recognizes a KNN model. High computing time is assumed, and as a result, the train dataset is reduced.')
+  split.percent <- as.numeric(round(100000/numbers.of.row.train, digits = 3))
+  percent <- as.numeric(round(100*split.percent, digits = 0))
+  set.seed(123)  # for reproducibility
+  split <- rsample::initial_split(train_data, prop = split.percent)
+  train_data <- rsample::training(split)
+  new.numbers.of.rows.train <- nrow(train_data)
+  print(paste('Your train data set has been reduced from',numbers.of.row.train,
+              'rows to',new.numbers.of.rows.train,
+              'rows, you are now working with',
+              percent,'% of your original train data'))
+  }
+}
+
+# Reduce test data set
+if(grepl("knn", model_input)){
+  numbers.of.row.test <- nrow(data_evaluate)
+  if(numbers.of.row.test > 88000){
+    print('The function recognizes a KNN model. High computing time is assumed, and as a result, the test dataset is reduced.')
+    split.percent <- as.numeric(round(5000/numbers.of.row.test, digits = 3))
+    percent <- as.numeric(round(100*split.percent, digits = 0))
+    set.seed(123)  # for reproducibility
+    split <- rsample::initial_split(data_evaluate, prop = split.percent)
+    data_evaluate <- rsample::training(split)
+    new.numbers.of.rows.test <- nrow(data_evaluate)
+    print(paste('Your test data set has been reduced from',numbers.of.row.test,
+              'rows to',new.numbers.of.rows.test,
+              'rows, you are now predicting with',
+              percent,'% of your original test data'))
+    }
+}
 
 #------------------------------------------------------------------------------
 # Metrics Train (RMSE, MAE, RSQ, Bias)
@@ -115,6 +152,7 @@ main_stats <- data_evaluate|>
 
 main_stats <- tibble(main_stats |>
   summarise(Bias = round(mean(Anomaly), digits = 3),
+            Median = round(median(Anomaly), digits = 3),
             Std = round(sd(Anomaly), digits = 3),
             Max = round(max(Anomaly), digits = 3),
             Min = round(min(Anomaly), digits = 3),
