@@ -52,7 +52,7 @@ work package 2 (WP2):
 
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
 
-# Introduction^WP1, WP2^
+# Introduction^WP1, WP2^
 
 Anthropogenic climate change is expected to increase the amount, intensity,
 and duration of heat waves [@burger2021]. The urban heat island (UHI)
@@ -171,7 +171,7 @@ use. Zonal mean resolution is indicated with our owns first and then the distanc
 | Radiation in $W*m^{-2}$ (Zollikofen) for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
 | Windspeed in $m*s^{-1}$ (Zollikofen) for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
 | Winddirection in ° (Zollikofen) for the time period 2019 - 2022      | Meteorological   | 15 minutes / [1h mean]                                         |
-=======
+
 time period (see table 1). The network data is publicly available on
 [BORIS](https://boris.unibe.ch/161882/), however since
 
@@ -201,7 +201,6 @@ web into R. Table 1 provides a brief overview of the data we will use.
 | Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
 | Windspeed in $m*s^{-1}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
 | Winddirection in ° [Zollikofen] for the time period 2019 - 2022      | Meteorological   | 15 minutes / [1h mean]                                         |
->>>>>>> Stashed changes
 | Land Cover Building [LC_B]                                           | Geospatial Layer | [25m / 150m / 1000m], Burger used [250m]                       |
 | Open Space Forest [OS_FO]                                            | Geospatial Layer | [[25m / 150m / 1000m], Burger used [250m]                      |
 | Open Space Garden [OS_GA]                                            | Geospatial Layer | [25m / 150m / 1000m], Burger used [25m]                        |
@@ -304,7 +303,6 @@ into a recipe. This is now the basis for creating the models.
 | timestamp, year, month, day, hour | Because it is controversial whether time and date should be used as predictors. The model could simply learn the mean of the time and not the underlying pattern. |
 | NORD_CHTOP, OST_CHTOP             | Coordinates are not used because because the model should learn the underlying pattern.                                                                           |
 | LV_03_E, LV_03_N                  | Coordinates are not used because because the model should learn the underlying pattern.                                                                           |
-=======
 | Variable which is not a predictor | Reason                                                                                                                                                                       |
 |------------------------|---------------------------------------------------|
 | Log_Nr, name                      | Does not make sens for spatial upscaling                                                                                                                                     |
@@ -312,12 +310,11 @@ into a recipe. This is now the basis for creating the models.
 | timestamp, year, month, day, hour | Because it is controversial whether time and date should be used as predictors. The model could simply learn the mean of specific timestamps and not the underlying pattern. |
 | NORD_CHTOP, OST_CHTOP             | Coordinates are not used because the model should learn the underlying pattern.                                                                                              |
 | LV_03_E, LV_03_N                  | Coordinates are not used because the model should learn the underlying pattern.                                                                                              |
->>>>>>> Stashed changes
 
 : **TABLE 2:** Overview about the reasons why a variable/column were
 rejected as a predictor
 
-## How this Workflow Works^WP1, WP2^
+## How this Workflow Works^WP1, WP2^
 
 In the Data and Methodology section you will see that we work with a large
 amount of data. This means the computational time could be very high. To
@@ -499,7 +496,7 @@ models.
 
 ### Basic Models implementation
 
-<<<<<<< Updated upstream
+
 The basic models include linear regression, k-nearest neighbors (knn), and
 the random forest model. We will compare their performance based on their
 ability to explain variance, accuracy, and precision in predicting the
@@ -509,7 +506,7 @@ extensive size of our data set. Additionally, the models are designed and
 tuned to deliver optimal performance in regular mode. Consequently,
 significant deviations are inevitable when operating in demo mode
 exclusively.
-=======
+
 The basic models include multiple linear regression, k-nearest neighbors
 (knn), and the random forest model. We will compare their performance based
 on their ability to explain variance ($R^2$), accuracy (bias), and
@@ -520,7 +517,7 @@ Additionally, the models are designed and tuned to deliver optimal
 performance in regular mode. Consequently, significant deviations are
 inevitable when operating in "demo mode", "Burger demo mode", or "Burger
 regular mode".
->>>>>>> Stashed changes
+
 
 #### Implementation of the Linear Regression Model
 
@@ -1098,8 +1095,6 @@ logger station but the model predict this station, the it could b that the
 model perfoms worse. But we are not sure and more investigations are
 needed. But as a conclusion we can say, that more data improve the models.
 
-=======
->>>>>>> Stashed changes
 VALUES ARE OK (11.12.2023)!!
 
 | Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
@@ -1127,11 +1122,9 @@ it is unrealistic if you set your 6h temperature mean to 20°C and your 12h
 mean to -5°C. Please consider this if you play around.
 
 | Variable                | Default           | Interval                                             |
-<<<<<<< Updated upstream
+
 |-------------------|-------------------|-------------------------------------|
-=======
-|--------------------|--------------------|-----------------------------------|
->>>>>>> Stashed changes
+
 | Temperature             | 22 °C             | $x[°C] \in[-15 \leq x \leq 35]$                      |
 | Rain                    | 5 mm              | $x[mm] \in[0 \leq x \leq 200]$                       |
 | Radiation               | 290 $W*m^{-2}$    | $x[W*m^{-2}] \in[0 \leq x \leq 300]$, for a 10' mean |
