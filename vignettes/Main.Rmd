@@ -19,7 +19,7 @@ Course: Proseminar in Applied Geo-Data Science at the University of Bern
 
 Supervisor: Prof. Dr. Benjamin Stocker
 
-Adviser: Dr. Laura Marques, Pepa Arany
+Adviser: Dr. Laura Marques, Pepa Aran
 
 Further information: <https://geco-bern.github.io/agds_proseminar/>
 
@@ -56,19 +56,19 @@ work package 2 (WP2):
 
 Anthropogenic climate change is expected to increase the amount, intensity,
 and duration of heat waves [@burger2021]. The urban heat island (UHI)
-effect further amplifies this trend in urban environments [@burger2021];
-[@gubler2021]; [@wicki2018]. The UHI effect is expressed by higher air
+effect further amplifies this trend in urban environments [@burger2021;
+@gubler2021; @wicki2018]. The UHI effect is expressed by higher air
 temperatures in urban areas compared to rural areas in the region
-[@oke2017]. The effect is highest during night, as the emission of longwave
-radiation in urban environments is impaired and sensible heat fluxes are
-enhanced, whilst latent fluxes are reduced [@burger2021], [@gubler2021].
-People living in urban areas are thus highly affected by the UHI effect via
-thermal stress [@burger2021], [@wicki2018]). Given that more than 75% of
-the Central European population lives in urban areas, the increasing trend
-poses one of the major weather threats to people in urban environments
-[@wicki2018]. Studying spatial temperature variability in urban areas is
-therefore crucial to implement adaptation measures to minimize effects on
-human health and the environment [@burger2021].
+[@oke2017]. The effect is highest during night, as the emission of
+long-wave radiation in urban environments is impaired and sensible heat
+fluxes are enhanced, whilst latent fluxes are reduced [@burger2021;
+@gubler2021]. People living in urban areas are thus highly affected by the
+UHI effect via thermal stress [@burger2021; @wicki2018]. Given that more
+than 75% of the Central European population lives in urban areas, the
+increasing trend poses one of the major weather threats to people in urban
+environments [@wicki2018]. Studying spatial temperature variability in
+urban areas is therefore crucial to implement adaptation measures to
+minimize effects on human health and the environment [@burger2021].
 
 To capture small-scale temperature changes in these climatically complex
 areas, high spatial resolution measurement networks are needed. However,
@@ -82,20 +82,21 @@ LCDs (0.61 °C - 0.93 °C) compared to the reference station (AWS) during
 daytime (06:00 -- 22:00). During night-time (22:00 -- 06:00), differences
 were much lower or even negative (between -0.12 °C and 0.23 °C). But not
 only the LCD temperature and the anomaly between the LCDs and the AWS is
-interesting, but also the temperature distribution of the entire region of
-Bern, shown on a map [@gubler2021].
+interesting, but also the temperature distribution of the entire suburban
+region of the city of Bern, shown on a map [@gubler2021].
 
 In spring 2023, Nils Tinner generated a map of the current LCDs temperature
 in the city of Bern based on the study of @burger2021. He improved the map
 in June 2023 by also using geospatial data from the study of @burger2021.
 These improvements enabled him to generate a map showing the spatial
-temperature distribution of the city of Bern. The approach used was a
-classic multivariate linear regression model. As the model only knows the
-current temperature distribution, its scope and statistical power are
-limited. But because both @burger2021 and @gubler2021 showed that the city
-of Bern is affected by the urban heat island effect it is crucial to know
-more about it. This fact and the limited power of the first map from Nils
-Tinner motivated us to investigate the urban heat island once again.
+temperature distribution of the suburban area of the city of Bern. The
+approach used was a classic multivariate linear regression model. As the
+model only knows the current temperature distribution, its scope and
+statistical power are limited. But because both @burger2021 and @gubler2021
+showed that the city of Bern is affected by the urban heat island effect it
+is crucial to know more about it. This fact and the limited power of the
+first map from Nils Tinner motivated us to investigate the urban heat
+island using machine learning techniques.
 
 ## Objectives and Research Questions
 
@@ -135,9 +136,10 @@ section). Therefore, the following questions arise:
 Before starting this subchapter a brief clarification. This project uses cantonal land use data and federal geospatial data. These in their raw form are called predictor classes. These are then spatially averaged to obtain the actual predictors which are called geospatial layers or just predictors.
 
 Temperature data for the years 2019-2022 from the network of the city of
-Bern is used. This is a numerical data set of the 3 m temperature in 104
+Bern is used. This is a numerical data set of the 3m temperature in 104
 locations, with a temporal resolution of 10 minutes for all LCDs. How many
 LCD are active depends on the year but 55 LCDs are active over the entire
+<<<<<<< Updated upstream
 time period. The network data is publicly available on BORIS, however since
 data on BORIS is faulty at the moment we uploaded the corrected .csv-files
 to the Git- Hub Repo. The original files can be found here:
@@ -169,6 +171,37 @@ use. Zonal mean resolution is indicated with our owns first and then the distanc
 | Radiation in $W*m^{-2}$ (Zollikofen) for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
 | Windspeed in $m*s^{-1}$ (Zollikofen) for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
 | Winddirection in ° (Zollikofen) for the time period 2019 - 2022      | Meteorological   | 15 minutes / [1h mean]                                         |
+=======
+time period (see table 1). The network data is publicly available on
+[BORIS](https://boris.unibe.ch/161882/), however since
+
+!!! SHOW SOURCE!!! BORIS, coordinates?! RIP -\> discuss with Patrickone.
+
+data on BORIS is faulty at the moment we uploaded the corrected .csv-files
+to the Git- Hub Repo. We use additional data from the AWS at Zollikofen, as
+it is the official meteorologic station of Bern. The five meteorological
+variables (2m temperature, precipitation, radiation and winddirection and
+windspeed) with a temporal resolution of 10 minutes for the years 2019-2022
+will be used as well as the timestamp. Data of temperature and
+precipitation of the previous six hours and twelve hours, and one, three
+and five days (for precipitation even ten days) will also be fed into the
+model. This data is uploaded to the repository to ensure availability since
+the IDAWEB-data service is open for scientific use but not completely open
+access. To show small scale urban patterns of temperature distributions,
+geospatial data as shown in @burger2021 is used. These are cantonal land
+use classes as well as federal geospatial data. All of the data is
+spatially averaged to obtain the layers most effective as shown in
+@burger2021. The federal and cantonal data is directly downloaded from the
+web into R. Table 1 provides a brief overview of the data we will use.
+
+| Predictor class                                                      | Variable Type    | Zonal Mean Resolution / [3 predictors per class] [@burger2021] |
+|-----------------------------|-------------------|---------------------------|
+| 2m Temperature in °C [Zollikofen] for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean]      |
+| Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120,240 hours rolling sum]   |
+| Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
+| Windspeed in $m*s^{-1}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
+| Winddirection in ° [Zollikofen] for the time period 2019 - 2022      | Meteorological   | 15 minutes / [1h mean]                                         |
+>>>>>>> Stashed changes
 | Land Cover Building [LC_B]                                           | Geospatial Layer | [25m / 150m / 1000m], Burger used [250m]                       |
 | Open Space Forest [OS_FO]                                            | Geospatial Layer | [[25m / 150m / 1000m], Burger used [250m]                      |
 | Open Space Garden [OS_GA]                                            | Geospatial Layer | [25m / 150m / 1000m], Burger used [25m]                        |
@@ -195,12 +228,12 @@ temperature distributions for a possible day as a map as a model output.
 ## Methodology: Main Goal/Structure
 
 The methodology section is subdivided into preparation and modelling. Our
-goal is to predict the temperature anomlay of the on site location to the
+goal is to predict the temperature anomaly of the on site location to the
 official measurement station in Zollikofen and thus the UHI. Therefore the
 target variable is the temperature and the predictor variables are a
 combination of the above stated meteorologic variables and geospatial
 layers. Models are generated later in the workflow and include a linear
-regression, a knn and a random forest. Aditionally, a XGBoost and a neural
+regression, a knn and a random forest. Additionally, a XGBoost and a neural
 network can be run.
 
 ### Methodology: Preparation^WP1^
@@ -230,32 +263,36 @@ The processed files can be found in the data folder in the subdirectory Tiffs.
 
 #### Data combination
 
-Data from meteoswiss for the Zollikofen meteostation is averaged to 1 hour
-intervals for the variables radiation, windspeed, winddirection, 2m
-temperature and precipitation (for precipitation it is summed). Then
-rolling means/sums for the 6, 12, 24 hours, 3 days, 5 days are added for
-precipitation and temperature (in case of precipitation 10 days as well
-beacuse we want to capture the moisture). This is then the processed
-version of the meteoswiss meteorologic data. Then data from the loggers in
-the city (the LCD temperature loggers) are read in. This is then combined
-with the metadata, resulting in a tidy data frame, where each row
-corresponds to a measurement of a single logger to a single point in time
-with its attributes such as its location as columns (from the metadata).
-Then, the values corresponding to each location of the loggers is read out
-of the geospatial predictors. This data is also added to the data frame.
-This then is the finished Combined.csv with all data.
+Data from MeteoSwiss for the Zollikofen meteostation is averaged to 1-hour
+intervals for the variables: radiation, wind speed, wind direction, 2m
+temperature, and precipitation (precipitation is summed). Subsequently,
+rolling means/sums are calculated for 6, 12, 24 hours, 3 days, and 5 days
+for both precipitation and temperature. Additionally, a 10-day rolling sum
+is computed for precipitation to capture moisture comprehensively. This
+processed data represents the MeteoSwiss meteorological dataset. Then data
+from the LCD temperature loggers in the city are read in. This is then
+combined with the **metadata**, resulting in a tidy data frame, where each
+row corresponds to a measurement of a single logger to a single point in
+time with its attributes such as its location as columns (from the
+**metadata**). Then, the values corresponding to each location of the
+loggers is read out of the geospatial predictors. This data is also added
+to the data frame. This then is the finished Combined.csv with all data.
 
 #### Variable Selection
 
-First, a variable selection was carried out (Markdown::
-Variable_Selection.rmd). This was only explored for the predictors in table
-1 since layers by @burger2021 were already reduced and selected. The
-variable selection with Boruta resulted after removal of variable that
-should be removed not due to relevance reasons but other reasons (see table
-2), that all variables are relevant. Further variable selection was
-explored, but no definitive answers were reached. For that reason, all
-generated predictors are used.
+First, variable selection was performed (see [variable
+selection](Markdown::%20Variable_Selection.rmd)). This process was only
+exculsively applied to the predictors listed i table 1, as layers by
+@burger2021 were already reduced and selected. The variable selection using
+the Boruta-algorithm revealed that, after removing variables for reasons
+unrelated to relevance (refer to table 2), all remaining variables proved
+to be relevant. While further variable selection was investigated, no
+definitive conclusions were reached. Therefore, all generated predictors
+are utilized. Table two provides a brief overview of why certain variables
+were rejected. Based on this selection, a formula is now generated, which
+is processed into a recipe. This is now the basis for creating the models.
 
+<<<<<<< Updated upstream
 Table two provides a brief overview of why certain variables were rejected.
 Based on this selection, a formula is now generated, which is processed
 into a recipe. This is now the basis for creating the models.
@@ -267,6 +304,15 @@ into a recipe. This is now the basis for creating the models.
 | timestamp, year, month, day, hour | Because it is controversial whether time and date should be used as predictors. The model could simply learn the mean of the time and not the underlying pattern. |
 | NORD_CHTOP, OST_CHTOP             | Coordinates are not used because because the model should learn the underlying pattern.                                                                           |
 | LV_03_E, LV_03_N                  | Coordinates are not used because because the model should learn the underlying pattern.                                                                           |
+=======
+| Variable which is not a predictor | Reason                                                                                                                                                                       |
+|------------------------|---------------------------------------------------|
+| Log_Nr, name                      | Does not make sens for spatial upscaling                                                                                                                                     |
+| temperature                       | It is the target                                                                                                                                                             |
+| timestamp, year, month, day, hour | Because it is controversial whether time and date should be used as predictors. The model could simply learn the mean of specific timestamps and not the underlying pattern. |
+| NORD_CHTOP, OST_CHTOP             | Coordinates are not used because the model should learn the underlying pattern.                                                                                              |
+| LV_03_E, LV_03_N                  | Coordinates are not used because the model should learn the underlying pattern.                                                                                              |
+>>>>>>> Stashed changes
 
 : **TABLE 2:** Overview about the reasons why a variable/column were
 rejected as a predictor
@@ -294,20 +340,36 @@ alter the results.
 
 This subsection generate your basic .csv file (it is called 'Combined') in
 a interactive way when not knitting. Therefore, you have to navigate
-through some questions. There are 3 main options when running the scrip:
+through some questions. There are four main options when running the scrip:
+
+-   **Demo mode (reduced data set, our geospatial layser) is the default
+    verison**
+
+-   **Regular mode (full data set, our geospatial layer) it is what we want
+    to investiagte and all fine tuning, evaluations, and result are based
+    on this mode)**
+
+-   **Burger demo (5% of our meteorologic data but geospatial layers from
+    @burger2021)**
+
+-   **Burger regular mode: full data set ut geospatial layers from
+    @burger2021**
+
+**I know, you describe it later but I think we need an overview which is
+crystal clear**
 
 #### Geospatial layers
 
 The geospatial layers vary in this workflow. As described above, this
 script can run either all geospatial layers with three different zonal mean
-values or with the zonal mean values as demonstrated by @burger (table1).
-This can be chosen in the console when run normally. Because the generation
-of the zonal means of the geospatial layers is very time-intensive (20min -
-2h, depends on your device), when knitting, the files are always downloaded
-from an external source (Dropbox). When the files are downloaded. The
-version with all geospatial layers is downloaded. When run not knitted, the
-console will ask whether to download, or generate the geospatial means, as
-well as which geospatial means.
+values [25m, 150m, 1000m] or with the zonal mean values as demonstrated by
+@burger (see table1). This can be chosen in the console when run normally.
+**Because the generation of the zonal means of the geospatial layers is
+very time-intensive (20min - 2h, depends on your device), when knitting,
+the files are always downloaded from an external source (Dropbox). When the
+files are downloaded. The version with all geospatial layers is downloaded.
+When run not knitted, the console will ask whether to download, or generate
+the geospatial means, as well as which geospatial means.**
 
 #### Data size
 
@@ -429,13 +491,15 @@ pp <- recipes::recipe(formula_local,
 In this methodology subsection, we describe how the models are implemented
 and specify the hyperparameters that should be used. It is important to
 note that we have already conducted hyperparameter tuning, but exclusively
-for the regular mode. Consequently, if you choose to use the demo mode (and
-thus for knitting), the models may be under- or overfitted and may not
-perform well. As mentioned before, we distinguish between our basic models
-and our advanced models.
+for the regular mode (all meteorologic data and our geospatial layers).
+Consequently, if you choose to use the demo mode (and thus for knitting),
+the models may be under- or overfitted and may not perform well. As
+mentioned before, we distinguish between our basic models and our advanced
+models.
 
 ### Basic Models implementation
 
+<<<<<<< Updated upstream
 The basic models include linear regression, k-nearest neighbors (knn), and
 the random forest model. We will compare their performance based on their
 ability to explain variance, accuracy, and precision in predicting the
@@ -445,6 +509,18 @@ extensive size of our data set. Additionally, the models are designed and
 tuned to deliver optimal performance in regular mode. Consequently,
 significant deviations are inevitable when operating in demo mode
 exclusively.
+=======
+The basic models include multiple linear regression, k-nearest neighbors
+(knn), and the random forest model. We will compare their performance based
+on their ability to explain variance ($R^2$), accuracy (bias), and
+precision (RMSE) in predicting the target (temperature anomaly). In the
+following subsections, we will introduce you to these models. Please note
+that we utilize DoParallel due to the extensive size of our data set.
+Additionally, the models are designed and tuned to deliver optimal
+performance in regular mode. Consequently, significant deviations are
+inevitable when operating in "demo mode", "Burger demo mode", or "Burger
+regular mode".
+>>>>>>> Stashed changes
 
 #### Implementation of the Linear Regression Model
 
@@ -478,10 +554,11 @@ must compute $O(cv⋅n⋅d+cv⋅k⋅n)$ distances, where "n" is the number of
 observations, "d" is the number of dimensions, "cv" is the number of
 cross-validations, and "k" is the hyperparameter. For this reason, a
 typical device may require several hours. The safety feature limits the
-data input to 100,000 rows. The adjustment takes place automatically, and
-you will be informed about how many rows are removed and what percentage of
-the original data remains. Note that model tuning takes place for the
-regular mode.
+data input to 150,000 rows and limits therefore the computational time to
+about 5 minutes. The adjustment takes place automatically, and you will be
+informed about how many rows are removed and what percentage of the
+original data remains. Note that model tuning takes place for the regular
+mode.
 
 KNN utilizes "k" as a hyperparameter, providing an option for model tuning.
 When setting "tuning=TRUE", the function automatically fine-tunes the model
@@ -490,8 +567,6 @@ hyperparameter "k" is unique, you can consider the tuning successful if "k"
 belongs to $k\in[9, 10, 11]$. In cases where "k" is either 8 or 12, we
 recommend accessing the corresponding R script and expanding the range of
 the "tuning_vector". The default setting is "k=10".
-
-coputationa time abou 5min
 
 ```{r Calculation of the knn-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to calculate a KNN model
@@ -588,7 +663,8 @@ test_labels <- test_data|> pull(temperature)
 # Results
 
 In this section, we present our findings in terms of the explanation of
-variance ($R^2$), precision (RMSE), and accuracy (bias). Once again, we
+variance ($R^2$), precision (RMSE), and accuracy (bias). Moreover, we
+present additional the main statistic parameters. Once again, we
 distinguish between basic models (lm, knn, and random forest models) and
 advanced models (XGBoost and neural network). An overview of the results
 can be found in tables 3-5 in the Summary of Key Findings subsection.
@@ -610,15 +686,17 @@ The function returns a list containing four elements:
     (R2R2, RMSE, MAE, and bias) for the model itself, including evaluations
     on both the training set and the test set (which should be considered)
 
-2.  The second element
+2.  The second element is a table and provides the main statistics
+    parameters (bias, median, standard deviation, max, min, spread, IQR,
+    .25 quantile, .75 quantile, and skewness).
 
-3.  The thirdelement is a visualization of the model's performance on both
+3.  The third element is a visualization of the model's performance on both
     the training set and the test set. This includes key metrics, providing
     an overview of how the model performed and where its performance is
-    optimal or suboptimal. The orange line represents the ideal
-    performance, and if all points lie on this line, the model predicts the
-    target perfectly. The red line depicts the actual regression, and the
-    closer it is to the orange line, the better the model.
+    good or worse. The orange line represents the ideal performance, and if
+    all points lie on this line, the model predicts the target perfectly.
+    The red line depicts the actual regression, and the closer it is to the
+    orange line, the better the model.
 
 4.  The fourth element is a boxplot for the LCDs used for evaluation in the
     test set. This allows you to see which LCDs are being used and how they
@@ -770,7 +848,7 @@ when different geospatial layers dominate (water (Egelsee, LCD 12), forest
 
 The fifth element is the evaluation by the hour of the day. Between 21:00 -
 7:00 (night-time), the overestimation is relatively constant and
-corresponds with the findings of \@burger2021. During day-time (9:00 and
+corresponds with the findings of @burger2021. During day-time (9:00 and
 18:00), the model underestimates the temperature in the city of Bern.
 Furthermore, the spread is about 7°C and tends to be larger in
 underestimating than in overestimating, especially during night-time.
@@ -847,7 +925,7 @@ print(paste0("BIAS: ",mean(combined_test$nn_prediction-combined_test$temperature
 
 ## Partial Dependency Plots
 
-Since random forest performes the best, we now look at the impact of
+Since random forest performed the best, we now look at the impact of
 variables. The generation of these plots takes very long even with little
 data. therefore only the two most important (based on boruta) meteorologic
 (top) and geospatial (bottom) variables are plotted.
@@ -887,7 +965,66 @@ For the geospatial predictors, the garden 150 meters geospatial layers behaves a
 
 ## Summary of the Key Findings^WP2^
 
-### Overview about the Evaluation of the Models
+This subsection summarizes the evaluation of the individual models. Only
+the explanation of the variance, the precision and the accuracy are shown.
+
+### Summary for the Regular Modes
+
+Table 3 provides an overview of both basic and advanced models for the
+regular mode. For model training, we utilized all meteorological data and
+our geospatial layers, each with three different zonal means (25m, 150m,
+and 1000m). The random forest model outperforms all other models,
+explaining more variance with the highest $R^2$. Additionally, it
+demonstrates superior precision, reflected in the lowest RMSE. It is worth
+noting that, while the random forest model does not achieve the highest
+accuracy due to a slightly higher bias (approximately 0.04 °C), its
+exceptional $R^2$ and RMSE lead us to consider it as our best model.
+
+| Model                         | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
+|---------------|---------------|---------------|---------------|---------------|
+| Linear Regression             | 0.45           | 0.88 °C         | 0.69 °C        | 0.088 °C        |
+| KNN [reduced to 13%]          | 0.48           | 0.86 °C         | 0.66 °C        | 0.03 C °        |
+| Random Forest                 | 0.73           | 0.62 °C         | 0.46 °C        | 0.083 °C        |
+| XGB Boost                     | \-             | \-              | \-             | \-              |
+| Neuronal Network              | \-             | \-              | \-             | \-              |
+
+: **TABLE 3:** Overview of the evaluation of the models in the
+regular-mode.
+
+In order to comprehensively assess the quality of our models, we generated
+and evaluated them in Burger-regular-mode, utilizing full meteorologic data
+but employing the geospatial layer from @burger. In this mode, the random
+forest model outperforms all others, excelling in both explaining variance
+(highest $R^2$) and precision (lowest RMSE). While its bias (accuracy) is
+not the lowest, it remains at a low level. It's essential to note that our
+models are not specifically tuned for Burger-regular mode but rather for
+the regular mode. A brief summary of these findings is presented in Table
+4.
+
+Upon comparison with our own models (full meteorologic data and our own
+geospatial layers), we observed that each model performs superiorly in
+Burger-regular mode. Notably, the most substantial differences in
+explaining variance are observed in the KNN model, where our own KNN model
+lags by 8%. While there is no significant difference in precision (RMSE),
+the Burger mode models exhibit a slight improvement (approximately 0.03°C
+lower). The bias (accuracy) is significantly reduced in the random forest
+model of the Burger mode (approximately 0.03°C).
+
+| Model                | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
+|---------------|---------------|---------------|---------------|---------------|
+| Linear Regression    | 0.49           | 0.91 °C         | 0.7 °C         | 0.001 °C        |
+| KNN [reduced to 13%] | 0.55           | 0.84 °C         | 0.63 °C        | -0.03 C °       |
+| Random Forest        | 0.78           | 0.62 °C         | 0.45 °C        | 0.03 °C         |
+| XGB Boost            | \-             | \-              | \-             | \-              |
+| Neuronal Network     | \-             | \-              | \-             | \-              |
+
+: **TABLE 4:** Overview of the evaluation of the models in the
+Burger-regular-mode.
+
+### Summary for the Demo Modes
+
+To complete our analysis, we also summarize the results of the demo-mode
+(table 5) and the burger-demo-mode (table 6).
 
 VALUES ARE OK (11.12.2023)!!
 
@@ -899,9 +1036,10 @@ VALUES ARE OK (11.12.2023)!!
 | XGB Boost         | \-             | \-              | \-             | \-              |
 | Neuronal Network  | \-             | \-              | \-             | \-              |
 
-: **TABLE 4:** Overview of the evaluation and results of the models with
+: **TABLE 5:** Overview of the evaluation and results of the models with
 data from Burger et al. (2019) with 5% of the data.
 
+<<<<<<< Updated upstream
 To fully implement the Open Sciences approach, the models can be computed
 using the following code chunks. Further, for every model, a short synopsis
 of the optimized hyperparameters is given. It must therefore be decided
@@ -960,6 +1098,8 @@ logger station but the model predict this station, the it could b that the
 model perfoms worse. But we are not sure and more investigations are
 needed. But as a conclusion we can say, that more data improve the models.
 
+=======
+>>>>>>> Stashed changes
 VALUES ARE OK (11.12.2023)!!
 
 | Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
@@ -970,7 +1110,7 @@ VALUES ARE OK (11.12.2023)!!
 | XGB Boost         | \-             | \-              | \-             | \-              |
 | Neuronal Network  | \-             | \-              | \-             | \-              |
 
-: **TABLE 4:** Overview of the evaluation of the models with 5 % of the
+: **TABLE 6:** Overview of the evaluation of the models with 5 % of the
 data.
 
 ## Map^WP2^
@@ -987,12 +1127,16 @@ it is unrealistic if you set your 6h temperature mean to 20°C and your 12h
 mean to -5°C. Please consider this if you play around.
 
 | Variable                | Default           | Interval                                             |
+<<<<<<< Updated upstream
 |-------------------|-------------------|-------------------------------------|
+=======
+|--------------------|--------------------|-----------------------------------|
+>>>>>>> Stashed changes
 | Temperature             | 22 °C             | $x[°C] \in[-15 \leq x \leq 35]$                      |
 | Rain                    | 5 mm              | $x[mm] \in[0 \leq x \leq 200]$                       |
 | Radiation               | 290 $W*m^{-2}$    | $x[W*m^{-2}] \in[0 \leq x \leq 300]$, for a 10' mean |
-| Windspeed               | 8 $m*s^{-1}$      | $x[m*s^{-1}] \in[0 \leq x \leq 20]$                  |
-| Winddirection           | 200 ° (west wind) | $x[°] \in[0 \leq x \leq 360]$, with 0° = N, 180° = S |
+| Wind speed              | 8 $m*s^{-1}$      | $x[m*s^{-1}] \in[0 \leq x \leq 20]$                  |
+| Wind direction          | 200 ° (west wind) | $x[°] \in[0 \leq x \leq 360]$, with 0° = N, 180° = S |
 | 6h mean temperature     | 22                | $x[°C] \in[-15 \leq x \leq 35]$                      |
 | 12h mean temperature    | 19                | $x[°C] \in[-15 \leq x \leq 35]$                      |
 | 1d mean temperature     | 20                | $x[°C] \in[-15 \leq x \leq 35]$                      |
@@ -1041,6 +1185,32 @@ More data quality
 
 KNN is not suitable for large data sets because of the high computational
 time
+
+**The random forest model explains about 73% of the variance. The RSME is
+about 0.63 °C. Note that the error of a single LCD in the climate network
+of the city of Bern is about 1.5°C (see Burger et all 2019). Further we can
+see, that data scattering is about 0.2°C lower than for a KNN- or lm-model
+(accuracy). The bias is for all models about 0.07°C (systematic error /
+precision). It is positive and therefore our models overestimate the
+temperature (see evaluation and access the second element of the list).**
+
+**The XGB Boost and the neuronal network are additional and should show
+you, that there are further techniques which could be explored. But those
+model we did not taken into account.**
+
+**As mentioned, the model calculation can be very time intensive. Table 4
+shows the results for approach with reduced data. Overall we can say, that
+the models perform less. All values are lesser than in table 3. Note the
+high bias for the random forest. The model highli overestimate the
+temperature. We do not have an explanation for this. May be there is a
+problem with the reducing process. If we only use 5% of our data, then we
+lose a lot of information. If we lose all information about a certain
+logger station but the model predict this station, the it could b that the
+model perfoms worse. But we are not sure and more investigations are
+needed. But as a conclusion we can say, that more data improve the
+models.**
+
+## 
 
 ## Conclusion^WP2^
 
