@@ -170,7 +170,7 @@ resolution is indicated with our owns first and then the distance used by
 @burger2021.
 
 | Predictor class                                                      | Variable Type  | Zonal Mean Resolution / [3 predictors per class] [abbreviation] |
-|----------------------------|-------------------|---------------------------|
+|----------------------------------------------------------------------|----------------|-----------------------------------------------------------------|
 | 2m Temperature in °C (Zollikofen) for the time period 2019 - 2022    | Meteorological | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean]       |
 | Precipitation in mm (Zollikofen) for the time period 2019 - 2022     | Meteorological | 15 minutes / [1h mean, 6,12,24,72,120,240 hours rolling sum]    |
 | Radiation in $W*m^{-2}$ (Zollikofen) for the time period 2019 - 2022 | Meteorological | 15 minutes / [1h mean]                                          |
@@ -200,7 +200,7 @@ SLO are calculated based on these datasets and are then used as predictor
 classes. Table 1 provides a brief overview of the data we will use.
 
 | Predictor class                                                      | Variable Type    | Zonal Mean Resolution / [3 predictors per class] [@burger2021] |
-|----------------------------|-------------------|---------------------------|
+|----------------------------------------------------------------------|------------------|----------------------------------------------------------------|
 | 2m Temperature in °C [Zollikofen] for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean]      |
 | Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120,240 hours rolling sum]   |
 | Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
@@ -302,7 +302,7 @@ Based on this selection, a formula is now generated, which is processed
 into a recipe. This is now the basis for creating the models.
 
 |                                       |                                                                                                                                                                              |
-|-----------------------------|----------------------------------------------|
+|---------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Variable which is not a predictor** | **Reason**                                                                                                                                                                   |
 | Log_Nr, name                          | Does not make sens for spatial upscaling                                                                                                                                     |
 | temperature                           | It is the target                                                                                                                                                             |
@@ -313,7 +313,7 @@ into a recipe. This is now the basis for creating the models.
 : TABLE 2: Overview about the reasons why a variable/column were rejected
 as a predictor.
 
-## How this Workflow Works^WP1,\ WP2^
+## How this Workflow Works^WP1, WP2^
 
 In the Data and Methodology section you will see that we work with a large
 amount of data. This means the computational time could be very high. To
@@ -350,8 +350,6 @@ through some questions. There are four main options when running the scrip:
 
 -   **Burger regular mode: full data set but geospatial layers from
     @burger2021**
-
-
 
 #### Geospatial layers
 
@@ -496,19 +494,19 @@ models.
 The basic models include linear regression, k-nearest neighbors (knn), and
 the random forest model. We will compare their performance based on their
 ability to explain variance, accuracy, and precision in predicting the
-target (local temperature anomaly). In the following subsections, we will introduce
-you to these models. Please note that we utilize DoParallel due to the
-extensive size of our data set. Additionally, the models are designed and
-tuned to deliver optimal performance in regular mode. Consequently,
-significant deviations are inevitable when operating in demo mode
-exclusively.
+target (local temperature anomaly). In the following subsections, we will
+introduce you to these models. Please note that we utilize DoParallel due
+to the extensive size of our data set. Additionally, the models are
+designed and tuned to deliver optimal performance in regular mode.
+Consequently, significant deviations are inevitable when operating in demo
+mode exclusively.
 
 The basic models include multiple linear regression, k-nearest neighbors
 (knn), and the random forest model. We will compare their performance based
 on their ability to explain variance ($R^2$), accuracy (bias), and
-precision (RMSE) in predicting the target (local temperature anomaly). In the
-following subsections, we will introduce you to these models. Please note
-that we utilize DoParallel due to the extensive size of our data set.
+precision (RMSE) in predicting the target (local temperature anomaly). In
+the following subsections, we will introduce you to these models. Please
+note that we utilize DoParallel due to the extensive size of our data set.
 Additionally, the models are designed and tuned to deliver optimal
 performance in regular mode. Consequently, significant deviations are
 inevitable when operating in "demo mode", "Burger demo mode", or "Burger
@@ -605,8 +603,8 @@ The XGBoost-model can be time intensive. We use the DoParallel Package for
 that. Please make sure, that your device does nothing else. Implementation
 of the XGB Model
 
-For the XGBoost model, all hyperparameters are tuned and a cross validation is performed by 3 folds for
-the logger ID. Tuning is always enabled.
+For the XGBoost model, all hyperparameters are tuned and a cross validation
+is performed by 3 folds for the logger ID. Tuning is always enabled.
 
 ```{r}
 
@@ -622,7 +620,8 @@ xgb_model <- xgb(data_train = combined_train,formula = formula_local) }
 
 A neural network with 223 neurons is used. learning rate is set to 0.001
 and a batch size of 30. These are some standard values for the data size of
-5% of the data. Make sure tensorflow is up and running before running this model.
+5% of the data. Make sure tensorflow is up and running before running this
+model.
 
 ```{r}
 
@@ -640,10 +639,10 @@ if(advanced_models == "y"){
 
 In this section, we present our findings in terms of the explanation of
 variance ($R^2$), precision (RMSE), and accuracy (bias). Additionally, we
-present the main statistic parameters. Once again, we
-distinguish between basic models (lm, knn, and random forest models) and
-advanced models (XGBoost and neural network). An overview of the results
-can be found in tables 3-5 in the Summary of Key Findings subsection.
+present the main statistic parameters. Once again, we distinguish between
+basic models (lm, knn, and random forest models) and advanced models
+(XGBoost and neural network). An overview of the results can be found in
+tables 3-5 in the Summary of Key Findings subsection.
 
 ## Basic Models^WP2^
 
@@ -990,7 +989,7 @@ accuracy due to a slightly higher bias (approximately 0.04 °C), its
 exceptional $R^2$ and RMSE lead us to consider it as our best model.
 
 | Model                | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|---------------|---------------|---------------|---------------|---------------|
+|----------------------|----------------|-----------------|----------------|-----------------|
 | Linear Regression    | 0.45           | 0.88 °C         | 0.69 °C        | 0.088 °C        |
 | KNN [reduced to 13%] | 0.48           | 0.86 °C         | 0.66 °C        | 0.03 C °        |
 | Random Forest        | 0.73           | 0.62 °C         | 0.46 °C        | 0.083 °C        |
@@ -1020,11 +1019,11 @@ lower). The bias (accuracy) is significantly reduced in the random forest
 model of the Burger mode (approximately 0.03°C).
 
 | Model                | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|---------------|---------------|---------------|---------------|---------------|
+|----------------------|----------------|-----------------|----------------|-----------------|
 | Linear Regression    | 0.49           | 0.91 °C         | 0.7 °C         | 0.001 °C        |
 | KNN [reduced to 13%] | 0.55           | 0.84 °C         | 0.63 °C        | -0.03 C °       |
 | Random Forest        | 0.78           | 0.62 °C         | 0.45 °C        | 0.03 °C         |
-| XGB Boost            | 0.65           | 0.752 °C         | 0.538 °C      | -0.061          |
+| XGB Boost            | 0.65           | 0.752 °C        | 0.538 °C       | -0.061          |
 | Neuronal Network     | \-             | \-              | \-             | \-              |
 
 : **TABLE 4:** Overview of the results and evaluation of the models in the
@@ -1045,7 +1044,7 @@ approximately 0.18°C higher than the bias of the KNN model, which excels in
 accuracy and overall performance.
 
 | Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|---------------|---------------|---------------|---------------|---------------|
+|-------------------|----------------|-----------------|----------------|-----------------|
 | Linear Regression | 0.422          | 0.93 °C         | 0.739 °C       | 0.125 °C        |
 | KNN               | 0.457          | 0.91 °C         | 0.704 °C       | 0.05 °C         |
 | Random Forest     | 0.477          | 0.899 °C        | 0.661 °C       | 0.184 °C        |
@@ -1071,7 +1070,7 @@ the most meaningful insights, as they directly address the objectives of
 this study.
 
 | Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|---------------|---------------|---------------|---------------|---------------|
+|-------------------|----------------|-----------------|----------------|-----------------|
 | Linear Regression | 0.45           | 0.9 °C          | 0.7 °C         | 0.1 °C          |
 | KNN               | 0.54           | 0.82 °C         | 0.63 °C        | 0.09 °C         |
 | Random Forest     | 0.52           | 0.85 °C         | 0.64 °C        | 0.12 °C         |
@@ -1099,7 +1098,7 @@ We reduced the intervals by about 10% on both sides, where possible. Please
 keep this in mind when exploring and adjusting values.
 
 | Variable                | Default      | Realistic Interval                                        |
-|------------------|------------------|--------------------------------------|
+|-------------------------|--------------|-----------------------------------------------------------|
 | Temperature             | 22 °C        | $x[°C] \in[-15\leq x \leq 35]$                            |
 | Rain                    |              | $x[mm] \in[0 \leq x \leq 200]$                            |
 | Radiation               |              | \$ x[W\*m\^{-2}] \in[0 \leq x \leq 300]\$, for a 10' mean |
