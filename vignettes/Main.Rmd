@@ -105,7 +105,7 @@ heat island effect in the city of Bern for a nighttime mean. In this study
 we aim to calculate our own models at an hourly rate all day. Furthermore,
 we will implement a classic approach (multiple linear regression model) and
 machine learning approaches (k-nearest neighbors (knn) and random forest).
-We use two sets of geospatial layers. First, we will use the same set as
+We use two sets of geospatial layers. First, we use the same set as
 @burger2021 with the same zonal mean per predictor class. The predictor
 class represents the original layer without processing, for example the
 vegetation height. These are cut to the extent of the city and its
@@ -144,33 +144,33 @@ Temperature data for the years 2019-2022 from the network of the city of
 Bern is used. This is a numerical data set of the 3m temperature in 104
 locations, with a temporal resolution of 10 minutes for all LCDs. How many
 LCD are active depends on the year but 55 LCDs are active over the entire
-
 time period. The network data is publicly available on BORIS, however since
 data on BORIS is faulty at the moment we uploaded the corrected .csv-files
-to the Git- Hub Repo. The original files can be found here:
-<https://boris.unibe.ch/161882/> We use additional data from the AWS at
-Zollikofen, as it is the official meteorologic station of Bern. The five
-meteorological variables (2m temperature, precipitation, radiation and
-winddirection and windspeed) with a temporal resolution of 10 minutes for
-the years 2019-2022 will be used as well as the timestamp. Data of
-temperature and precipitation of the previous six hours and twelve hours,
-and one, three and five days and ten days (precipitation only) will also be
-fed into the model. This data is uploaded to the repository to ensure
-availability since the IDAWEB-data service is open for scientific use but
-not completely open access. To show small scale urban patterns of
-temperature distributions, zonally meaned geospatial data as shown in
-@burger2021 is used. These are cantonal land use classes as well as federal
-geospatial data. All of the data is spatially averaged/meaned to obtain the
-layers most effective as shown in @burger2021 as well as our own take:
-generate three different geospatial layers per predictor class. The federal
-and cantonal data is directly downloaded from the web into R and processed.
+to the Git- Hub Repo. The original files can be found here, as well as the
+metadata containing the logger location: <https://boris.unibe.ch/161882/>.
+We use additional data from the AWS at Zollikofen, as it is the official
+meteorologic station of Bern. The five meteorological variables (2m
+temperature, precipitation, radiation and winddirection and windspeed) with
+a temporal resolution of 10 minutes for the years 2019-2022 will be used as
+well as the timestamp. Data of temperature and precipitation of the
+previous six hours and twelve hours, and one, three and five days and ten
+days (precipitation only) will also be fed into the model. This data is
+uploaded to the repository to ensure availability since the IDAWEB-data
+service is open for scientific use but not completely open access. To show
+small scale urban patterns of temperature distributions, zonally meaned
+geospatial data as shown in @burger2021 is used. These are cantonal land
+use classes as well as federal geospatial data. All of the data is
+spatially averaged/meaned to obtain the layers most effective as shown in
+@burger2021 as well as our own take: generate three different geospatial
+layers per predictor class. The federal and cantonal data is directly
+downloaded from the web into R and processed.
 
 Table 1 provides a brief overview of the data we will use. Zonal mean
 resolution is indicated with our owns first and then the distance used by
 @burger2021.
 
 | Predictor class                                                      | Variable Type  | Zonal Mean Resolution / [3 predictors per class] [abbreviation] |
-|-----------------------------|-------------------|----------------------------|
+|----------------------------|-------------------|---------------------------|
 | 2m Temperature in °C (Zollikofen) for the time period 2019 - 2022    | Meteorological | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean]       |
 | Precipitation in mm (Zollikofen) for the time period 2019 - 2022     | Meteorological | 15 minutes / [1h mean, 6,12,24,72,120,240 hours rolling sum]    |
 | Radiation in $W*m^{-2}$ (Zollikofen) for the time period 2019 - 2022 | Meteorological | 15 minutes / [1h mean]                                          |
@@ -178,29 +178,29 @@ resolution is indicated with our owns first and then the distance used by
 | Winddirection in ° (Zollikofen) for the time period 2019 - 2022      | Meteorological | 15 minutes / [1h mean]                                          |
 
 time period (see table 1). The network data is publicly available on
-[BORIS](https://boris.unibe.ch/161882/), however since
-
-!!! SHOW SOURCE!!! BORIS, coordinates?! RIP -\> discuss with Patrickone.
-
-data on BORIS is faulty at the moment we uploaded the corrected .csv-files
-to the Git- Hub Repo. We use additional data from the AWS at Zollikofen, as
-it is the official meteorologic station of Bern. The five meteorological
-variables (2m temperature, precipitation, radiation and winddirection and
-windspeed) with a temporal resolution of 10 minutes for the years 2019-2022
-will be used as well as the timestamp. Data of temperature and
-precipitation of the previous six hours and twelve hours, and one, three
-and five days (for precipitation even ten days) will also be fed into the
-model. This data is uploaded to the repository to ensure availability since
-the IDAWEB-data service is open for scientific use but not completely open
+[BORIS](https://boris.unibe.ch/161882/), however since data on BORIS is
+faulty at the moment we uploaded the corrected .csv-files to the Git- Hub
+Repo. We use additional data from the AWS at Zollikofen, as it is the
+official meteorologic station of Bern. The five meteorological variables
+(2m temperature, precipitation, radiation and winddirection and windspeed)
+with a temporal resolution of 10 minutes for the years 2019-2022 will be
+used as well as the timestamp. Data of temperature (mean) and precipitation
+(sum) of the previous six hours and twelve hours, and one, three and five
+days (for precipitation even ten days) will also be fed into the model.
+This data is uploaded to the repository to ensure availability since the
+IDAWEB-data service is open for scientific use but not completely open
 access. To show small scale urban patterns of temperature distributions,
 geospatial data as shown in @burger2021 is used. These are cantonal land
 use classes as well as federal geospatial data. All of the data is
 spatially averaged to obtain the layers most effective as shown in
-@burger2021. The federal and cantonal data is directly downloaded from the
-web into R. Table 1 provides a brief overview of the data we will use.
+@burger2021. The federal (meteorologic values; DEM, VH) and cantonal (all
+land cover classes: LC/OS/BH) data is directly downloaded from the web into
+R and then used as predictor classes. The geospatial layers ROU, FLAC, ASP,
+SLO are calculated based on these datasets and are then used as predictor
+classes. Table 1 provides a brief overview of the data we will use.
 
 | Predictor class                                                      | Variable Type    | Zonal Mean Resolution / [3 predictors per class] [@burger2021] |
-|------------------------------|-------------------|---------------------------|
+|----------------------------|-------------------|---------------------------|
 | 2m Temperature in °C [Zollikofen] for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean]      |
 | Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120,240 hours rolling sum]   |
 | Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
@@ -301,25 +301,19 @@ Table two provides a brief overview of why certain variables were rejected.
 Based on this selection, a formula is now generated, which is processed
 into a recipe. This is now the basis for creating the models.
 
-| Variable which is not a predictor | Reason                                                                                                                                                                       |
-|--------------------|-------------------------------------------------------|
-| Log_Nr, name                      | Does not make sens for spatial upscaling                                                                                                                                     |
-| temperature                       | It is the target                                                                                                                                                             |
-| timestamp, year, month, day, hour | Because it is controversial whether time and date should be used as predictors. The model could simply learn the mean of the time and not the underlying pattern.            |
-| NORD_CHTOP, OST_CHTOP             | Coordinates are not used because because the model should learn the underlying pattern.                                                                                      |
-| LV_03_E, LV_03_N                  | Coordinates are not used because because the model should learn the underlying pattern.                                                                                      |
-| Variable which is not a predictor | Reason                                                                                                                                                                       |
-| ------------------------          | ---------------------------------------------------                                                                                                                          |
-| Log_Nr, name                      | Does not make sens for spatial upscaling                                                                                                                                     |
-| temperature                       | It is the target                                                                                                                                                             |
-| timestamp, year, month, day, hour | Because it is controversial whether time and date should be used as predictors. The model could simply learn the mean of specific timestamps and not the underlying pattern. |
-| NORD_CHTOP, OST_CHTOP             | Coordinates are not used because the model should learn the underlying pattern.                                                                                              |
-| LV_03_E, LV_03_N                  | Coordinates are not used because the model should learn the underlying pattern.                                                                                              |
+|                                       |                                                                                                                                                                              |
+|-----------------------------|----------------------------------------------|
+| **Variable which is not a predictor** | **Reason**                                                                                                                                                                   |
+| Log_Nr, name                          | Does not make sens for spatial upscaling                                                                                                                                     |
+| temperature                           | It is the target                                                                                                                                                             |
+| timestamp, year, month, day, hour     | Because it is controversial whether time and date should be used as predictors. The model could simply learn the mean of specific timestamps and not the underlying pattern. |
+| NORD_CHTOP, OST_CHTOP                 | Coordinates are not used because the model should learn the underlying pattern.                                                                                              |
+| LV_03_E, LV_03_N                      | Coordinates are not used because the model should learn the underlying pattern.                                                                                              |
 
-: **TABLE 2:** Overview about the reasons why a variable/column were
-rejected as a predictor
+: TABLE 2: Overview about the reasons why a variable/column were rejected
+as a predictor.
 
-## How this Workflow Works\^WP1, WP2\^
+## How this Workflow Works^WP1,\ WP2^
 
 In the Data and Methodology section you will see that we work with a large
 amount of data. This means the computational time could be very high. To
@@ -354,11 +348,10 @@ through some questions. There are four main options when running the scrip:
 -   **Burger demo (5% of our meteorologic data but geospatial layers from
     @burger2021)**
 
--   **Burger regular mode: full data set ut geospatial layers from
+-   **Burger regular mode: full data set but geospatial layers from
     @burger2021**
 
-**I know, you describe it later but I think we need an overview which is
-crystal clear**
+
 
 #### Geospatial layers
 
@@ -405,7 +398,7 @@ packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
               "workflows","tune","dials","stringr","terra","stars","sf","plyr",
               "doParallel", "foreach", "terrainr","starsExtra", "pdp", "recipes", 
               "tidyterra","shiny", "xgboost", 'kableExtra','rnaturalearth','zoo',
-              'moments', 'tibble','rsample','yardstick','cowplot','purr')
+              'moments', 'tibble','rsample','yardstick','cowplot','purrr')
 ```
 
 ```{r Choose your workflow mode, message=FALSE, warning=FALSE, include=FALSE}
@@ -461,7 +454,7 @@ combined_train <- combined |>
 
 The model recipe corresponds to the defined predictors minus the in table 2
 mentioned removed variables. Furthermore a step_YeoJohnson (includes Box
-Cox and an extansion. Now, it can handle x ≤ 0), step_center (subsracting
+Cox and an extension. Now, it can handle x ≤ 0), step_center (subsracting
 the mean from each observation/measurement), and a step_scale (transforming
 numeric variables to a similar scale) are preformed.
 
@@ -490,9 +483,9 @@ pp <- recipes::recipe(formula_local,
 ## Methodology: Modelling^WP2^
 
 In this methodology subsection, we describe how the models are implemented
-and specify the hyperparameters that should be used. It is important to
-note that we have already conducted hyperparameter tuning, but exclusively
-for the regular mode (all meteorologic data and our geospatial layers).
+and specify the hyperparameters that are used. It is important to note that
+we have already conducted hyperparameter tuning, but exclusively for the
+regular mode (all meteorologic data and our geospatial layers).
 Consequently, if you choose to use the demo mode (and thus for knitting),
 the models may be under- or overfitted and may not perform well. As
 mentioned before, we distinguish between our basic models and our advanced
@@ -503,7 +496,7 @@ models.
 The basic models include linear regression, k-nearest neighbors (knn), and
 the random forest model. We will compare their performance based on their
 ability to explain variance, accuracy, and precision in predicting the
-target (local temperature). In the following subsections, we will introduce
+target (local temperature anomaly). In the following subsections, we will introduce
 you to these models. Please note that we utilize DoParallel due to the
 extensive size of our data set. Additionally, the models are designed and
 tuned to deliver optimal performance in regular mode. Consequently,
@@ -513,7 +506,7 @@ exclusively.
 The basic models include multiple linear regression, k-nearest neighbors
 (knn), and the random forest model. We will compare their performance based
 on their ability to explain variance ($R^2$), accuracy (bias), and
-precision (RMSE) in predicting the target (temperature anomaly). In the
+precision (RMSE) in predicting the target (local temperature anomaly). In the
 following subsections, we will introduce you to these models. Please note
 that we utilize DoParallel due to the extensive size of our data set.
 Additionally, the models are designed and tuned to deliver optimal
@@ -594,7 +587,7 @@ demonstration purposes only. The estimated computational time to generate a
 random forest model is about 15 seconds. In regular mode, we provide an
 option for fine-tuning. If you wish to perform fine-tuning, change the
 tuning option to TRUE. The estimated computational time is about 100
-seconds.
+seconds when not tuning in regular mode.
 
 ```{r Calculation of the random forest-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to calculate a random forest model
@@ -612,8 +605,8 @@ The XGBoost-model can be time intensive. We use the DoParallel Package for
 that. Please make sure, that your device does nothing else. Implementation
 of the XGB Model
 
-All hyperparameters are tuned, cross validation is performed for 3 folds by
-the logger ID.
+For the XGBoost model, all hyperparameters are tuned and a cross validation is performed by 3 folds for
+the logger ID. Tuning is always enabled.
 
 ```{r}
 
@@ -628,16 +621,16 @@ xgb_model <- xgb(data_train = combined_train,formula = formula_local) }
 #### Implementation of the neuronal network
 
 A neural network with 223 neurons is used. learning rate is set to 0.001
-and a batch size of 64. These are some standard values for the data size of
-5% of the data.
+and a batch size of 30. These are some standard values for the data size of
+5% of the data. Make sure tensorflow is up and running before running this model.
 
 ```{r}
 
 if(advanced_models == "y"){
   source("../R/neural_network.R")
   #tensorflow::install_tensorflow() may need to be run...
+  #Use pyhton version 3.11... rest should be fine...
   nn_model <- neural_network(combined_train)
-#preprocessing needed for test imput of nn
 
 }  
 ```
@@ -645,8 +638,8 @@ if(advanced_models == "y"){
 # Results
 
 In this section, we present our findings in terms of the explanation of
-variance ($R^2$), precision (RMSE), and accuracy (bias). Moreover, we
-present additional the main statistic parameters. Once again, we
+variance ($R^2$), precision (RMSE), and accuracy (bias). Additionally, we
+present the main statistic parameters. Once again, we
 distinguish between basic models (lm, knn, and random forest models) and
 advanced models (XGBoost and neural network). An overview of the results
 can be found in tables 3-5 in the Summary of Key Findings subsection.
@@ -684,7 +677,7 @@ The function returns a list containing four elements:
     test set. This allows you to see which LCDs are being used and how they
     performed.
 
-5.  The fivth element is a boxplot for the hour of the day. This plot shows
+5.  The fifth element is a boxplot for the hour of the day. This plot shows
     you the deviation at different times of the day.
 
 Note that this study aims to find the best model with the available data.
@@ -894,7 +887,7 @@ compatible with the neural network.
 ```{r Evaluation of the neuronal network, echo=FALSE, message=FALSE, warning=FALSE}
 
 if(advanced_models == "y"){  
-  
+  #preprocessing needed for test input of neural network
     predictors_nn <- combined_test |>
   dplyr::select(all_of(predictors))
 temperature <- combined_test |>
@@ -929,9 +922,9 @@ print(paste0("BIAS: ",mean(combined_test$nn_prediction-combined_test$temperature
 
 ## Partial Dependency Plots
 
-Since random forest performed the best, we now look at the impact of
+Since random forest performes the best, we now look at the impact of
 variables. The generation of these plots takes very long even with little
-data. therefore only the two most important (based on boruta) meteorologic
+data. Therefore only the two most important (based on boruta) meteorologic
 (top) and geospatial (bottom) variables are plotted.
 
 ```{r Evaluation of the random forest-model variable partial dependency plot, echo=FALSE, message=FALSE, warning=FALSE}
@@ -964,7 +957,7 @@ cowplot::plot_grid(plotlist = all_plots, ncol = 2)
 } 
 ```
 
-radiation behaves roughly as expected. A higher temperature in the
+Radiation behaves roughly as expected. A higher temperature in the
 logger/predicted data with higher radiation. This was known and has
 something to do with the bias of the logger. Interestingly the temperature
 prediction also increases when approaching zero radiation. A possible
@@ -1030,7 +1023,7 @@ model of the Burger mode (approximately 0.03°C).
 | Linear Regression    | 0.49           | 0.91 °C         | 0.7 °C         | 0.001 °C        |
 | KNN [reduced to 13%] | 0.55           | 0.84 °C         | 0.63 °C        | -0.03 C °       |
 | Random Forest        | 0.78           | 0.62 °C         | 0.45 °C        | 0.03 °C         |
-| XGB Boost            | \-             | \-              | \-             | \-              |
+| XGB Boost            | 0.65           | 0.752 °C         | 0.538 °C      | -0.061          |
 | Neuronal Network     | \-             | \-              | \-             | \-              |
 
 : **TABLE 4:** Overview of the results and evaluation of the models in the
@@ -1104,24 +1097,24 @@ variable. These intervals are derived from extreme events recorded by
 We reduced the intervals by about 10% on both sides, where possible. Please
 keep this in mind when exploring and adjusting values.
 
-| Variable                 | Default       | Realistic Interval                                    |
-|--------------------|------------|-------------------------------------------|
-| Temperature              | 22 °C         | $x[°C] \in[-15\leq x \leq 35]$                        |
-| Rain                     |               | $x[mm] \in[0 \leq x \leq 200]$                        |
-| Radiation                |               | $x[W*m^{-2}] \in[0 \leq x \leq 300]$, for a 10' mean  |
-| Wind speed               | 8 $m*s^{-1}$  |  $x[m*s^{-1}] \in[0 \leq x \leq 20]$                  |
-| Wind direction           |               | $x[°] \in[0 \leq x \leq 360]$, with 0° = N, 180° = S  |
-| 6h mean temperature      | 22 °C         | $x[°C] \in[-15 \leq x \leq 35]$                       |
-| 12h mean temperature     | 19 °C         | $x[°C] \in[-15 \leq x \leq 35]$                       |
-| 1d mean temperature      | 20 °C         | $x[°C] \in[-15 \leq x \leq 35]$                       |
-| 3d mean temperature      | 18 °C         | $x[°C] \in[-15 \leq x \leq 35]$                       |
-| 5d mean temperature      | 17 °C         | $x[°C] \in[-15 \leq x \leq 35]$                       |
-| 6h precipitation [sum]   | 30 mm         | $x[mm] \in[0 \leq x \leq 100]$                        |
-| 12h precipitation [sum]  | 25 mm         | $x[mm] \in[0 \leq x \leq 200]$                        |
-| 1d precipitation [sum]   | 20 mm         | $x[mm] \in[0 \leq x \leq 400]$                        |
-| 3d precipitation [sum]   | 15 mm         | $x[mm] \in[0 \leq x \leq 600]$                        |
-| 5d precipitation [sum]   | 10 mm         | $x[mm] \in[0 \leq x \leq 600]$                        |
-| 19d precipitation [sum]  | 5 mm          | $x[mm] \in[0 \leq x \leq 600]$                        |
+| Variable                | Default      | Realistic Interval                                        |
+|------------------|------------------|--------------------------------------|
+| Temperature             | 22 °C        | $x[°C] \in[-15\leq x \leq 35]$                            |
+| Rain                    |              | $x[mm] \in[0 \leq x \leq 200]$                            |
+| Radiation               |              | \$ x[W\*m\^{-2}] \in[0 \leq x \leq 300]\$, for a 10' mean |
+| Wind speed              | 8 $m*s^{-1}$ | $x[m*s^{-1}] \in[0 \leq x \leq 20]$                       |
+| Wind direction          |              | $x[°] \in[0 \leq x \leq 360]$, with 0° = N, 180° = S      |
+| 6h mean temperature     | 22 °C        | $x[°C] \in[-15 \leq x \leq 35]$                           |
+| 12h mean temperature    | 19 °C        | $x[°C] \in[-15 \leq x \leq 35]$                           |
+| 1d mean temperature     | 20 °C        | $x[°C] \in[-15 \leq x \leq 35]$                           |
+| 3d mean temperature     | 18 °C        | $x[°C] \in[-15 \leq x \leq 35]$                           |
+| 5d mean temperature     | 17 °C        | $x[°C] \in[-15 \leq x \leq 35]$                           |
+| 6h precipitation [sum]  | 30 mm        | $x[mm] \in[0 \leq x \leq 100]$                            |
+| 12h precipitation [sum] | 25 mm        | $x[mm] \in[0 \leq x \leq 200]$                            |
+| 1d precipitation [sum]  | 20 mm        | $x[mm] \in[0 \leq x \leq 400]$                            |
+| 3d precipitation [sum]  | 15 mm        | $x[mm] \in[0 \leq x \leq 600]$                            |
+| 5d precipitation [sum]  | 10 mm        | $x[mm] \in[0 \leq x \leq 600]$                            |
+| 19d precipitation [sum] | 5 mm         | $x[mm] \in[0 \leq x \leq 600]$                            |
 
 : **Table 7:** Overview about the default values for the variables used to
 predict the map. Further, it shows reasonable possible values for the
