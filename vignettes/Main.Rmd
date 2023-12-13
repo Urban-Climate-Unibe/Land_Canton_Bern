@@ -398,7 +398,7 @@ packages <- c("influxdbclient","ggplot2","tidyverse","lubridate",
               "workflows","tune","dials","stringr","terra","stars","sf","plyr",
               "doParallel", "foreach", "terrainr","starsExtra", "pdp", "recipes", 
               "tidyterra","shiny", "xgboost", 'kableExtra','rnaturalearth','zoo',
-              'moments', 'tibble','rsample','yardstick','cowplot','purrr')
+              'moments', 'tibble','rsample','yardstick','cowplot','purrr','renv','ranger','Boruta','devtools','sp','keras','tensorflow')
 ```
 
 ```{r Choose your workflow mode, message=FALSE, warning=FALSE, include=FALSE}

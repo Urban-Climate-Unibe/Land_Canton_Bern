@@ -13,8 +13,8 @@ First some data processing
 
 ```{r Load the Packages needed, message=FALSE, warning=FALSE, include=FALSE}
 # Decide which packages you need. For this Project you need the following:
-packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
-              "dplyr","googledrive","caret","rgdal","vip","parsnip",
+packages <- c("influxdbclient","ggplot2","tidyverse","lubridate",
+              "dplyr","googledrive","caret","vip","parsnip",
               "workflows","tune","dials","stringr","terra","stars","sf","plyr",
               "doParallel","terrainr","starsExtra", "pdp", "kableExtra", "recipes","Boruta")
 
