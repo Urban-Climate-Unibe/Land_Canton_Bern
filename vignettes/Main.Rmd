@@ -638,24 +638,7 @@ if(advanced_models == "y"){
   #tensorflow::install_tensorflow() may need to be run...
   nn_model <- neural_network(combined_train)
 #preprocessing needed for test imput of nn
-  predictors_nn <- combined_test |>
-  dplyr::select(all_of(predictors))
-temperature <- combined_test |>
-  dplyr::select(temperature)
 
-# Normalize/Scale the predictors using dplyr
-scaled_predictors <- predictors_nn|>
-  mutate(across(everything(), scale))
-
-# Combining the scaled predictors with the temperature into a single data frame
-processed_data <- cbind(scaled_predictors, temperature)
-
-
-test_data <- processed_data
-
-  
-test_features <- test_data|> select(-temperature)
-test_labels <- test_data|> pull(temperature)
 }  
 ```
 
@@ -911,12 +894,30 @@ compatible with the neural network.
 ```{r Evaluation of the neuronal network, echo=FALSE, message=FALSE, warning=FALSE}
 
 if(advanced_models == "y"){  
-  # Evaluate the model
-evaluation <- nn_model|> evaluate(as.matrix(test_features), test_labels)
-cat("Mean Absolute Error on Test Data:", evaluation, "\n")
+  
+    predictors_nn <- combined_test |>
+  dplyr::select(all_of(predictors))
+temperature <- combined_test |>
+  dplyr::select(temperature)
+
+# Normalize/Scale the predictors using dplyr
+scaled_predictors <- predictors_nn|>
+  mutate(across(everything(), scale)) |>
+  mutate(across(everything(), ~replace_na(., 0))) # this is because subset sometimes cant be scaled due to all data being 0.
+
+# Combining the scaled predictors with the temperature into a single data frame
+processed_data <- cbind(scaled_predictors, temperature)
+
+
+test_data <- processed_data
+
+  
+test_features <- test_data|> select(-temperature)
+test_labels <- test_data|> pull(temperature)
+row_names <- as.character(1:nrow(test_features))
 
 # Make predictions
-combined_test$nn_prediction <- nn_model|> predict(as.matrix(test_features))
+combined_test$nn_prediction <-  predict(nn_model,as.matrix(test_features))
 
 
 print(paste0("RSQ: ",cor(combined_test$nn_prediction,combined_test$temperature)^2))
@@ -1054,8 +1055,8 @@ accuracy and overall performance.
 | Linear Regression | 0.422          | 0.93 °C         | 0.739 °C       | 0.125 °C        |
 | KNN               | 0.457          | 0.91 °C         | 0.704 °C       | 0.05 °C         |
 | Random Forest     | 0.477          | 0.899 °C        | 0.661 °C       | 0.184 °C        |
-| XGB Boost         | \-             | \-              | \-             | \-              |
-| Neuronal Network  | \-             | \-              | \-             | \-              |
+| XGB Boost         | 0.533          | 0.829 °C        | 0.629 °C       | 0.061 °C        |
+| Neuronal Network  | 0.185          | 1.104 °C        | 0.890 °C       | 0.047 °C        |
 
 : **TABLE 5:** Overview of the results and evaluation of the models with 5
 % of the data and our own geospatial layer.
