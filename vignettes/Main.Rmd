@@ -393,8 +393,8 @@ the vector 'packages' and run the code again.
 
 ```{r Load the Packages needed, echo=TRUE, message=FALSE, warning=FALSE}
 # Decide which packages you need. For this Project you need the following:
-packages <- c("influxdbclient","ggplot2","tidyverse","lubridate","raster",
-              "dplyr","googledrive","caret","rgdal","keras","vip","parsnip",
+packages <- c("influxdbclient","ggplot2","tidyverse","lubridate",
+              "dplyr","caret","vip","parsnip",
               "workflows","tune","dials","stringr","terra","stars","sf","plyr",
               "doParallel", "foreach", "terrainr","starsExtra", "pdp", "recipes", 
               "tidyterra","shiny", "xgboost", 'kableExtra','rnaturalearth','zoo',
@@ -628,6 +628,7 @@ and a batch size of 30. These are some standard values for the data size of
 
 if(advanced_models == "y"){
   source("../R/neural_network.R")
+  library(keras)
   #tensorflow::install_tensorflow() may need to be run...
   #Use pyhton version 3.11... rest should be fine...
   nn_model <- neural_network(combined_train)
