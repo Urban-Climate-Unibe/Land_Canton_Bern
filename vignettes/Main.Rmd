@@ -324,7 +324,7 @@ processing. You can also change the way this files knits by changing the
 parameters manually in the knitting settings blow. Figure 1 gives you a
 overview about the default mode and all other options you have:
 
-SCHEMATIC OF THE DIFFERENT WORKFLOWS
+![Workflow Overview](../fig/Workflow.jpeg)
 
 Please note that the default version is only guaranteed until the end of
 February 2024. After that, geospatial data processing that is dependent on
