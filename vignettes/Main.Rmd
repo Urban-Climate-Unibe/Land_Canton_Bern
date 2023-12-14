@@ -1214,7 +1214,19 @@ model perfoms worse. But we are not sure and more investigations are
 needed. But as a conclusion we can say, that more data improve the
 models.**
 
-## 
+## Results
+
+-- Diurnal cycle :error when predicting
+
+-- General burger better because more generalisable
+
+-- Models perform as expected except xgboost
+
+-- XGBoost overfitting?
+
+-- Logger selection, at random, we have not looked at variable space
+
+-- 
 
 ## Conclusion^WP2^
 
