@@ -178,7 +178,7 @@ used as predictor classes. Table 1 provides a brief overview of the data we
 will use.
 
 | Predictor class                                                      | Variable Type    | Zonal Mean Resolution / [3 predictors per class] [@burger2021] |
-|----------------------------------------------------------------------|------------------|----------------------------------------------------------------|
+|-------------------------------|----------------|----------------------------|
 | 2m Temperature in °C [Zollikofen] for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean]      |
 | Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120,240 hours rolling sum]   |
 | Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
@@ -266,7 +266,7 @@ generated, which is processed into a recipe. This is now the basis for
 creating the models.
 
 |                                       |                                                                                                                                                                              |
-|---------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|-----------------|----------------------------------------------------------|
 | **Variable which is not a predictor** | **Reason**                                                                                                                                                                   |
 | Log_Nr, name                          | Does not make sens for spatial upscaling                                                                                                                                     |
 | temperature                           | It is the target                                                                                                                                                             |
@@ -405,6 +405,8 @@ packages <- c("influxdbclient","ggplot2","tidyverse","lubridate",
               'moments', 'tibble','rsample','yardstick','cowplot','purrr','renv','ranger','Boruta','devtools','sp','keras','tensorflow')
 ```
 
+MAYBE WE NEED SOME WORDS HERE?
+
 ```{r Choose your workflow mode, message=FALSE, warning=FALSE, include=FALSE}
 # Set seed for reproducibility
 set.seed(123)
@@ -460,7 +462,8 @@ The model recipe corresponds to the defined predictors minus the in table 2
 mentioned removed variables. Furthermore a step_YeoJohnson (includes Box
 Cox and an extension. Now, it can handle x ≤ 0), step_center (subsracting
 the mean from each observation/measurement), and a step_scale (transforming
-numeric variables to a similar scale) are preformed.
+numeric variables to a similar scale) are preformed. With the recipe it is
+now possible to generate the different models.
 
 ```{r Predictors and Recipe, echo=FALSE, message=FALSE, warning=FALSE}
 # Take all column-names you need as predictors from the combined file
@@ -489,30 +492,19 @@ pp <- recipes::recipe(formula_local,
 In this methodology subsection, we describe how the models are implemented
 and specify the hyperparameters that are used. It is important to note that
 we have already conducted hyperparameter tuning, but exclusively for the
-regular mode (all meteorologic data and our geospatial layers).
-Consequently, if you choose to use the demo mode (and thus for knitting),
-the models may be under- or overfitted and may not perform well. As
-mentioned before, we distinguish between our basic models and our advanced
-models.
+regular mode. Consequently, if you choose to use the demo mode (and thus
+for knitting), the models may be under- or overfitted and may not perform
+well. As mentioned before, we distinguish between our basic models and our
+advanced models.
 
 ### Basic Models implementation
 
 The basic models include linear regression, k-nearest neighbors (knn), and
-the random forest model. We will compare their performance based on their
+the random forest model. We compare their performance based on their
 ability to explain variance, accuracy, and precision in predicting the
 target (local temperature anomaly). In the following subsections, we will
 introduce you to these models. Please note that we utilize DoParallel due
-to the extensive size of our data set. Additionally, the models are
-designed and tuned to deliver optimal performance in regular mode.
-Consequently, significant deviations are inevitable when operating in demo
-mode exclusively.
-
-The basic models include multiple linear regression, k-nearest neighbors
-(knn), and the random forest model. We will compare their performance based
-on their ability to explain variance ($R^2$), accuracy (bias), and
-precision (RMSE) in predicting the target (local temperature anomaly). In
-the following subsections, we will introduce you to these models. Please
-note that we utilize DoParallel due to the extensive size of our data set.
+to the extensive size of our data set (and thus high computational time).
 Additionally, the models are designed and tuned to deliver optimal
 performance in regular mode. Consequently, significant deviations are
 inevitable when operating in "demo mode", "Burger demo mode", or "Burger
@@ -540,14 +532,14 @@ lm_model <- LM_Model(pp, combined_train)
 Calculating the KNN model requires a recipe and training data as inputs.
 The function computes a KNN model with the recipe and employs 3
 cross-validations by logger numbers. By default, the hyperparameter "k" is
-set to 10. In demo mode, model tuning is not meaningful because it exists
-for demonstration purposes only. The estimated computational time is about
-25 seconds.
+set to 10. In demo mode, model tuning is not meaningful because the mode
+exists for demonstration purposes only. The estimated computational time is
+about 30 seconds.
 
 The function has a safety feature implemented because the computing time
 for a KNN model in regular mode can be very high. In the worst case, one
-must compute $O(cv⋅n⋅d+cv⋅k⋅n)$ distances, where "n" is the number of
-observations, "d" is the number of dimensions, "cv" is the number of
+must **compute** $O(cv⋅n⋅d+cv⋅k⋅n)$ **distances,** where "n" is the number
+of observations, "d" is the number of dimensions, "cv" is the number of
 cross-validations, and "k" is the hyperparameter. For this reason, a
 typical device may require several hours. The safety feature limits the
 data input to 100,000 rows and limits therefore the computational time to
@@ -661,11 +653,12 @@ hyperparameters were tuned for the regular mode during the implementation
 of the models. Consequently, the quality of the models varies significantly
 depending on the mode.
 
-The function returns a list containing four elements:
+The function returns a list containing five elements:
 
 1.  The first element is a table that provides an overview of the metrics
-    (R2R2, RMSE, MAE, and bias) for the model itself, including evaluations
-    on both the training set and the test set (which should be considered)
+    ($R^2$, RMSE, MAE, and bias) for the model itself, including
+    evaluations on both the training set and the test set (which should be
+    considered)
 
 2.  The second element is a table and provides the main statistics
     parameters (bias, median, standard deviation, max, min, spread, IQR,
@@ -674,10 +667,11 @@ The function returns a list containing four elements:
 3.  The third element is a visualization of the model's performance on both
     the training set and the test set. This includes key metrics, providing
     an overview of how the model performed and where its performance is
-    good or worse. The orange line represents the ideal performance, and if
-    all points lie on this line, the model predicts the target perfectly.
-    The red line depicts the actual regression, and the closer it is to the
-    orange line, the better the model.
+    good or worse. The orange line within the plot represents the ideal
+    performance, and if all points lie on this line, the model predicts the
+    target perfectly. The red line within the plot depicts the actual
+    regression, and the closer it is to the orange line, the better the
+    model.
 
 4.  The fourth element is a boxplot for the LCDs used for evaluation in the
     test set. This allows you to see which LCDs are being used and how they
@@ -690,7 +684,7 @@ Note that this study aims to find the best model with the available data.
 Therefore, the evaluation has been conducted in the regular mode. The
 results described in the evaluation subsections cannot be transferred to
 other modes. If you are interested in the findings of the demo mode or the
-\@burger2021 mode, please refer to Table 3 and 4, respectively.
+@burger2021 mode, please refer to Table 3 and 4, respectively.
 
 ### Evaluation of the lm-model
 
@@ -709,7 +703,7 @@ relatively high spread of about 12.5 °C. However, the IQR is approximately
 1.1°C, signifying that 50% of the data falls within this interval. The
 skewness is negative, indicating a longer right tail and an asymmetric
 distribution. We conclude that the model contains negative outliers (mean
-\< median). This conclusion is confirmed by boxplots (fifth element).
+\< median). This conclusion is confirmed by boxplots (see fifth element).
 
 The third element is the visualization, which reveals that the model does
 not perform well at high temperatures. The plot also displays negative
@@ -995,7 +989,7 @@ accuracy due to a slightly higher bias (approximately 0.04 °C), its
 exceptional $R^2$ and RMSE lead us to consider it as our best model.
 
 | Model                | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|----------------------|----------------|-----------------|----------------|-----------------|
+|---------------|---------------|---------------|---------------|---------------|
 | Linear Regression    | 0.45           | 0.88 °C         | 0.69 °C        | 0.088 °C        |
 | KNN [reduced to 13%] | 0.48           | 0.86 °C         | 0.66 °C        | 0.03 C °        |
 | Random Forest        | 0.73           | 0.62 °C         | 0.46 °C        | 0.083 °C        |
@@ -1025,7 +1019,7 @@ lower). The bias (accuracy) is significantly reduced in the random forest
 model of the Burger mode (approximately 0.03°C).
 
 | Model                | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|----------------------|----------------|-----------------|----------------|-----------------|
+|---------------|---------------|---------------|---------------|---------------|
 | Linear Regression    | 0.49           | 0.91 °C         | 0.7 °C         | 0.001 °C        |
 | KNN [reduced to 13%] | 0.55           | 0.84 °C         | 0.63 °C        | -0.03 C °       |
 | Random Forest        | 0.78           | 0.62 °C         | 0.45 °C        | 0.03 °C         |
@@ -1050,7 +1044,7 @@ approximately 0.18°C higher than the bias of the KNN model, which excels in
 accuracy and overall performance.
 
 | Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|-------------------|----------------|-----------------|----------------|-----------------|
+|---------------|---------------|---------------|---------------|---------------|
 | Linear Regression | 0.422          | 0.93 °C         | 0.739 °C       | 0.125 °C        |
 | KNN               | 0.457          | 0.91 °C         | 0.704 °C       | 0.05 °C         |
 | Random Forest     | 0.477          | 0.899 °C        | 0.661 °C       | 0.184 °C        |
@@ -1076,7 +1070,7 @@ the most meaningful insights, as they directly address the objectives of
 this study.
 
 | Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|-------------------|----------------|-----------------|----------------|-----------------|
+|---------------|---------------|---------------|---------------|---------------|
 | Linear Regression | 0.45           | 0.9 °C          | 0.7 °C         | 0.1 °C          |
 | KNN               | 0.54           | 0.82 °C         | 0.63 °C        | 0.09 °C         |
 | Random Forest     | 0.52           | 0.85 °C         | 0.64 °C        | 0.12 °C         |
@@ -1104,7 +1098,7 @@ We reduced the intervals by about 10% on both sides, where possible. Please
 keep this in mind when exploring and adjusting values.
 
 | Variable                | Default      | Realistic Interval                                        |
-|-------------------------|--------------|-----------------------------------------------------------|
+|-----------------|-----------------|------------------------------------------|
 | Temperature             | 22 °C        | $x[°C] \in[-15\leq x \leq 35]$                            |
 | Rain                    |              | $x[mm] \in[0 \leq x \leq 200]$                            |
 | Radiation               |              | \$ x[W\*m\^{-2}] \in[0 \leq x \leq 300]\$, for a 10' mean |
