@@ -405,7 +405,9 @@ packages <- c("influxdbclient","ggplot2","tidyverse","lubridate",
               'moments', 'tibble','rsample','yardstick','cowplot','purrr','renv','ranger','Boruta','devtools','sp','keras','tensorflow')
 ```
 
-MAYBE WE NEED SOME WORDS HERE?
+### Data split
+For model training, the data is always split into training and evaluation data, even when no hyperparameter tuning is performed.
+The split is done by selecting 10 temperature measurement locations (Loggers) at random and using them as evaluation data. The rest of the measurement locations are used as training data.
 
 ```{r Choose your workflow mode, message=FALSE, warning=FALSE, include=FALSE}
 # Set seed for reproducibility
@@ -1216,17 +1218,22 @@ models.**
 
 ## Results
 
+-- ML vs Linear regression
+
+
+
+One of the main findings is that the geospatial layers of [@burger2021] perform better than the one generated in this study. Interestingly the random forest stepwise backwards regression was unable to detect this trend because it is implemented based on the RSME not on the R-swuared. The models do have the same RSME but not the same R-Squared. This is probably due to overfitting in case of to many spatial predictors. The model then learns very localized patterns that are poorly generalizable. 
+
+-- Models perform as expected
+
 -- Diurnal cycle :error when predicting
 
--- General burger better because more generalisable
+One general issue is the generation of the training and evaluation dataset. We just split the dataset in
 
--- Models perform as expected except xgboost
+### Advanced Models
+The XGBoost model performes best of all models with 5% of the data for our own layers but poorer than the random forest with all of the data for the layers of [@burger2021]. This might be due to overfitting. The RMSE of the XGBoost of the training dataset become very low (not shown in the results) but is high for the evaluation dataset with all of the data. One explanation could be overfitting.
 
--- XGBoost overfitting?
-
--- Logger selection, at random, we have not looked at variable space
-
--- 
+The performance of the neural network is very poor. It is by far the worst model for the 5% of the data with our geospatial predictors. This should not be considered a definitive result at all. It is more a sort of proof of concept and this study is does not implement the neural network with great expertise. Check out the neural network yourself and judge whether the metrics used are reasonable.
 
 ## Conclusion^WP2^
 
