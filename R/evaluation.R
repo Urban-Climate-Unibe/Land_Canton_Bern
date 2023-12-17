@@ -181,6 +181,8 @@ p1 <- ggplot(data = train_data, aes(temperature, fitted)) +
        title = paste("Train set evaluation [",model_input,"]")) +
   theme_classic()
 
+
+std_dev <- sd(data_evaluate$fitted)
 # We create the plot for the test set
 p2 <- ggplot(data = data_evaluate, aes(temperature, fitted)) +
  geom_point(alpha = 0.3) +
@@ -225,11 +227,28 @@ boxplot_hour <- ggplot(data = data_evaluate,
        title = paste("Boxplot by hours of the day [",model_input,"]")) +
   theme_classic()
 
+#------------------------------------------------------------------------------
+# Position 6: distribution of the anomaly
+
+df <- data.frame(random = rnorm(10000000, mean = 0, sd = 1))
+
+density <- data_evaluate |>
+  ggplot() +
+  geom_density(aes(x = Bias), color = "black") +
+  geom_vline(xintercept = mean(data_evaluate$Bias), color = 'orange2', linetype = 4) +
+  geom_density(data = df, aes(x = random), color = "red3") +
+  annotate("text", x = -5, y = 0.3, label = paste("Bias =",bias.test), color = "orange2", size = 5, hjust = 0, vjust = 0) +
+  annotate("text", x = -5, y = 0.4, label = "Normal Distribution", color = "red3", size = 5, hjust = 0, vjust = 0) +
+  annotate("text", x = -5, y = 0.35, label = 'Effective Distribution', color = "black", size = 5, hjust = 0, vjust = 0) +
+  labs(title = "Distribution of the Temperature Anomaly",
+       x = "Temperature Anomaly [K]",
+       y = "Density") +
+  theme_minimal()
 
 
 ###############################################################################
 # We define our list for the return:
-output <- list(tabl, main_stats, out, boxplot_logger, boxplot_hour)
+output <- list(tabl, main_stats, out, boxplot_logger, boxplot_hour, density)
 
 
 return(output)}
