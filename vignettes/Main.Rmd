@@ -46,13 +46,13 @@ work package 2 (WP2):
 
 -   Model evaluation
 
--   Visualize the key findings
+-   Visualization of the key findings
 
 -   Structure and design of this markdown and the workflow
 
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
 
-# Introduction\^WP1, WP2\^
+# Introduction^WP1, WP2^
 
 Anthropogenic climate change is expected to increase the amount, intensity,
 and duration of heat waves [@burger2021]. The urban heat island (UHI)
@@ -101,7 +101,7 @@ island using machine learning techniques.
 ## Objectives and Research Questions
 
 @burger2021 used a multiple linear regression approach to model the urban
-heat island effect in the city of Bern for a nighttime mean. In this study
+heat island effect in the city of Bern for a night-time mean. In this study
 we aim to calculate our own models at an hourly rate all day. Furthermore,
 we will implement a classic approach (multiple linear regression model) and
 machine learning approaches (k-nearest neighbors (knn) and random forest).
@@ -111,7 +111,7 @@ class represents the original layer without processing, for example the
 vegetation height. These are cut to the extent of the city and its
 surrounding lands as well as a spatial resolution of 5 meters and will be
 in the raw-data folder. But since @burger2021 was selecting layers with
-nighttime mean modelling in mind this study also uses generated geospatial
+night-time mean modelling in mind this study also uses generated geospatial
 layers with several zonal mean distances per predictor class (these will be
 introduced in the data section). Therefore, the following questions arise:
 
@@ -132,79 +132,149 @@ introduced in the data section). Therefore, the following questions arise:
 
 # Data and Methodology
 
-In this section, we introduce you to the data used and the methodology
-wehave chosen. Firstly, we present the data employed in our study.
-Followingthat, we delve into the methodology, starting with the processing
-ofgeospatial layers and an explanation of how we determined which
-variablesto use. To address the research questions, we guide you through
-the 'modes'in which you can execute this workflow. Finally, we provide an
-overview ofthe implemented model.
+In this section, we introduce you to the data used and the methodology.
+First, we present the data employed in our study. Second, we delve into the
+methodology, starting with the processing of the geospatial layers.
+Moreover, we give an explanation of how we determined which variables to
+use. To address our research questions, we implemented different modes to
+run this workflow. We provide an overview about those modes and guide you
+through. At last, we explain how we implemented the models.
 
 ## Data^WP1^
 
 To avoid misunderstanding we want to start with a brief clarification: This
-project uses cantonal land use data and federal geospatial data. These
-intheir raw form are called predictor classes. These are then spatially
+project uses cantonal land use data and federal geospatial data. These in
+their raw form are called predictor classes. These are then spatially
 averaged to obtain the actual predictors which are called geospatial layers
 or just predictors.
 
-Temperature data for the years 2019-2022 from the network of the city
-ofBern is used. This is a numerical data set of the 3m temperature in
-104locations, with a temporal resolution of 10 minutes for all LCDs. How
-manyLCD are active depends on the year but 55 LCDs are active over the
-entiretime period (see table 1). The network data is publicly available on
-BORIS,however since data on BORIS is faulty at the moment we uploaded
-thecorrected .csv-files to the Github Repo. The original files can be
-found[here](https://boris.unibe.ch/161882/), as well as the metadata
-containingthe logger location. We use additional data from the AWS at
-Zollikofen, asit is the official meteorologic station of Bern. The five
-meteorological variables (2m temperature, precipitation, radiation and wind
-direction and wind speed) with a temporal resolution of 10 minutes for the
-years2019-2022 will be used as well as the timestamp. Data of
-temperature(average) and precipitation (sum) of the previous six hours and
-twelve hours, and one, three and five days and ten days (precipitation
-only) will also be fed into the model. This data is uploaded to the
-repository to ensure availability since the IDAWEB-data service is open for
-scientific use but not completely open access. To show small scale urban
-patterns of temperature distributions, zonally meaned geospatial data as
-shown [in\@burger2021](mailto:in@burger2021){.email} is used. These are
+Temperature data for the years 2019-2022 from the network of the city of
+Bern is used. This is a numerical data set of the 3m temperature in 104
+locations, with a temporal resolution of 10 minutes for all LCDs. How many
+LCD are active depends on the year but 55 LCDs are active over the entire
+time period (see table 1). The network data is publicly available on BORIS,
+however since data on BORIS is faulty at the moment we uploaded the
+corrected .csv-files to the Github repository. The original files can be
+found [here](https://boris.unibe.ch/161882/), as well as the metadata
+containing the logger location. We use additional data from the
+MeteoSchweiz AWS at Zollikofen, as it is the official meteorologic station
+of Bern. The five meteorological variables (2m temperature, precipitation,
+radiation, wind direction and wind speed) with a temporal resolution of 10
+minutes for the years2019-2022 will be used as well as the timestamp. Data
+of temperature (average) and precipitation (sum) of the previous six and
+twelve hours, and one, three and five days (and additionally ten days for
+precipitation) will also be fed into the model. This data is uploaded to
+the repository to ensure availability since the IDAWEB-data service is open
+for scientific use but not completely open access. To show small scale
+urban patterns of temperature distributions, zonally meaned geospatial data
+as shown in [\@burger2021](mailto:in@burger2021){.email} is used. These are
 cantonal land use classes as well as federal geospatial data. All of the
 data is spatially averaged to obtain the layers most effective as shown in
-@burger2021. The federal data (meteorologic values, DEM, and VH) and
-cantonal data (all land cover classes: LC/OS/BH)is directly downloaded from
-the web into R and then used as predictor classes. The geospatial layers
-ROU, FLAC, ASP, SLO are calculated based on these data sets and are then
-used as predictor classes. Table 1 provides a brief overview of the data we
-will use.
+@burger2021. The federal data (meteorologic values from the AWS at
+Zollikofen, digital elevation model (DEM), and vegetation height (VH)) and
+cantonal data (all land cover classes: land cover (LC), different open
+spaces (OS) and building heights (BH)) is directly downloaded from the web
+into R and then used as predictor classes. The geospatial layers roughness
+(ROU), flow accumulation (FLAC), aspect (ASP) and slop (SLO) are calculated
+based on these data sets and are then used as predictor classes. Table 1
+provides a brief overview of the data we use.
 
-| Predictor class                                                      | Variable Type    | Zonal Mean Resolution / [3 predictors per class] [@burger2021] |
-|-------------------------------|----------------|----------------------------|
-| 2m Temperature in °C [Zollikofen] for the time period 2019 - 2022    | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120 hours rolling mean]      |
-| Precipitation in mm [Zollikofen] for the time period 2019 - 2022     | Meteorological   | 15 minutes / [1h mean, 6,12,24,72,120,240 hours rolling sum]   |
-| Radiation in $W*m^{-2}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
-| Windspeed in $m*s^{-1}$ [Zollikofen] for the time period 2019 - 2022 | Meteorological   | 15 minutes / [1h mean]                                         |
-| Winddirection in ° [Zollikofen] for the time period 2019 - 2022      | Meteorological   | 15 minutes / [1h mean]                                         |
-| Land Cover Building [LC_B]                                           | Geospatial Layer | [25m / 150m / 1000m], Burger used [250m]                       |
-| Open Space Forest [OS_FO]                                            | Geospatial Layer | [[25m / 150m / 1000m], Burger used [250m]                      |
-| Open Space Garden [OS_GA]                                            | Geospatial Layer | [25m / 150m / 1000m], Burger used [25m]                        |
-| Open Space Sealed [OS_SE]                                            | Geospatial Layer | [25m / 150m / 1000m], Burger used [500m]                       |
-| Open Space Agriculture [OS_AC]                                       | Geospatial Layer | [25m / 150m / 1000m], Burger used [500m]                       |
-| Open Space Water [OS_WA]                                             | Geospatial Layer | [25m / 150m / 1000m], Burger used [150m]                       |
-| Vegetation Height [VH]                                               | Geospatial Layer | [25m / 150m / 1000m], Burger used [150m]                       |
-| Mean Building Heights [BH]                                           | Geospatial Layer | [25m / 150m / 1000m], Burger used [150m]                       |
-| Slope [SLO]                                                          | Geospatial Layer | [25m / 150m / 1000m], Burger used [100m]                       |
-| Digital Elevation Model (DEM)                                        | Geospatial Layer | No zonal mean                                                  |
-| Aspect [ASP]                                                         | Geospatial Layer | [25m / 150m / 1000m], Burger used [150m]                       |
-| Flow accumulation [FLAC]                                             | Geospatial Layer | [25m / 150m / 1000m], Burger used [200m]                       |
-| Roughness [ROU]                                                      | Geospatial Layer | [25m / 150m / 1000m], Burger used [25m, replaces SVF]          |
-| Climate Network in °C (80 LCDs, different sides) in year 2019        | Meteorological   | 10 minutes / [1h mean]                                         |
-| Climate Network in °C (67 LCDs, different sides) in year 2020        | Meteorological   | 10 minutes / [1h mean]                                         |
-| Climate Network in °C (67 LCDs, different sides) in year 2021        | Meteorological   | 10 minutes / [1h mean]                                         |
-| Climate Network in °C (81 LCDs, different sides) in year 2022        | Meteorological   | 10 minutes / [1h mean]                                         |
++----------------------------+-----------------+-------------------------+
+| Predictor class            | Variable Type   | Resolution / zonal mean |
+|                            |                 | [used resolutions /     |
+|                            |                 | zonal means]            |
++============================+=================+=========================+
+| 2m Temperature in °C       | Meteorological  | 15 minutes / [1h mean,  |
+| [Zollikofen] for the time  |                 | 6, 12, 24, 72, 120      |
+| period 2019 - 2022         |                 | hours rolling mean]     |
++----------------------------+-----------------+-------------------------+
+| Precipitation in mm        | Meteorological  | 15 minutes / [1h mean,  |
+| [Zollikofen] for the time  |                 | 6, 12, 24, 72, 120, 240 |
+| period 2019 - 2022         |                 | hours rolling sum]      |
++----------------------------+-----------------+-------------------------+
+| Radiation in $W*m^{-2}$    | Meteorological  | 15 minutes / [1h mean]  |
+| [Zollikofen] for the time  |                 |                         |
+| period 2019 - 2022         |                 |                         |
++----------------------------+-----------------+-------------------------+
+| Windspeed in $m*s^{-1}$    | Meteorological  | 15 minutes / [1h mean]  |
+| [Zollikofen] for the time  |                 |                         |
+| period 2019 - 2022         |                 |                         |
++----------------------------+-----------------+-------------------------+
+| Winddirection in °         | Meteorological  | 15 minutes / [1h mean]  |
+| [Zollikofen] for the time  |                 |                         |
+| period 2019 - 2022         |                 |                         |
++----------------------------+-----------------+-------------------------+
+| Land Cover Building [LC_B] | Geospatial      | [25m / 150m / 1000m],   |
+|                            | Layer           |                         |
+|                            |                 | Burger used [250m]      |
++----------------------------+-----------------+-------------------------+
+| Open Space Forest [OS_FO]  | Geospatial      | [[25m / 150m / 1000m],  |
+|                            | Layer           |                         |
+|                            |                 | Burger used [250m]      |
++----------------------------+-----------------+-------------------------+
+| Open Space Garden [OS_GA]  | Geospatial      | [25m / 150m / 1000m],   |
+|                            | Layer           |                         |
+|                            |                 | Burger used [25m]       |
++----------------------------+-----------------+-------------------------+
+| Open Space Sealed [OS_SE]  | Geospatial      | [25m / 150m / 1000m],   |
+|                            | Layer           |                         |
+|                            |                 | Burger used [500m]      |
++----------------------------+-----------------+-------------------------+
+| Open Space Agriculture     | Geospatial      | [25m / 150m / 1000m],   |
+| [OS_AC]                    | Layer           |                         |
+|                            |                 | Burger used [500m]      |
++----------------------------+-----------------+-------------------------+
+| Open Space Water [OS_WA]   | Geospatial      | [25m / 150m / 1000m],   |
+|                            | Layer           |                         |
+|                            |                 | Burger used [150m]      |
++----------------------------+-----------------+-------------------------+
+| Vegetation Height [VH]     | Geospatial      | [25m / 150m / 1000m],   |
+|                            | Layer           |                         |
+|                            |                 | Burger used [150m]      |
++----------------------------+-----------------+-------------------------+
+| Mean Building Heights [BH] | Geospatial      | [25m / 150m / 1000m],   |
+|                            | Layer           |                         |
+|                            |                 | Burger used [150m]      |
++----------------------------+-----------------+-------------------------+
+| Slope [SLO]                | Geospatial      | [25m / 150m / 1000m],   |
+|                            | Layer           |                         |
+|                            |                 | Burger used [100m]      |
++----------------------------+-----------------+-------------------------+
+| Digital Elevation Model    | Geospatial      | No zonal mean           |
+| (DEM)                      | Layer           |                         |
++----------------------------+-----------------+-------------------------+
+| Aspect [ASP]               | Geospatial      | [25m / 150m / 1000m],   |
+|                            | Layer           |                         |
+|                            |                 | Burger used [150m]      |
++----------------------------+-----------------+-------------------------+
+| Flow accumulation [FLAC]   | Geospatial      | [25m / 150m / 1000m],   |
+|                            | Layer           |                         |
+|                            |                 | Burger used [200m]      |
++----------------------------+-----------------+-------------------------+
+| Roughness [ROU]            | Geospatial      | [25m / 150m / 1000m],   |
+|                            | Layer           |                         |
+|                            |                 | Burger used [25m,       |
+|                            |                 | replaces SVF]           |
++----------------------------+-----------------+-------------------------+
+| Climate Network in °C (80  | Meteorological  | 10 minutes / [1h mean]  |
+| LCDs, different sides) in  |                 |                         |
+| year 2019                  |                 |                         |
++----------------------------+-----------------+-------------------------+
+| Climate Network in °C (67  | Meteorological  | 10 minutes / [1h mean]  |
+| LCDs, different sides) in  |                 |                         |
+| year 2020                  |                 |                         |
++----------------------------+-----------------+-------------------------+
+| Climate Network in °C (67  | Meteorological  | 10 minutes / [1h mean]  |
+| LCDs, different sides) in  |                 |                         |
+| year 2021                  |                 |                         |
++----------------------------+-----------------+-------------------------+
+| Climate Network in °C (81  | Meteorological  | 10 minutes / [1h mean]  |
+| LCDs, different sides) in  |                 |                         |
+| year 2022                  |                 |                         |
++----------------------------+-----------------+-------------------------+
 
-: **Table 1:** provides a brief overview of the data we will use. Zonal
-mean resolution is indicated with our owns first and then the distance used
-by @burger2021.
+: **Table 1:** Brief overview of the data we use. Zonal mean resolution is
+indicated with our owns first and then the zonal mean used by @burger2021.
 
 ## Methodology: Main Goal/Structure
 
@@ -214,15 +284,13 @@ anomaly from the on-site location to the official measurement station in
 Zollikofen, and thus, the Urban Heat Island (UHI). Therefore, the target
 variable is the temperature (of the LCDs in the city of Bern). The
 predictor variables consist of a combination of the meteorological
-variables and geospatial layers as mention before. Models are generated
-later in the workflow and include linear regression, k-nearest
-neighbors(KNN), and random forest. Additionally, XGBoost and a neural
-network can be executed.
+variables and geospatial layers as mention before (see table 1). This
+section provides information about the methodology.
 
 ### Methodology: Preparation^WP1^
 
 In this initial methodology section, we conduct all preparations for
-modeling. It will provide information about the generation of geospatial
+modeling. It provides information about the generation of geospatial
 layers. Furthermore, we explain how we decide which variables to use for
 prediction and what options you have to generate the base-file
 'Combined.csv'.
@@ -230,32 +298,33 @@ prediction and what options you have to generate the base-file
 #### Geospatial layers
 
 Either the geospatial layers are downloaded directly from a remote
-repository, which is the case when knitting (default). Alternatively, the
-geospatial layers are generated by downloading and processing of the
-geospatial layers as raw data from open sources. First, the files are
-downloaded from either cantonal or federal swiss websites. Then, the
-processing goes as follows: 1) The predictor classes layers are formatted
-to be separate files. This means that for each land use class as defined by
-[\@burger2021](mailto:by@burger2021){.email} and for each geospatial layer
-from swisstopo there is a raster file which is the predictor class. 2) Then
-spatial extent and resolution are all standardized to 5 meters and the
-extent of the city and the surrounding lands. 3) Each layer then is zonally
-meaned. This can be performed with the layer resolutions by @burger2021
-which corresponds to one predictor per predictor class in table 1.
-Alternatively the geospatial layers are all meaned by the resolutions in
-table 1 (3 mean layers perpredictor class). Finally, this results in three
-(or one in case of [\@burger2021](mailto:of@burger2021){.email}) geospatial
-layers per predictor class (see table 1). The data of the predictor classes
-which corresponds to the raw layers can be found in the data-raw subfolder
-of this project for the land use classes. The processed files can be found
-in the data folder in the subdirectory Tiffs.
+repository (dropbox account), which is the case when knitting (default).
+Alternatively, the geospatial layers are generated by downloading and
+processing of the geospatial layers as raw data from open sources. First,
+the files are downloaded from either cantonal or federal swiss websites.
+Then, the processing goes as follows: 1) The predictor classes layers are
+formatted to be separate files. This means that for each land use class as
+defined by [\@burger2021](mailto:by@burger2021){.email} and for each
+geospatial layer from Swisstopo there is a raster file which is the
+predictor class. 2) Then spatial extent and resolution are all standardized
+to 5 meters and the extent of the city and the surrounding lands. 3) Each
+layer then is zonally averaged. This can be performed with the layer
+resolutions by @burger2021 which corresponds to one predictor per predictor
+class in table 1. Alternatively, the geospatial layers are all meaned by
+the resolutions in table 1 (3 mean layers per predictor class). Finally,
+this results in three (or one in case of
+[\@burger2021](mailto:of@burger2021){.email}) geospatial layers per
+predictor class. The data of the predictor classes which corresponds to the
+raw layers can be found in the data-raw subfolder of this project for the
+land use classes. The processed files can be found in the data folder in
+the subdirectory Tiffs.
 
 #### Variable Selection
 
 After processing the geospatial layers, a variable selection was performed
 (see [variable selection](Markdown::%20Variable_Selection.rmd)). This
-process was only exclusively applied to the predictors listed in table 1,as
-layers by @burger2021 were already reduced and selected. The variable
+process was only exclusively applied to the predictors listed in table 1,
+as layers by @burger2021 were already reduced and selected. The variable
 selection using the Boruta-algorithm revealed that, after removing
 variables for reasons unrelated to relevance (see table 2), all remaining
 variables proved to be relevant. While further variable selection was
@@ -265,26 +334,39 @@ certain variables were rejected. Based on this selection, a formula is now
 generated, which is processed into a recipe. This is now the basis for
 creating the models.
 
-|                                       |                                                                                                                                                                              |
-|-----------------|----------------------------------------------------------|
-| **Variable which is not a predictor** | **Reason**                                                                                                                                                                   |
-| Log_Nr, name                          | Does not make sens for spatial upscaling                                                                                                                                     |
-| temperature                           | It is the target                                                                                                                                                             |
-| timestamp, year, month, day, hour     | Because it is controversial whether time and date should be used as predictors. The model could simply learn the mean of specific timestamps and not the underlying pattern. |
-| NORD_CHTOP, OST_CHTOP                 | Coordinates are not used because the model should learn the underlying pattern.                                                                                              |
-| LV_03_E, LV_03_N                      | Coordinates are not used because the model should learn the underlying pattern.                                                                                              |
++----------------+--------------------------------------------------------+
+| **Variable     | **Reason**                                             |
+| which is not a |                                                        |
+| predictor**    |                                                        |
++----------------+--------------------------------------------------------+
+| Log_Nr and     | Does not make sens for spatial upscaling               |
+| name           |                                                        |
++----------------+--------------------------------------------------------+
+| temperature    | It is the target variable                              |
++----------------+--------------------------------------------------------+
+| timestamp,     | Because it is controversial whether time and date      |
+| year, month,   | should be used as predictors. The model could simply   |
+| day and hour   | learn the mean of specific timestamps and not the      |
+|                | underlying pattern.                                    |
++----------------+--------------------------------------------------------+
+| NORD_CHTOP,    | Coordinates are not used because the model should      |
+| OST_CHTOP      | learn the underlying pattern.                          |
++----------------+--------------------------------------------------------+
+| LV_03_E,       | Coordinates are not used because the model should      |
+| LV_03_N        | learn the underlying pattern.                          |
++----------------+--------------------------------------------------------+
 
-: **TABLE 2:** Overview about the reasons why a variable/column were
-rejected as a predictor.
+: **TABLE 2:** Overview about the reasons why a variable were rejected as a
+predictor.
 
 #### Data Combination
 
-Now that we have identified the variables to use, ensuring that the models
+Now, that we have identified the variables to use, ensuring that the models
 contain the right information is crucial for model training. As briefly
 outlined in table 2, we decided against utilizing the timestamp due to its
 controversial relevance. However, considering that past meteorological
-conditions can influence the future, we applied various aggregations to
-thedata from MeteoSwiss for the meteostation. Specifically, we averaged the
+conditions can influence the future, we applied various aggregations to the
+data from MeteoSwiss for the meteostation. Specifically, we averaged the
 10-minute resolution to 1-hour intervals for the variables: radiation, wind
 speed, wind direction, 2m temperature, and precipitation (summed).
 Following this, rolling means/sums were calculated for 6, 12, 24 hours, 3
@@ -293,14 +375,14 @@ days, and 5 days for both precipitation and temperature. Additionally, a
 capture moisture. This processed data represents the MeteoSwiss
 meteorological data set.
 
-Subsequently, data from the LCD temperature loggers in the city were readin
-and combined with the metadata. The result is a tidy data frame where each
-row corresponds to a measurement of a single logger at a specific point in
-time, with attributes such as location as columns (from themetadata).
-Afterward, the values corresponding to each location of the loggers were
-extracted from the geospatial predictors, and this data was added to the
-data frame. The outcome is the file 'Combined.csv,' which serves as the
-basis for this study.
+Subsequently, data from the LCD temperature loggers in the city were read
+in and combined with the metadata. The result is a tidy data frame where
+each row corresponds to a measurement of a single logger at a specific
+point in time, with attributes such as location as columns (from the
+metadata). Afterward, the values corresponding to each location of the
+loggers were extracted from the geospatial predictors, and this data was
+added to the data frame. The outcome is the file 'Combined.csv,' which
+serves as the basis for this study.
 
 To address the research questions, you can modify the workflow by changing
 the data source of your 'Combined.csv' file. By default, it randomly
@@ -310,84 +392,86 @@ an overview of the modes within this workflow.
 
 ### How this Workflow Works^WP1, WP2^
 
-In the Data and Methodology section you will see that we work with a large
-amount of data. This means the computational time could be very high. To
-address this issue we implemented different workflows within this markdown.
-The file runs automatically in the most performant mode when knitting. When
-run normally, the terminal will guide you through the decision steps about
-processing. You can also change the way this files knits by changing the
-parameters manually in the knitting settings blow. Figure 1 gives you a
-overview about the default mode and all other options you have. Please note
-that the default mode is only guaranteed until the end of February 2024.
-After that, geospatial data processing that is dependent on the VH of WSL
-(Eidg. Forschungsanstalt für Wald, Schnee und Landschaft) will not be
-executed anymore and thus miss as predictor layers. This will alter the
-results.
+If you run the workflow you see that we deal with a large amount of data.
+This means the computational time could be very high (depends on your
+device). To address this issue we implemented different workflows within
+this markdown. The file runs automatically in the most performant mode when
+knitting. When run normally, the terminal will guide you through the
+decision steps about processing. You can also change the way this files
+knits by changing the parameters manually in the knitting settings below.
+Figure 1 gives you a overview about the default mode and all other options
+you have. Please note that the default mode is only guaranteed until the
+end of February 2024. After that, geospatial data processing that is
+dependent on the VH of WSL (Eidg. Forschungsanstalt für Wald, Schnee und
+Landschaft) will not be executed anymore and thus miss as predictor layers.
+This will alter the results. But you always have the option to contact the
+authors. We will keep all data local so that reproducibility is guaranteed
+at all time.
 
-![**Fig. 1:** Overview about the workflow](../fig/Workflow.jpeg)
+![**Fig. 1:** Overview about the workflow modes](../fig/Workflow.jpeg)
 
-#### Geospatial layers
+As described above, this markdown can run with either our geospatial layers
+(three different zonal mean values [25m, 150m, 1000m]), or with one zonal
+mean as demonstrated by @burger. It depends on the mode you choose. To
+avoid misunderstandings, you can choose whether you want to download our
+geospatial layers from a Dropbox account (default) or if you want to
+generate our geospatial layers from scratch (time-intensive but guarantees
+reproducibility). If you neither want to download our geospatial layers nor
+generate them from scratch, geospatial layers from @burger2021 will be
+generated.
 
-The geospatial layers vary in this workflow. As described above, this
-script can run either all geospatial layers with three different zonal mean
-values [25m, 150m, 1000m] (that woud be our geospatial layers) or with the
-zonal mean values as demonstrated by @burger (see table1). This can be
-chosen in the console when run normally. Because the generation of the
-zonal means of the geospatial layers is very time-intensive (20min - 2h,
-depends on your device), when knitting, the files are always downloaded
-from an external source (Dropbox). When the files are downloaded. The
-version with all geospatial layers is downloaded. When run not knitted, the
-console will ask whether to download, or generate the geospatial means, as
-well as which geospatial means.
-
-#### Data size
+#### Data Size
 
 Computation of models is also very time-intensive. For this reason, there
-is the option to run the model in "demo mode", i.e. just using 5% of the
-data. This data is randomly picked and then the model is run. This will
+is the option to run the model in "demo mode" (just using 5% of the data).
+This data is randomly picked and then the model is run. This will
 substantially worsen the models but is preferred for knitting because of
 processing time. This can be changed when knitting with setting the
 variable model_demo \<- "n". When run not knitted, the console will ask
 whether to run with 5% of the data or not.
 
-#### Advanced models
+#### Typ of Models
 
-There are two advanced models: one is a xgBoost model and one a improvised
-neural network. These are were not part of the proposal and are thus
-considered secondary information. If these should be run while knitting,
-the variable advanced_models \<- "y". When run not knitted, the console
-will ask whether to run them. It is strongly recommended to only run these
-with 5% of the data!
+In this study, we distinguish between basic models and advanced models. The
+basic models are the multiple linear regression model, the knn model and
+the random forest model. We use these models to answer our research
+questions. Further information and specifications is provided in subsection
+'Basic models implementation'. Additionally, there are two advanced models:
+one is a xgBoost model and one a improvised neural network. These are not
+part of the proposal and are thus considered secondary information. If
+these should be run while knitting, the variable advanced_models \<- "y".
+When run not knitted, the console will ask whether to run them. It is
+strongly recommended to only run these with 5% of the data.
 
 #### The Four Modes of the Workflow
 
-This subsection generates your base .csv file (calles Combined.csv)
-incorporating all the information provided above in an interactive manner
-when not knitting. Therefore, you have to navigate through some questions
-as described in figure 1. As a result, the current workflow changes to the
-mode you require. There are four main options when running the script, and
-for each, you can additionally choose whether you want to run the advanced
-models.
+This subsection provides information about how the base .csv file, named
+Combined.csv, is generated. It incorporates all the information provided
+above in an interactive manner when not knitting. Therefore, you need to
+navigate through some questions, as described in figure 1. As a result, the
+current workflow adapts to the mode you require. There are four options
+when running the code, and for each option, you can additionally choose
+whether you want to run the advanced models.
 
--   Demo mode: Is the default mode and uses for the 'Combiend.csv' file
-    randomly 5% of our geospatial layer and our the MeteoSwiss
-    meteorological data set. We implemented this mode to show our work in
-    class or if you looking for a short overview. It should not be used for
-    modelling the UHI effect.
+-   **demo mode**: Is the default mode and uses for the 'Combiend.csv' file
+    randomly 5% of our geospatial layer and our MeteoSwiss meteorological
+    data set. We implemented this mode to show our work in class or if you
+    looking for a short overview. It should not be used for modelling the
+    UHI effect.
 
--   Regular mode: Uses for the 'Combiend.csv' file our geospatial layer and
-    our MeteoSwiss meteorological data set. This is the mode we use to
+-   **regular mode**: Uses for the 'Combiend.csv' file our geospatial layer
+    and our MeteoSwiss meteorological data set. This is the mode we use to
     answer the first two research questions of this study.
 
--   Burger demo mode: Uses for the 'Combined.csv' file randomly 5% of the
-    geospatial layers of @burger2021 and our MeteoSwiss meteorological data
-    set. We implemented this mode to show how we address our third research
-    question in class.
+-   **Burger demo mode**: Uses for the 'Combined.csv' file randomly 5% of
+    the geospatial layers of @burger2021 and our MeteoSwiss meteorological
+    data set. We implemented this mode to show how we address our third
+    research question in class.
 
--   Burger regulat mode: Uses for the 'Combiend.csv' file our geospatial
-    layer of @burger2021 and our MeteoSwiss meteorological data set. This
-    is the mode we use to answer the third research questions of this
-    study.
+-   **Burger regular mode**: Uses for the 'Combiend.csv' file our
+    geospatial layer of @burger2021 and our MeteoSwiss meteorological data
+    set. This is the mode we use to answer the third research questions of
+    this study.
 
 ### Packages
 
@@ -397,17 +481,21 @@ the vector 'packages' and run the code again.
 
 ```{r Load the Packages needed, echo=TRUE, message=FALSE, warning=FALSE}
 # Decide which packages you need. For this Project you need the following:
-packages <- c("influxdbclient","ggplot2","tidyverse","lubridate",
-              "dplyr","caret","vip","parsnip",
-              "workflows","tune","dials","stringr","terra","stars","sf","plyr",
-              "doParallel", "foreach", "terrainr","starsExtra", "pdp", "recipes", 
-              "tidyterra","shiny", "xgboost", 'kableExtra','rnaturalearth','zoo',
-              'moments', 'tibble','rsample','yardstick','cowplot','purrr','renv','ranger','Boruta','devtools','sp','keras','tensorflow')
+packages <- c('influxdbclient', 'ggplot2', 'tidyverse', 'lubridate', 'dplyr', 'caret',
+              'vip', 'parsnip', 'workflows', 'tune', 'dials', 'stringr', 'terra', 'stars',
+              'sf', 'plyr', 'doParallel', 'foreach', 'terrainr', 'starsExtra', 'pdp', 
+              'recipes', 'tidyterra', 'shiny', 'xgboost', 'kableExtra', 'rnaturalearth', 'zoo',
+              'moments', 'tibble', 'rsample', 'yardstick', 'cowplot', 'purrr', 'renv',
+              'ranger','Boruta','devtools','sp','keras','tensorflow')
 ```
 
 ### Data split
-For model training, the data is always split into training and evaluation data, even when no hyperparameter tuning is performed.
-The split is done by selecting 10 temperature measurement locations (Loggers) at random and using them as evaluation data. The rest of the measurement locations are used as training data.
+
+For model training, the data is always split into training and evaluation
+data, even when no hyperparameter tuning is performed. The split is done by
+selecting 10 temperature measurement locations (loggers) at random and
+using them as evaluation data. The rest of the measurement locations are
+used as training data.
 
 ```{r Choose your workflow mode, message=FALSE, warning=FALSE, include=FALSE}
 # Set seed for reproducibility
@@ -446,7 +534,7 @@ combined <- read_csv("../data/Combined.csv") |>
     combined <- dplyr::slice_sample(combined,prop = .05) 
   }
 
-# Random sample
+# Random sample of the 10 logger (10 locations) for evaluation
 loggers_test <- sample(unique(combined$Log_Nr), 10)
 
 # Generate a test set
@@ -460,12 +548,12 @@ combined_train <- combined |>
 
 ### Model Recipe
 
-The model recipe corresponds to the defined predictors minus the in table 2
-mentioned removed variables. Furthermore a step_YeoJohnson (includes Box
-Cox and an extension. Now, it can handle x ≤ 0), step_center (subsracting
-the mean from each observation/measurement), and a step_scale (transforming
-numeric variables to a similar scale) are preformed. With the recipe it is
-now possible to generate the different models.
+The model recipe corresponds to the defined predictors minus the variables
+in table 2 mentioned. Furthermore, a step_YeoJohnson (includes Box Cox and
+an extension. Now, it can handle x ≤ 0), step_center (subsracting the mean
+from each observation/measurement), and a step_scale (transforming numeric
+variables to a similar scale) are preformed. With the recipe it is now
+possible to generate the different models.
 
 ```{r Predictors and Recipe, echo=FALSE, message=FALSE, warning=FALSE}
 # Take all column-names you need as predictors from the combined file
@@ -489,28 +577,28 @@ pp <- recipes::recipe(formula_local,
     recipes::step_scale(recipes::all_numeric(), -recipes::all_outcomes())
 ```
 
-## Methodology: Modelling^WP2^
+## Methodology: Modelling
 
 In this methodology subsection, we describe how the models are implemented
 and specify the hyperparameters that are used. It is important to note that
 we have already conducted hyperparameter tuning, but exclusively for the
 regular mode. Consequently, if you choose to use the demo mode (and thus
 for knitting), the models may be under- or overfitted and may not perform
-well. As mentioned before, we distinguish between our basic models and our
-advanced models.
+well.
 
-### Basic Models implementation
+### Basic Models Implementation^WP2^
 
 The basic models include linear regression, k-nearest neighbors (knn), and
 the random forest model. We compare their performance based on their
-ability to explain variance, accuracy, and precision in predicting the
-target (local temperature anomaly). In the following subsections, we will
-introduce you to these models. Please note that we utilize DoParallel due
-to the extensive size of our data set (and thus high computational time).
-Additionally, the models are designed and tuned to deliver optimal
-performance in regular mode. Consequently, significant deviations are
-inevitable when operating in "demo mode", "Burger demo mode", or "Burger
-regular mode".
+ability to explain variance ($R^2$), accuracy (bias), and precision (RMSE)
+in predicting the target (local temperature anomaly). In the following
+subsections, we will introduce you to these models. Please note that we
+utilize DoParallel due to the extensive size of our data set (and thus high
+computational time). Additionally, the models are designed and tuned to
+deliver optimal performance in 'regular mode'. Consequently, significant
+deviations are inevitable when operating in 'demo mode', 'Burger demo
+mode', or 'Burger regular mode'. The estimated computational time depends
+on your device and should be considerd as a guiding value.
 
 #### Implementation of the Linear Regression Model
 
@@ -518,8 +606,8 @@ The lm-model is a classic multiple linear regression model. Calculating the
 model requires a recipe and training data as inputs, and there is no option
 available for model tuning. To enhance model performance, three
 cross-validations are performed by logger number. The computational time
-should not exceed 10 seconds for the demo mode and 60 seconds for the
-regular mode (depending on your device).
+should not exceed 10 seconds for the 'demo mode' and 60 seconds for the
+'regular mode'.
 
 ```{r Calculate lm-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to calculate a lm model
@@ -533,30 +621,26 @@ lm_model <- LM_Model(pp, combined_train)
 
 Calculating the KNN model requires a recipe and training data as inputs.
 The function computes a KNN model with the recipe and employs 3
-cross-validations by logger numbers. By default, the hyperparameter "k" is
-set to 10. In demo mode, model tuning is not meaningful because the mode
+cross-validations by logger numbers. By default, the hyperparameter 'k' is
+set to 10. In 'demo mode', model tuning is not meaningful because the mode
 exists for demonstration purposes only. The estimated computational time is
-about 30 seconds.
+about 45 seconds.
 
 The function has a safety feature implemented because the computing time
-for a KNN model in regular mode can be very high. In the worst case, one
-must **compute** $O(cv⋅n⋅d+cv⋅k⋅n)$ **distances,** where "n" is the number
-of observations, "d" is the number of dimensions, "cv" is the number of
-cross-validations, and "k" is the hyperparameter. For this reason, a
-typical device may require several hours. The safety feature limits the
-data input to 100,000 rows and limits therefore the computational time to
-about 5 minutes. The adjustment takes place automatically, and you will be
-informed about how many rows are removed and what percentage of the
-original data remains. Note that model tuning takes place for the regular
-mode.
+for a KNN model in 'regular mode' can be very high. The safety feature
+limits the data input to 100,000 rows and limits therefore the
+computational time to about 5 minutes. The adjustment takes place
+automatically, and you will be informed about how many rows are removed and
+what percentage of the original data remains. Note that model tuning takes
+place for the 'regular mode'.
 
-KNN utilizes "k" as a hyperparameter, providing an option for model tuning.
-When setting "tuning=TRUE", the function automatically fine-tunes the model
-for the specified "k" values (k=c(8:12)). Since the determination of the
-hyperparameter "k" is unique, you can consider the tuning successful if "k"
-belongs to $k\in[9, 10, 11]$. In cases where "k" is either 8 or 12, we
+KNN utilizes 'k' as a hyperparameter, providing an option for model tuning.
+When setting 'tuning=TRUE', the function automatically fine-tunes the model
+for the specified 'k' values (k=c(8:12)). Since the determination of the
+hyperparameter 'k' is unique, you can consider the tuning successful if 'k'
+belongs to $k\in[9, 10, 11]$. In cases where 'k' is either 8 or 12, we
 recommend accessing the corresponding R script and expanding the range of
-the "tuning_vector". The default setting is "k=10".
+the 'tuning_vector'.
 
 ```{r Calculation of the knn-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to calculate a KNN model
@@ -574,18 +658,18 @@ employs 3 cross-validations using logger numbers. The model requires two
 hyperparameters. By default, the 'mtry' hyperparameter is set to 16 (number
 of variables in the recipe divided by 3.5). This hyperparameter represents
 the number of features randomly sampled at each split when constructing a
-decision tree within the forest, controlling the diversity among the trees
-in the ensemble. The second one is 'min.node.size,' which controls the
-minimum number of data points required to create a node in a decision tree
-within the forest, helping to control the size of the tree and prevent
+decision tree within the forest. It is controlling the diversity among the
+trees in the ensemble. The second one is 'min.node.size,' which controls
+the minimum number of data points required to create a node in a decision
+tree within the forest, helping to control the size of the tree and prevent
 overfitting. By default, this hyperparameter is set to 3.
 
-In demo mode, model tuning is not meaningful because it exists for
+In 'demo mode', model tuning is not meaningful because it exists for
 demonstration purposes only. The estimated computational time to generate a
-random forest model is about 15 seconds. In regular mode, we provide an
+random forest model is about 15 seconds. In 'regular mode', we provide an
 option for fine-tuning. If you wish to perform fine-tuning, change the
 tuning option to TRUE. The estimated computational time is about 100
-seconds when not tuning in regular mode.
+seconds if you do not use the tuning option.
 
 ```{r Calculation of the random forest-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to calculate a random forest model
@@ -595,18 +679,18 @@ source("../R/random_forest.R")
 random_forest <- random_forest(pp, combined_train, tuning = F)
 ```
 
-### Advanced Models implementation^WP1^
+### Advanced Models Implementation^WP1^
+
+The XGBoost-model can be time intensive. We use the DoParallel Package for
+that. Please make sure, that your device does nothing else.
 
 #### Implementation of the XGBoost
 
-The XGBoost-model can be time intensive. We use the DoParallel Package for
-that. Please make sure, that your device does nothing else. Implementation
-of the XGB Model
-
 For the XGBoost model, all hyperparameters are tuned and a cross validation
-is performed by 3 folds for the logger ID. Tuning is always enabled.
+is performed by 3 folds for the logger ID. If you calculating the model,
+fine tuning is always true.
 
-```{r}
+```{r XG Bost, echo=FALSE, message=FALSE, warning=FALSE}
 
 if(advanced_models == "y"){
 source("../R/XGB.R")
@@ -623,16 +707,14 @@ and a batch size of 30. These are some standard values for the data size of
 5% of the data. Make sure tensorflow is up and running before running this
 model.
 
-```{r}
+```{r Neuronal Network, echo=FALSE, message=FALSE, warning=FALSE}
 
 if(advanced_models == "y"){
   source("../R/neural_network.R")
   library(keras)
   #tensorflow::install_tensorflow() may need to be run...
   #Use pyhton version 3.11... rest should be fine...
-  nn_model <- neural_network(combined_train)
-
-}  
+  nn_model <- neural_network(combined_train) }  
 ```
 
 # Results
@@ -640,9 +722,10 @@ if(advanced_models == "y"){
 In this section, we present our findings in terms of the explanation of
 variance ($R^2$), precision (RMSE), and accuracy (bias). Additionally, we
 present the main statistic parameters. Once again, we distinguish between
-basic models (lm, knn, and random forest models) and advanced models
-(XGBoost and neural network). An overview of the results can be found in
-tables 3-5 in the Summary of Key Findings subsection.
+basic models (multiple linear regression, knn, and random forest models)
+and advanced models (XGBoost and neural network). An overview of the
+results can be found in tables 3-5 in the 'Summary of the Key Findings'
+subsection.
 
 ## Basic Models^WP2^
 
@@ -651,11 +734,11 @@ basic models are assessed using the same evaluation function. The function
 takes a training data set, a test data set, and the model as inputs. The
 mode in which the respective model was generated is irrelevant, as the
 function processes them identically. However, it should be noted that all
-hyperparameters were tuned for the regular mode during the implementation
+hyperparameters were tuned for the 'regular mode' during the implementation
 of the models. Consequently, the quality of the models varies significantly
 depending on the mode.
 
-The function returns a list containing five elements:
+The function returns a list containing seven elements:
 
 1.  The first element is a table that provides an overview of the metrics
     ($R^2$, RMSE, MAE, and bias) for the model itself, including
@@ -682,34 +765,40 @@ The function returns a list containing five elements:
 5.  The fifth element is a boxplot for the hour of the day. This plot shows
     you the deviation at different times of the day.
 
+6.  Plot shows the distribution of the temperature anomaly compared to a
+    normal distribution with mean = 0 and standard deviation = 1. It is a
+    visualization of the bias and therefore of the systematic error.
+
 Note that this study aims to find the best model with the available data.
-Therefore, the evaluation has been conducted in the regular mode. The
+Therefore, the evaluation has been conducted in the 'regular mode'. The
 results described in the evaluation subsections cannot be transferred to
-other modes. If you are interested in the findings of the demo mode or the
-@burger2021 mode, please refer to Table 3 and 4, respectively.
+other modes. If you are interested in the findings of the 'demo mode' or
+one of the 'Burger modes', please refer to Table 3 and 4, respectively.
 
-### Evaluation of the lm-model
+### Evaluation of the lm Model
 
-Here, we evaluate the lm-model using the evaluation function. Computational
+Here, we evaluate the lm model using the evaluation function. Computational
 time should not be a concern, and we estimate it to be about 30 seconds.
 
 The first element is a table that shows the main metrics. The multiple
 linear regression model explains 45% of the variance. Furthermore, it
 exhibits a precision (RMSE) of approximately 0.88°C and an accuracy (bias)
 of around 0.09°C. The bias of the training data is zero, indicating a
-successful implementation of the evaluation function, as required by
-definition.
+successful implementation of the evaluation function (bias for training
+must be zero by definition).
 
-The second element displays the main statistical parameters. This reveals a
-relatively high spread of about 12.5 °C. However, the IQR is approximately
-1.1°C, signifying that 50% of the data falls within this interval. The
-skewness is negative, indicating a longer right tail and an asymmetric
-distribution. We conclude that the model contains negative outliers (mean
-\< median). This conclusion is confirmed by boxplots (see fifth element).
+The second element provides the main statistical parameters. The table
+reveals a relatively high spread of about 12.5 °C. However, the IQR is
+approximately 1.1°C, signifying that 50% of the data falls within this
+interval. The skewness is negative, indicating a longer right tail and
+thus, an asymmetric distribution. We conclude that the model contains
+negative outliers (mean \< median). This conclusion is confirmed by
+boxplots (see fifth element).
 
 The third element is the visualization, which reveals that the model does
 not perform well at high temperatures. The plot also displays negative
-outliers (note dots in the test set evaluation plot, bottom right).
+outliers (note dots in the test set evaluation plot, bottom right). This
+corresponds with the main statistic parameters.
 
 The fourth element comprises boxplots by logger side. All ten box-whiskers
 are within a ±2 °C range, but there are outliers, especially in Murifeld
@@ -739,15 +828,19 @@ evaluation[[2]]
 evaluation[[3]]
 # Boxplot for each logger station 
 evaluation[[4]]
-# Boxplot for each hour of the day (24h)
+# Boxplot for each hour of the day (24h) (Precision)
 evaluation[[5]]
+# Distribution compared to a normal distribution (systematic error / accuracy)
+evaluation[[6]]
 ```
 
-### Evaluation of the knn-model
+### Evaluation of the knn-Model
 
-Here, we evaluate the knn-model using the evaluation function.
+Here, we evaluate the knn model using the evaluation function.
 Computational time can be a concern, and we estimate it to be about 5
-minutes.
+minutes. That is why we implemented a safety feature which recognized if
+you use a knn model and limits the rows to about 4500. This works
+automatically.
 
 The first element is a table that displays the main metrics. The knn model
 explains 48% of the variance. Furthermore, it demonstrates a precision
@@ -798,13 +891,15 @@ evaluation[[2]]
 evaluation[[3]]
 # Boxplot for each logger station 
 evaluation[[4]]
-# Boxplot for each hour of the day (24h)
+# Boxplot for each hour of the day (24h) (Precision)
 evaluation[[5]]
+# Distribution compared to a normal distribution (systematic error / accuracy)
+evaluation[[6]]
 ```
 
-### Evaluation of the random forest-model
+### Evaluation of the Random Forest Model
 
-Here, we evaluate the knn-model using the evaluation function.
+Here, we evaluate the random forest model using the evaluation function.
 Computational time can be a concern, and we estimate it to be about 60
 seconds.
 
@@ -851,8 +946,10 @@ evaluation[[2]]
 evaluation[[3]]
 # Boxplot for each logger station 
 evaluation[[4]]
-# Boxplot for each hour of the day (24h)
+# Boxplot for each hour of the day (24h) (Precision)
 evaluation[[5]]
+# Distribution compared to a normal distribution (systematic error / accuracy)
+evaluation[[6]]
 ```
 
 ## Advanced Models^WP1^
@@ -975,90 +1072,125 @@ increase with higher values. This is also expected.
 
 ## Summary of the Key Findings^WP2^
 
-This subsection summarizes the evaluation of the individual models. Only
-the explanation of the variance, the precision and the accuracy are shown.
+This subsection summarizes the evaluation of the models and provides an
+easy way to compare the models in different modes in terms of explaining of
+the variance, the precision and accuracy.
 
 ### Summary for the Regular Modes
 
 Table 3 provides an overview of both basic and advanced models for the
-regular mode. For model training, we utilized all meteorological data and
+'regular mode'. For model training, we utilized all meteorological data and
 our geospatial layers, each with three different zonal means (25m, 150m,
 and 1000m). The random forest model outperforms all other models,
-explaining more variance with the highest $R^2$. Additionally, it
+explaining more of the variance (the highest $R^2$). Additionally, it
 demonstrates superior precision, reflected in the lowest RMSE. It is worth
 noting that, while the random forest model does not achieve the highest
 accuracy due to a slightly higher bias (approximately 0.04 °C), its
 exceptional $R^2$ and RMSE lead us to consider it as our best model.
 
-| Model                | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|---------------|---------------|---------------|---------------|---------------|
-| Linear Regression    | 0.45           | 0.88 °C         | 0.69 °C        | 0.088 °C        |
-| KNN [reduced to 13%] | 0.48           | 0.86 °C         | 0.66 °C        | 0.03 C °        |
-| Random Forest        | 0.73           | 0.62 °C         | 0.46 °C        | 0.083 °C        |
-| XGB Boost            | \-             | \-              | \-             | \-              |
-| Neuronal Network     | \-             | \-              | \-             | \-              |
++-------------+-------------+-------------+-------------+-------------+
+| Model       | RSQ [Test   | RMSE [Test  | MAE [Test   | Bias [Test  |
+|             | set]        | set]        | set]        | set]        |
++=============+=============+=============+=============+=============+
+| Linear      | 0.45        | 0.88 °C     | 0.69 °C     | 0.088 °C    |
+| Regression  |             |             |             |             |
++-------------+-------------+-------------+-------------+-------------+
+| KNN         | 0.48        | 0.86 °C     | 0.66 °C     | 0.03 C °    |
+| [reduced to |             |             |             |             |
+| 13%]        |             |             |             |             |
++-------------+-------------+-------------+-------------+-------------+
+| Random      | 0.73        | 0.62 °C     | 0.46 °C     | 0.083 °C    |
+| Forest      |             |             |             |             |
++-------------+-------------+-------------+-------------+-------------+
+| XGB Boost   | \-          | \-          | \-          | \-          |
++-------------+-------------+-------------+-------------+-------------+
+| Neuronal    | \-          | \-          | \-          | \-          |
+| Network     |             |             |             |             |
++-------------+-------------+-------------+-------------+-------------+
 
 : **TABLE 3:** Overview of the results and evaluation of the models in the
-regular-mode (all meteorologic data and our own geospatial layers).
+'regular-mode' (all meteorologic data and our own geospatial layers).
 
 In order to comprehensively assess the quality of our models, we generated
-and evaluated them in Burger-regular-mode, utilizing full meteorologic data
-but employing the geospatial layer from @burger. In this mode, the random
-forest model outperforms all others, excelling in both explaining variance
-(highest $R^2$) and precision (lowest RMSE). While its bias (accuracy) is
-not the lowest, it remains at a low level. It's essential to note that our
-models are not specifically tuned for Burger-regular mode but rather for
-the regular mode. A brief summary of these findings is presented in Table
-4.
+and evaluated them in 'Burger regular mode', utilizing full meteorologic
+data but employing the geospatial layer from @burger. In this mode, the
+random forest model outperforms all others, excelling in both explaining
+variance (highest $R^2$) and precision (lowest RMSE). While its bias
+(accuracy) is not the lowest, it remains at a low level. It's essential to
+note that our models are not specifically tuned for 'Burger regular mode'
+but rather for the 'regular mode'. A brief summary of these findings is
+presented in Table 4.
 
-Upon comparison with our own models (full meteorologic data and our own
-geospatial layers), we observed that each model performs superior in
-Burger-regular mode. Notably, the most substantial differences in
-explaining variance are observed in the KNN model, where our own KNN model
-lags by 8%. While there is no significant difference in precision (RMSE),
-the Burger mode models exhibit a slight improvement (approximately 0.03°C
-lower). The bias (accuracy) is significantly reduced in the random forest
-model of the Burger mode (approximately 0.03°C).
+Upon comparison with our own models we observed that each model performs
+superior in 'Burger regular mode'. Notably, the most substantial
+differences in explaining variance are observed in the KNN model, where our
+own KNN model lags by 8%. While there is no significant difference in
+precision (RMSE), the 'Burger regular mode' models exhibit a slight
+improvement (approximately 0.03°C lower). The bias (accuracy) is
+significantly reduced in the random forest model of the 'Burger regular
+mode' (approximately 0.03°C).
 
-| Model                | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|---------------|---------------|---------------|---------------|---------------|
-| Linear Regression    | 0.49           | 0.91 °C         | 0.7 °C         | 0.001 °C        |
-| KNN [reduced to 13%] | 0.55           | 0.84 °C         | 0.63 °C        | -0.03 C °       |
-| Random Forest        | 0.78           | 0.62 °C         | 0.45 °C        | 0.03 °C         |
-| XGB Boost            | 0.65           | 0.752 °C        | 0.538 °C       | -0.061          |
-| Neuronal Network     | \-             | \-              | \-             | \-              |
++-------------+-------------+-------------+-------------+-------------+
+| Model       | RSQ [Test   | RMSE [Test  | MAE [Test   | Bias [Test  |
+|             | set]        | set]        | set]        | set]        |
++=============+=============+=============+=============+=============+
+| Linear      | 0.49        | 0.91 °C     | 0.7 °C      | 0.001 °C    |
+| Regression  |             |             |             |             |
++-------------+-------------+-------------+-------------+-------------+
+| KNN         | 0.55        | 0.84 °C     | 0.63 °C     | -0.03 C °   |
+| [reduced to |             |             |             |             |
+| 13%]        |             |             |             |             |
++-------------+-------------+-------------+-------------+-------------+
+| Random      | 0.78        | 0.62 °C     | 0.45 °C     | 0.03 °C     |
+| Forest      |             |             |             |             |
++-------------+-------------+-------------+-------------+-------------+
+| XGB Boost   | 0.65        | 0.752 °C    | 0.538 °C    | -0.061      |
++-------------+-------------+-------------+-------------+-------------+
+| Neuronal    | \-          | \-          | \-          | \-          |
+| Network     |             |             |             |             |
++-------------+-------------+-------------+-------------+-------------+
 
 : **TABLE 4:** Overview of the results and evaluation of the models in the
-Burger-regular-mode (all meteorologic data and the geospatial layers of
+'Burger regular mode' (all meteorologic data and the geospatial layers of
 @burger2021).
 
 ### Summary for the Demo Modes
 
 To conclude our analysis, we present a summary of the results from both the
-demo mode (Table 5) and the Burger demo mode (Table 6). In these modes, we
-utilized only approximately 5% of randomly chosen meteorologic data, along
-with either our geospatial layers (for demo mode) or the geospatial layers
-of @burger2021 (Burger demo mode). Table 5 provides an overview of the
-results for the demo mode. Once again, the random forest emerges as the
-best model, explaining 2--5% more variance than other models and
-demonstrating superior precision with the lowest RMSE. However, its bias is
-approximately 0.18°C higher than the bias of the KNN model, which excels in
-accuracy and overall performance.
+'demo mode' (Table 5) and the 'Burger demo mode' (Table 6). In these modes,
+we utilized only approximately 5% of randomly chosen meteorologic data,
+along with either our geospatial layers (for 'demo mode') or the geospatial
+layers of @burger2021 ('Burger demo mode').
 
-| Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|---------------|---------------|---------------|---------------|---------------|
-| Linear Regression | 0.422          | 0.93 °C         | 0.739 °C       | 0.125 °C        |
-| KNN               | 0.457          | 0.91 °C         | 0.704 °C       | 0.05 °C         |
-| Random Forest     | 0.477          | 0.899 °C        | 0.661 °C       | 0.184 °C        |
-| XGB Boost         | 0.533          | 0.829 °C        | 0.629 °C       | 0.061 °C        |
-| Neuronal Network  | 0.185          | 1.104 °C        | 0.890 °C       | 0.047 °C        |
+Once again, the random forest emerges as the best model, explaining 2--5%
+more variance than other models and demonstrating superior precision with
+the lowest RMSE. However, its bias is approximately 0.18°C higher than the
+bias of the KNN model, which excels in accuracy and overall performance.
 
-: **TABLE 5:** Overview of the results and evaluation of the models with 5
-% of the data and our own geospatial layer.
++-------------+-------------+-------------+-------------+-------------+
+| Model       | RSQ [Test   | RMSE [Test  | MAE [Test   | Bias [Test  |
+|             | set]        | set]        | set]        | set]        |
++=============+=============+=============+=============+=============+
+| Linear      | 0.422       | 0.93 °C     | 0.739 °C    | 0.125 °C    |
+| Regression  |             |             |             |             |
++-------------+-------------+-------------+-------------+-------------+
+| KNN         | 0.457       | 0.91 °C     | 0.704 °C    | 0.05 °C     |
++-------------+-------------+-------------+-------------+-------------+
+| Random      | 0.477       | 0.899 °C    | 0.661 °C    | 0.184 °C    |
+| Forest      |             |             |             |             |
++-------------+-------------+-------------+-------------+-------------+
+| XGB Boost   | 0.533       | 0.829 °C    | 0.629 °C    | 0.061 °C    |
++-------------+-------------+-------------+-------------+-------------+
+| Neuronal    | 0.185       | 1.104 °C    | 0.890 °C    | 0.047 °C    |
+| Network     |             |             |             |             |
++-------------+-------------+-------------+-------------+-------------+
+
+: **TABLE 5:** Overview of the results and evaluation of the models in the
+'demo mode' (with 5 % of the data and our own geospatial layer).
 
 In order to comprehensively assess the quality of our models, we generated
-and evaluated them in Burger-demo-mode, utilizing complete meteorologic
-data but incorporating the geospatial layer from @burger. In this context,
+and evaluated them in 'Burger demo mode', utilizing 5% of the meteorologic
+data and incorporating the geospatial layer from @burger. In this context,
 the knn model exhibits the best performance, explaining the highest amount
 of variance (highest $R^2$), achieving the best precision (lowest RMSE),
 and demonstrating superior accuracy (lowest bias).
@@ -1071,16 +1203,27 @@ excessive computational time. The results presented in Tables 3 and 4 hold
 the most meaningful insights, as they directly address the objectives of
 this study.
 
-| Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
-|---------------|---------------|---------------|---------------|---------------|
-| Linear Regression | 0.45           | 0.9 °C          | 0.7 °C         | 0.1 °C          |
-| KNN               | 0.54           | 0.82 °C         | 0.63 °C        | 0.09 °C         |
-| Random Forest     | 0.52           | 0.85 °C         | 0.64 °C        | 0.12 °C         |
-| XGB Boost         | \-             | \-              | \-             | \-              |
-| Neuronal Network  | \-             | \-              | \-             | \-              |
++-------------+-------------+-------------+-------------+-------------+
+| Model       | RSQ [Test   | RMSE [Test  | MAE [Test   | Bias [Test  |
+|             | set]        | set]        | set]        | set]        |
++=============+=============+=============+=============+=============+
+| Linear      | 0.45        | 0.9 °C      | 0.7 °C      | 0.1 °C      |
+| Regression  |             |             |             |             |
++-------------+-------------+-------------+-------------+-------------+
+| KNN         | 0.54        | 0.82 °C     | 0.63 °C     | 0.09 °C     |
++-------------+-------------+-------------+-------------+-------------+
+| Random      | 0.52        | 0.85 °C     | 0.64 °C     | 0.12 °C     |
+| Forest      |             |             |             |             |
++-------------+-------------+-------------+-------------+-------------+
+| XGB Boost   | \-          | \-          | \-          | \-          |
++-------------+-------------+-------------+-------------+-------------+
+| Neuronal    | \-          | \-          | \-          | \-          |
+| Network     |             |             |             |             |
++-------------+-------------+-------------+-------------+-------------+
 
-: **TABLE 6:** Overview of the results and evaluation of the models with 5
-% of the data and the geospatial layer of @burger2021.
+: **TABLE 6:** Overview of the results and evaluation of the models in
+'Burger demo mode' (with 5 % of the data and the geospatial layer of
+@burger2021).
 
 ## Map^WP2^
 
@@ -1088,39 +1231,77 @@ This subsection aims to generate maps to visualize our key findings. The
 map displays the spatial distribution of temperature anomalies for the
 suburban area of the city of Bern. To achieve this, we defined multiple
 vectors, each representing a typical meteorologic situation. You also have
-the option to define your own vector with custom values. However, it's
+the option to define your own vector with customized values. However, it's
 important to note that the models are not trained for extremes.
-Additionally, ensure that you avoid contradictions (e.g., the sum of 3D
-precipitation \< sum of 1D precipitation).
+Additionally, ensure that you avoid contradictions (e.g., the sum of 3 day
+precipitation \< sum of 1 day precipitation).
 
-Table 7 provides a concise overview of possible intervals for each
-variable. These intervals are derived from extreme events recorded by
-[MeteSchweiz](https://www.meteoschweiz.admin.ch/klima/klima-der-schweiz/rekorde-und-extreme.html).
-We reduced the intervals by about 10% on both sides, where possible. Please
-keep this in mind when exploring and adjusting values.
+Table 7 provides a brief overview of possible intervals for each variable.
+These intervals are derived from extreme events recorded by
+[MeteoSchweiz](https://www.meteoschweiz.admin.ch/klima/klima-der-schweiz/rekorde-und-extreme.html).
+We reduced the intervals by about 10% on both sides (and rounded it to a
+even number), where possible. Please keep this in mind when exploring and
+adjusting values.
 
-| Variable                | Default      | Realistic Interval                                        |
-|-----------------|-----------------|------------------------------------------|
-| Temperature             | 22 °C        | $x[°C] \in[-15\leq x \leq 35]$                            |
-| Rain                    |              | $x[mm] \in[0 \leq x \leq 200]$                            |
-| Radiation               |              | \$ x[W\*m\^{-2}] \in[0 \leq x \leq 300]\$, for a 10' mean |
-| Wind speed              | 8 $m*s^{-1}$ | $x[m*s^{-1}] \in[0 \leq x \leq 20]$                       |
-| Wind direction          |              | $x[°] \in[0 \leq x \leq 360]$, with 0° = N, 180° = S      |
-| 6h mean temperature     | 22 °C        | $x[°C] \in[-15 \leq x \leq 35]$                           |
-| 12h mean temperature    | 19 °C        | $x[°C] \in[-15 \leq x \leq 35]$                           |
-| 1d mean temperature     | 20 °C        | $x[°C] \in[-15 \leq x \leq 35]$                           |
-| 3d mean temperature     | 18 °C        | $x[°C] \in[-15 \leq x \leq 35]$                           |
-| 5d mean temperature     | 17 °C        | $x[°C] \in[-15 \leq x \leq 35]$                           |
-| 6h precipitation [sum]  | 30 mm        | $x[mm] \in[0 \leq x \leq 100]$                            |
-| 12h precipitation [sum] | 25 mm        | $x[mm] \in[0 \leq x \leq 200]$                            |
-| 1d precipitation [sum]  | 20 mm        | $x[mm] \in[0 \leq x \leq 400]$                            |
-| 3d precipitation [sum]  | 15 mm        | $x[mm] \in[0 \leq x \leq 600]$                            |
-| 5d precipitation [sum]  | 10 mm        | $x[mm] \in[0 \leq x \leq 600]$                            |
-| 19d precipitation [sum] | 5 mm         | $x[mm] \in[0 \leq x \leq 600]$                            |
++----------------+----------------+-------------------------------------+
+| Variable       | Default        | Realistic Interval                  |
++================+================+=====================================+
+| Temperature    | 22 °C          | $x[°C] \in[-15\leq x \leq 35]$      |
++----------------+----------------+-------------------------------------+
+| Rain           | 0 mm           | $x[mm] \in[0 \leq x \leq 200]$      |
++----------------+----------------+-------------------------------------+
+| Radiation      | 0 $[W*m^{-2}]$ | $x                                  |
+|                |                | [W*m^{-2}] \in[0 \leq x \leq 300]$, |
+|                |                | for a 10' mean                      |
++----------------+----------------+-------------------------------------+
+| Wind speed     | 8 $m*s^{-1}$   | $x[m*s^{-1}] \in[0 \leq x \leq 20]$ |
++----------------+----------------+-------------------------------------+
+| Wind direction | 0 (north wind) | $x[°] \in[0 \leq x \leq 360]$, with |
+|                |                | 0° = N, 180° = S                    |
++----------------+----------------+-------------------------------------+
+| 6h mean        | 22 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
+| temperature    |                |                                     |
++----------------+----------------+-------------------------------------+
+| 12h mean       | 19 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
+| temperature    |                |                                     |
++----------------+----------------+-------------------------------------+
+| 1d mean        | 20 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
+| temperature    |                |                                     |
++----------------+----------------+-------------------------------------+
+| 3d mean        | 18 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
+| temperature    |                |                                     |
++----------------+----------------+-------------------------------------+
+| 5d mean        | 17 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
+| temperature    |                |                                     |
++----------------+----------------+-------------------------------------+
+| 6h             | 30 mm          | $x[mm] \in[0 \leq x \leq 100]$      |
+| precipitation  |                |                                     |
+| [sum]          |                |                                     |
++----------------+----------------+-------------------------------------+
+| 12h            | 25 mm          | $x[mm] \in[0 \leq x \leq 200]$      |
+| precipitation  |                |                                     |
+| [sum]          |                |                                     |
++----------------+----------------+-------------------------------------+
+| 1d             | 20 mm          | $x[mm] \in[0 \leq x \leq 400]$      |
+| precipitation  |                |                                     |
+| [sum]          |                |                                     |
++----------------+----------------+-------------------------------------+
+| 3d             | 15 mm          | $x[mm] \in[0 \leq x \leq 600]$      |
+| precipitation  |                |                                     |
+| [sum]          |                |                                     |
++----------------+----------------+-------------------------------------+
+| 5d             | 10 mm          | $x[mm] \in[0 \leq x \leq 600]$      |
+| precipitation  |                |                                     |
+| [sum]          |                |                                     |
++----------------+----------------+-------------------------------------+
+| 10d            | 5 mm           | $x[mm] \in[0 \leq x \leq 600]$      |
+| precipitation  |                |                                     |
+| [sum]          |                |                                     |
++----------------+----------------+-------------------------------------+
 
 : **Table 7:** Overview about the default values for the variables used to
 predict the map. Further, it shows reasonable possible values for the
-variables
+meteoroolgical variables according to
 [MeteoSuisse](https://www.meteoschweiz.admin.ch/klima/klima-der-schweiz/rekorde-und-extreme.html).
 
 # Spatial Upscaling^WP2^
@@ -1147,7 +1328,9 @@ map_generater(model = random_forest, meteoswiss_input = normal_summarevening)
 
 # Discussion
 
-## Data^WP1^
+## Discussion of the Data Used^WP1^
+
+\-\-\-\-\-\--\> Should this part really be here?
 
 To fully implement the Open Sciences approach, the models can be computed
 using the following code chunks. Further, for every model, a short synopsis
@@ -1177,28 +1360,55 @@ we did not taken into account.
 As mentioned, the model calculation can be very time intensive. Table 4
 shows the results for approach with reduced data. Overall we can say, that
 the models perform less. All values are lesser than in table 3. Note the
-high bias for the random forest. The model highli overestimate the
+high bias for the random forest. The model highly overestimate the
 temperature. We do not have an explanation for this. May be there is a
 problem with the reducing process. If we only use 5% of our data, then we
 lose a lot of information. If we lose all information about a certain
 logger station but the model predict this station, the it could b that the
-model perfoms worse. But we are not sure and more investigations are
+model performs worse. But we are not sure and more investigations are
 needed. But as a conclusion we can say, that more data improve the models.
 
-## Methodology
+\-\-\-\-\-\--\> Should this part really be here?
 
-More data quality
+## Discussion of the Methodology Used
 
-KNN is not suitable for large data sets because of the high computational
-time
+### Basic Model: Implementation and Evaluation
 
-**The random forest model explains about 73% of the variance. The RSME is
-about 0.63 °C. Note that the error of a single LCD in the climate network
-of the city of Bern is about 1.5°C (see Burger et all 2019). Further we can
-see, that data scattering is about 0.2°C lower than for a KNN- or lm-model
-(accuracy). The bias is for all models about 0.07°C (systematic error /
-precision). It is positive and therefore our models overestimate the
-temperature (see evaluation and access the second element of the list).**
+Generally, we find that our results are plausible and promising, leading us
+to assume that no major errors were made in the implementation and
+evaluation of the models. However, we would like to briefly discuss a point
+in the implementation and two points in the evaluation.
+
+During implementation, we observed that the knn algorithm is only suitable
+for large data sets to a limited extent due to its high computational time.
+This is especially true when considering that the output still only
+demonstrates average performance. We had to reduce the data input to
+approximately 500,000 data points, as the calculation would otherwise take
+several hours. Consequently, the knn model is not as well-trained as the
+random forest, which partly explains its poorer performance. In 'demo
+mode,' however, knn and random forest show comparable performance.
+
+In the evaluation phase, we encountered a similar problem with the knn
+algorithm. Predicting the temperature and thus modeling the UHI effect
+takes a considerable amount of time (up to 2 h). Consequently, we had to
+reduce the data set here as well. This implies that we could not evaluate
+the knn and random forest models with the same data set, which might
+explain the large difference in performance. But here again, the models are
+comparable in 'demo mode.'
+
+There might also be a problem with the evaluation itself. As seen in the
+box plot, 10 randomly chosen LDC locations are used. However, it is
+possible that these 10 loggers represent the worst ones, having the highest
+RMSE and Bias and the lowest R². This would degrade our models. Of course,
+this would be true for all models, including Burger's. But we think this
+would make the validity of the models more honest. We recommend improving
+the evaluation function by including more locations, perhaps using all 55
+locations used in all years between 2019-2022. We believe this adjustment
+would enhance our evaluation.
+
+### Advanced Model: Implementation and Evaluation
+
+\-\-\-\-\-\--\> Should this part really be here?
 
 **The XGB Boost and the neuronal network are additional and should show
 you, that there are further techniques which could be explored. But those
@@ -1216,25 +1426,98 @@ model perfoms worse. But we are not sure and more investigations are
 needed. But as a conclusion we can say, that more data improve the
 models.**
 
-## Results
+\-\-\-\-\-\--\> Should this part really be here?
 
--- ML vs Linear regression
+## Discussion of the Results
 
+### Performance of the Basic Models
 
+In general we can say that the model performed how we expected. The results
+are plausible enough to answer or at least discuss the research questions.
+The following paragraphs answer the first three research questions.
 
-One of the main findings is that the geospatial layers of [@burger2021] perform better than the one generated in this study. Interestingly the random forest stepwise backwards regression was unable to detect this trend because it is implemented based on the RSME not on the R-swuared. The models do have the same RSME but not the same R-Squared. This is probably due to overfitting in case of to many spatial predictors. The model then learns very localized patterns that are poorly generalizable. 
+Our first research question aimed to assess whether machine learning
+techniques are reasonable approaches for modeling the UHI effect in the
+city of Bern. To answer this question, we focused on the results of the
+'regular mode' only. As depicted in table 3, the random forest model
+explains more variance compared to a multiple linear regression (75% versus
+45%). It also exhibits a lower RMSE (0.62°C versus 0.88°C) and bias (0.08°C
+versus 0.09°C). Therefore, it can be concluded that utilizing machine
+learning techniques is indeed a reasonable approach. However, the results
+also shows the importance of meticulous model selection. For instance, the
+k-nearest neighbors (knn) model performs only marginally better than the
+regression model and significantly worse than the random forest model. It
+would probably not make sense to use a knn model in our particular case, as
+the effort involved in implementation and tuning is large compared to a
+regression model and the gain in model performance is rather small.
 
--- Models perform as expected
+The second research question investigated whether machine learning
+techniques outperform a classic linear regression approach. Unfortunately,
+we cannot provide a definitive answer to this question based on our
+results, although our findings suggest that this is true. In our specific
+study (modeling the UHI), we discovered a machine learning-based model that
+outperforms the classical regression model. However, it cannot be concluded
+from this single event that machine learning outperforms classical
+regression in general. Such a conclusion would necessitate further
+research, including additional case studies, mathematical considerations,
+and a more comprehensive investigation involving a broader range of models
+under varying conditions. Nevertheless, we recommend considering the use of
+machine learning in future model selection.
 
--- Diurnal cycle :error when predicting
+The third research question involves the comparison between our 'regular
+mode' and the 'Burger regular mode.' As mentioned in the introduction,
+@burger2021 previously modeled the Urban Heat Island (UHI) of the city of
+Bern using geospatial layers. His model achieved an R² in the range of
+[0.72, 0.77] and an RMSE in the range of [0.47, 0.62]. Although his model
+explains more or less the same percentage of the variance as ours, it has a
+significantly lower RMSE. We believe this difference is because he modeled
+the UHI during night-time only (22:00-06:00), while our model covers the
+entire day. As observed in the evaluation, our model underestimates values
+during the day and overestimates them during the night. We attribute our
+larger RMSE to higher scattering, as we are modeling 24 hours. This
+scattering may result from the radiation shield. In the 24-hour boxplot of
+our evaluation function, there is a peak at sunrise (fast decrease in
+temperature) and sunset (fast decrease in temperature), indicating a
+diurnal cycle. This cycle presumably correlates with the radiation hitting
+the radiation shield. We recommend performing our analysis with night-time
+data only to make the results more comparable with those of @burger2021.
 
-One general issue is the generation of the training and evaluation dataset. We just split the dataset in
+One of our main findings is intresting, and we are not entirely certain
+about the reasons behind these results. As observed in tables 4 and 6, the
+models performed best when we ran the code in 'Burger demo mode' or 'Burger
+regular mode,' respectively. This implies that the geospatial layers from
+@burger2021 work outperformed those generated in this study. Interestingly,
+the random forest stepwise backward regression was unable to detect this
+trend. We hypothesize that this may be due to its implementation based on
+RMSE rather than on $R^2$. Although the models have the same RMSE, their
+$R^2$ values differ. This discrepancy could be due to overfitting when
+there are too many spatial predictors. In such cases, the model may learn
+very localized patterns that are poorly generalizable. To confirm this
+suspicion, however, more in-depth investigations would be needed."
 
-### Advanced Models
-The XGBoost model performes best of all models with 5% of the data for our own layers but poorer than the random forest with all of the data for the layers of [@burger2021]. This might be due to overfitting. The RMSE of the XGBoost of the training dataset become very low (not shown in the results) but is high for the evaluation dataset with all of the data. One explanation could be overfitting.
+### Performance of the Advanced Models
 
-The performance of the neural network is very poor. It is by far the worst model for the 5% of the data with our geospatial predictors. This should not be considered a definitive result at all. It is more a sort of proof of concept and this study is does not implement the neural network with great expertise. Check out the neural network yourself and judge whether the metrics used are reasonable.
+Although the advanced models are not an integral part of this study, we
+would like to discuss them briefly.
+
+The XGBoost model performes best of all models with 5% of the data for our
+own layers but poorer than the random forest with all of the data for the
+layers of [@burger2021]. This might be due to overfitting. The RMSE of the
+XGBoost of the training dataset become very low (not shown in the results)
+but is high for the evaluation dataset with all of the data. One
+explanation could be overfitting.
+
+The performance of the neural network is very poor. It is by far the worst
+model for the 5% of the data with our geospatial predictors. This should
+not be considered a definitive result at all. It is more a sort of proof of
+concept and this study is does not implement the neural network with great
+expertise. Check out the neural network yourself and judge whether the
+metrics used are reasonable.
+
+### Visualization of our Model: The Map
 
 ## Conclusion^WP2^
+
+This study aimed to answer four research questions.
 
 # Bibliography^WP2^
