@@ -179,7 +179,8 @@ p1 <- ggplot(data = train_data, aes(temperature, fitted)) +
                           Bias == .(format(bias.train, digits = 3))),
                          x = 'Measured temperature [°C]' , y = "Predicted temperature [°C]",
        title = paste("Train set evaluation [",model_input,"]")) +
-  theme_classic()
+  theme_classic()+
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth  = 1))
 
 
 std_dev <- sd(data_evaluate$fitted)
@@ -193,7 +194,8 @@ p2 <- ggplot(data = data_evaluate, aes(temperature, fitted)) +
                            Bias == .(format(bias.test, digits = 3))),
       x = 'Measured temperature [°C]' , y = "Predicted temperature [°C]",
       title = paste("Test set evaluation [",model_input,"]")) +
-  theme_classic()
+  theme_classic()+
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth  = 1))
 
 # We put both plots together
 out <- cowplot::plot_grid(p1, p2)
@@ -211,7 +213,8 @@ boxplot_logger <- ggplot(data = data_evaluate,
        title = paste("Boxplot by logger sides [",model_input,"]")) +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8)) +
-  scale_x_discrete(labels = paste(logger.names,'[Log Nr:',unique_numbers,']'))
+  scale_x_discrete(labels = paste(logger.names,'[Log Nr:',unique_numbers,']')) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth  = 1))
 
 
 #------------------------------------------------------------------------------
@@ -225,7 +228,8 @@ boxplot_hour <- ggplot(data = data_evaluate,
   stat_boxplot(geom = "errorbar", linewidth = 0.3, width = 0.5)+
   labs(x = "Hour of the day", y = 'Bias [°C]',
        title = paste("Boxplot by hours of the day [",model_input,"]")) +
-  theme_classic()
+  theme_classic()+
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth  = 1))
 
 #------------------------------------------------------------------------------
 # Position 6: distribution of the anomaly
@@ -240,15 +244,34 @@ density <- data_evaluate |>
   annotate("text", x = -5, y = 0.3, label = paste("Bias =",bias.test), color = "orange2", size = 5, hjust = 0, vjust = 0) +
   annotate("text", x = -5, y = 0.4, label = "Normal Distribution", color = "red3", size = 5, hjust = 0, vjust = 0) +
   annotate("text", x = -5, y = 0.35, label = 'Effective Distribution', color = "black", size = 5, hjust = 0, vjust = 0) +
-  labs(title = "Distribution of the Temperature Anomaly",
+  labs(title = "Distribution of the Temperature Anomaly (Bias)",
        x = "Temperature Anomaly [K]",
        y = "Density") +
-  theme_minimal()
+  theme_classic()+
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth  = 1))
 
+#------------------------------------------------------------------------------
+# Position 7: distribution of the anomaly
+
+density_2 <- data_evaluate |>
+  ggplot() +
+  geom_density(aes(x = fitted), color = "black") +
+  geom_density(aes(x = temperature), color = "red3") +
+  geom_vline(xintercept = mean(data_evaluate$fitted), color = 'orange2', linetype = 4) +
+  geom_vline(xintercept = median(data_evaluate$fitted), color = 'green3', linetype = 4) +
+  labs(title = "Distribution of the predicted values",
+       x = "Distribution of the predicted temperature anomaly (fitted values) [K]",
+       y = "Density") +
+  annotate("text", x = -5, y = 0.35, label = paste("Mean =", round(mean(data_evaluate$fitted), digits = 3)), color = "orange2", size = 5, hjust = 0, vjust = 0) +
+  annotate("text", x = -5, y = 0.3, label = paste('Median =', round(median(data_evaluate$fitted), digits = 3)), color = "green3", size = 5, hjust = 0, vjust = 0) +
+  annotate("text", x = -5, y = 0.45, label = "Distribution of 'temperature'", color = "red3", size = 5, hjust = 0, vjust = 0) +
+  annotate("text", x = -5, y = 0.4, label = "Distribution of 'predicted values'", color = "black", size = 5, hjust = 0, vjust = 0) +
+  theme_classic() +
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth  = 1))
 
 ###############################################################################
 # We define our list for the return:
-output <- list(tabl, main_stats, out, boxplot_logger, boxplot_hour, density)
+output <- list(tabl, main_stats, out, boxplot_logger, boxplot_hour, density, density_2)
 
 
 return(output)}
