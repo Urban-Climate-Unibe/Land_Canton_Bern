@@ -668,8 +668,8 @@ In 'demo mode', model tuning is not meaningful because it exists for
 demonstration purposes only. The estimated computational time to generate a
 random forest model is about 15 seconds. In 'regular mode', we provide an
 option for fine-tuning. If you wish to perform fine-tuning, change the
-tuning option to TRUE. The estimated computational time is about 100
-seconds if you do not use the tuning option.
+tuning option to TRUE. The estimated computational time is about 5-7
+minutes if you do not use the tuning option.
 
 ```{r Calculation of the random forest-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to calculate a random forest model
@@ -758,16 +758,30 @@ The function returns a list containing seven elements:
     regression, and the closer it is to the orange line, the better the
     model.
 
-4.  The fourth element is a boxplot for the LCDs used for evaluation in the
-    test set. This allows you to see which LCDs are being used and how they
-    performed.
+4.  The fourth element is a box plot for the LCDs used for evaluation in
+    the test set. This allows you to see which LCDs are being used and how
+    they performed.
 
-5.  The fifth element is a boxplot for the hour of the day. This plot shows
-    you the deviation at different times of the day.
+5.  The fifth element is a box plot for the hour of the day. This plot
+    shows you the deviation at different times of the day.
 
 6.  Plot shows the distribution of the temperature anomaly compared to a
     normal distribution with mean = 0 and standard deviation = 1. It is a
-    visualization of the bias and therefore of the systematic error.
+    visualization of the bias and therefore of the systematic error. The
+    model can be considered perfect if both distributions are equal (no
+    systematic error and therefore no bias and an expected random error.
+    However, this only makes sense if we assume that the error is normally
+    distributed (which is the case).
+
+7.  The plot shows the distribution of the predicted temperature and the
+    distribution of the "temperature" (difference between the temperature
+    of the LCDs and the temperature in Zollikofen). It is important to note
+    that this is not the same as the temperature anomaly (which would be
+    the sixth element). The anomaly shows the difference between the
+    "temperature" and the predicted values ("fitted"). However, only the
+    distribution of the predicted values is shown here. Therefore, the mean
+    and median differ from the main statistical parameters. The model can
+    be considered perfect if both distributions are identical.
 
 Note that this study aims to find the best model with the available data.
 Therefore, the evaluation has been conducted in the 'regular mode'. The
@@ -800,7 +814,7 @@ not perform well at high temperatures. The plot also displays negative
 outliers (note dots in the test set evaluation plot, bottom right). This
 corresponds with the main statistic parameters.
 
-The fourth element comprises boxplots by logger side. All ten box-whiskers
+The fourth element comprises box plots by logger side. All ten box-whiskers
 are within a ±2 °C range, but there are outliers, especially in Murifeld
 (LCD 58). Otherwise, the performance is relatively stable, even when
 different geospatial layers dominate (water (Egelsee, LCD 12), forest
@@ -813,6 +827,15 @@ corresponds to the findings of \@burger2021. Between 6:00 - 8:00 and
 those peaks, the model underestimates the temperature in the city of Bern
 (day-time). The plot also indicates that outliers tend to be negative,
 which is explained by the negative skewness.
+
+In the sixth element, we can see that our model slightly overestimates the
+temperature (positive bias and the curve is too narrow).
+
+The seventh element shows that the distribution is almost symmetrical
+(median=mean value). However, we also see that the distribution of the
+predicted value is not identical to the "temperature" (difference between
+the temperature of the LCDs and the temperature in Zollikofen). This means
+that our model still has systematic errors.
 
 ```{r Evaluation of the lm-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to evaluate the model
@@ -832,6 +855,8 @@ evaluation[[4]]
 evaluation[[5]]
 # Distribution compared to a normal distribution (systematic error / accuracy)
 evaluation[[6]]
+# Distribution of the predicted values
+evaluation[[7]]
 ```
 
 ### Evaluation of the knn-Model
@@ -876,6 +901,16 @@ overestimation is relatively constant, aligning with the findings of
 The plot also suggests that outliers tend to be balanced, indicating that
 the model does not prefer a specific direction.
 
+In the sixth element, we can see that our model slightly overestimates the
+temperature (positive bias and the curve is too narrow).
+
+The seventh element shows that the distribution is almost symmetrical
+(median=mean value). However, the mode is not equal to the median and the
+mean. However, we also see that the distribution of the predicted value is
+not identical to the "temperature" (difference between the temperature of
+the LCDs and the temperature in Zollikofen). This means that our model
+still has systematic errors.
+
 ```{r Evaluation of the knn-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to evaluate the model
 source("../R/evaluation.R")
@@ -895,6 +930,8 @@ evaluation[[4]]
 evaluation[[5]]
 # Distribution compared to a normal distribution (systematic error / accuracy)
 evaluation[[6]]
+# Distribution of the predicted values
+evaluation[[7]]
 ```
 
 ### Evaluation of the Random Forest Model
@@ -931,6 +968,15 @@ corresponds with the findings of @burger2021. During day-time (9:00 and
 Furthermore, the spread is about 7°C and tends to be larger in
 underestimating than in overestimating, especially during night-time.
 
+In the sixth element, we can see that our model slightly overestimates the
+temperature (slightly positive bias but the curve is way too narrow).
+
+The seventh element shows that the distribution is almost symmetrical
+(median=mean value). However, we also see that the distribution of the
+predicted value is not identical to the "temperature" (difference between
+the temperature of the LCDs and the temperature in Zollikofen). This means
+that our model still has systematic errors.
+
 ```{r Evaluation of the random forest-model, echo=FALSE, message=FALSE, warning=FALSE}
 # Load the R script to evaluate the model
 source("../R/evaluation.R")
@@ -950,6 +996,8 @@ evaluation[[4]]
 evaluation[[5]]
 # Distribution compared to a normal distribution (systematic error / accuracy)
 evaluation[[6]]
+# Distribution of the predicted values
+evaluation[[7]]
 ```
 
 ## Advanced Models^WP1^
@@ -975,6 +1023,10 @@ evaluation[[3]]
 evaluation[[4]]
 # Boxplot for each hour of the day (24h)
 evaluation[[5]]
+# Distribution compared to a normal distribution (systematic error / accuracy)
+evaluation[[6]]
+# Distribution of the predicted values
+evaluation[[7]]
 }
 ```
 
@@ -1239,9 +1291,8 @@ precipitation \< sum of 1 day precipitation).
 Table 7 provides a brief overview of possible intervals for each variable.
 These intervals are derived from extreme events recorded by
 [MeteoSchweiz](https://www.meteoschweiz.admin.ch/klima/klima-der-schweiz/rekorde-und-extreme.html).
-We reduced the intervals by about 10% on both sides (and rounded it to a
-even number), where possible. Please keep this in mind when exploring and
-adjusting values.
+We reduced the intervals (rounded it to a even number), where possible.
+Please keep this in mind when exploring and adjusting values.
 
 +----------------+----------------+-------------------------------------+
 | Variable       | Default        | Realistic Interval                  |
@@ -1301,7 +1352,7 @@ adjusting values.
 
 : **Table 7:** Overview about the default values for the variables used to
 predict the map. Further, it shows reasonable possible values for the
-meteoroolgical variables according to
+meteorolgical variables according to
 [MeteoSuisse](https://www.meteoschweiz.admin.ch/klima/klima-der-schweiz/rekorde-und-extreme.html).
 
 # Spatial Upscaling^WP2^
@@ -1312,7 +1363,7 @@ meteoroolgical variables according to
 source('../R/map_generator.R')
 
 #scenario default, rainy stormy day
-default = c(22, 5, 290, 8, 200, 22, 19, 20, 18, 17, 0, 0, 20, 15, 10, 5)
+default = c(22, 5,8, 290, 200, 22, 19, 20, 18, 17, 0, 0, 20, 15, 10, 5)
 
 # Define a vector with your inputs (here, we use a default as described in table x)
 #scenario heat day evening
@@ -1320,7 +1371,7 @@ normal_summarevening = c(26, 0, 0, 1, 180, 30, 28 , 24, 22, 22, 0, 0, 0, 0, 0, 0
 
 cold_rain = c(26, 0, 0, 1, 180, 30, 28 , 24, 22, 22, 0, 0, 0, 0, 0, 0)
 
-heat_cloudless = c(26, 0, 0, 1, 180, 30, 28 , 24, 22, 22, 0, 0, 0, 0, 0, 0)
+heat_cloudless = c(26, 0, 200, 1, 180, 30, 28 , 24, 22, 22, 0, 0, 0, 0, 0, 0)
 
 # Function call
 map_generater(model = random_forest, meteoswiss_input = normal_summarevening)
@@ -1505,6 +1556,13 @@ diurnal cycle. This cycle presumably correlates with the radiation hitting
 the radiation shield. We recommend performing our analysis with night-time
 data only to make the results more comparable with those of @burger2021.
 
+
+The evaluation of our models shows that the predicted values are similar to
+the actual values. However, the probability density shows that the models
+predict frequent values more frequently. This presumably also explains the
+RMSE, as this results in imprecision.
+
+
 One of our main findings is interesting, and we are not entirely certain
 about the reasons behind these results. As observed in tables 4 and 6, the
 models performed best when we ran the code in 'Burger demo mode' or 'Burger
@@ -1539,8 +1597,63 @@ metrics used are reasonable.
 
 ### Visualization of our Model: The Map
 
+The fourth research question asked whether it is possible to generate a map
+that shows the prediction of the spatial distribution of the temperature
+anomaly. In other words, it shows the relative deviation of the temperature
+in the city of Bern compared to the MeteoSwiss measuring station in
+Zollikofen.
+
+Overall, we believe that the map serves its purpose. However, its full
+potential has not yet been realized. Currently, meteorological conditions
+must be manually entered into a vector and fed into the function. The
+initial goal was for the latest data from the measuring station in
+Zollikofen to automatically flow into the function, ensuring the generation
+of an up-to-date map. This would also increase the application
+possibilities. As mentioned in the introduction, people in urban areas are
+affected by the urban heat island effect. This is particularly problematic
+for vulnerable people. With an up-to-date map, these people would be able
+to identify hotspots and specifically avoid them. However, the map is not
+yet ready. Unfortunately, this is not possible because MeteoSwiss does not
+transmit data automatically but only provide a csv file on request.
+
+The use of a Shiny map could enable the manual adjustment of parameters. We
+did attempt this approach, but it proved to be quite unstable. The map
+generation took several minutes, and changing even one of the 16 parameters
+during generation caused the code to crash. Nevertheless, it would
+certainly make sense to invest more time in this.
+
 ## Conclusion^WP2^
 
-This study aimed to answer four research questions.
+This study aimed to adsress our four research questions. In summary, we can
+conclude:
+
+-   Only the random forest approach proves to be reasonable for modeling
+    the UHI effect of the city of Bern. He shows a acceptable trade-off
+    among implementation, computational time and results. The knn algorithm
+    is not reasonable because it has a worse trade-off (high computational
+    time and worse results).
+
+-   In our specific case machine learning is superior to a classic multiple
+    regression approach. However, it remains unclear whether this is
+    generalizable.
+
+-   The model proposed by @burger2021 is very robust. We were not able to
+    beat it. It would be interesting if he were to apply his methodology
+    using a random forest. It might lead to further improvements in his
+    model.
+
+-   A map is a powerful instrument to visualize the findings. It also shows
+    a possible application. In future, vulnerable people could use our map
+    to decide where hot spots are and avoid them based on our map.
+
+# Acknowledgment
+
+We declare herewith that this study is our own work and that we have not
+used any sources\
+other than those stated. We have indicated the adoption of quotations as
+well as thoughts\
+taken from other authors as such in the study. We used AI (DeepL and
+ChatGPT) to check our grammar (but only small adjustments) or to find a
+synonym but not to generate the text itself. The text is our own work.
 
 # Bibliography^WP2^
