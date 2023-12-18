@@ -499,7 +499,9 @@ used as training data.
 
 ```{r Choose your workflow mode, message=FALSE, warning=FALSE, include=FALSE}
 # Set seed for reproducibility
+
 set.seed(123)
+
 # Load the R script to install and load all the packages from above
 source("../R/load_packages.R")  
 load_packages(packages = packages)
@@ -1379,55 +1381,13 @@ map_generater(model = random_forest, meteoswiss_input = normal_summarevening)
 
 # Discussion
 
-## Discussion of the Data Used^WP1^
 
-\-\-\-\-\-\--\> Should this part really be here?
 
-!!###
-To fully implement the Open Sciences approach, the models can be computed
-using the following code chunks. Further, for every model, a short synopsis
-of the optimized hyperparameters is given. It must therefore be decided
-before running the code chunk whether the hyperparameters determined by us
-are to be used or whether the hyperparameters are to be optimized.
 
-The aim of this project is the comparison of machine learning techniques to
-a linear regression. Further, we want to explore the superior of machine
-learning compared to a linear regression. Table 3 gives you an overview
-about our results, if you use the entire 'combined' data set. You see, that
-both KNN and random forest are superior compared to the linear regression
-model. 
 
-!!###
-!!### Results? Method? I dont understand
 
-The random forest model explains about 73% of the variance. The RSME is
-about 0.63 °C. Note that the error of a single LCD in the climate network
-of the city of Bern is up to 1.5°C (see Burger et. al. 2019). Further we can
-see, that data scattering is about 0.2°C lower than for a KNN- or lm-model
-(accuracy). The bias is for all models about 0.07°C (systematic error /
-precision). It is positive and therefore our models overestimate the
-temperature (see evaluation and access the second element of the list).
-
-The XGB Boost and the neuronal network are additional and should show you,
-that there are further techniques which could be explored. But those model
-were not taken into account for discussion.
-
-As mentioned, the model calculation can be very time intensive. Table 4
-shows the results for an approach with reduced data (5%). Overall we can say, that
-the models perform worse. All values are worse than in table 3. Note the
-high bias for the random forest. The model highly overestimate the
-temperature. We do not have an explanation for this. Maybe there is a
-problem with the reducing process. If we only use 5% of our data, then we
-lose a lot of information. If we lose all information about a certain land use type,
-the result could be that the
-model performs worse. But we are not sure and more investigations are
-needed. But as a conclusion we can say that more data improve the models.
-
-!!###
 
 ## Discussion of the Methodology Used
-
-### Basic Model: Implementation and Evaluation
 
 Generally, we find that our results are plausible and promising, leading us
 to assume that no major errors were made in the implementation and
@@ -1440,7 +1400,7 @@ During implementation, we observed that the knn algorithm is only suitable
 for large data sets to a limited extent due to its high computational time.
 This is especially true when considering that the output still only
 demonstrates average performance. We had to reduce the data input to
-approximately 500,000 data points when training with all of the data,  !!###Correct?
+approximately 500,000 data points when training with all of the data,  
 as the calculation would otherwise take several hours.
 Consequently, the knn model is not as well-trained as the
 random forest, which partly explains its poorer performance. In 'demo
@@ -1459,7 +1419,7 @@ comparable in 'demo mode.'
 There might also be a problem with the evaluation itself. As seen in the
 box plot, 10 randomly chosen LDC locations are used. However, it is
 possible that these 10 loggers represent a biased sample, having the highest or lowest
-RMSE and Bias and the lowest R². This would degrade or improve our models. 
+RMSE and Bias and the lowest $R^2$. This would degrade or improve our models. 
 Of course, this would be true for all models, including Burger's. For this
 reason we also implemented a 3 folds cross validation by logger number. The results of these
 can be seen in the evaluation presentation of the models under "values of the model".
@@ -1476,30 +1436,15 @@ did not find time to implement this.
 This Logger ID approach should still be much more representative then a 3 fold 
 random cross validation split as each fold has to predict unknown loggers. 
 
-!!!####
+
+The XGB Boost and the neuronal network are additional and should show
+you, that there are further techniques which could be explored. For the XGBoost model,
+all parameters are tuned and therefore the model should perform optimally. 
+The nerual network was a ad hoc implementation and we are not familiar with
+neural networks. All results are therefore not guaranteed to be anything
+like optimal. Please look at the implementation yourself.
 
 
-### Advanced Model: Implementation and Evaluation
-
-\-\-\-\-\-\--\> Should this part really be here?
-
-**The XGB Boost and the neuronal network are additional and should show
-you, that there are further techniques which could be explored. But those
-model we did not taken into account.**
-
-**As mentioned, the model calculation can be very time intensive. Table 4
-shows the results for approach with reduced data. Overall we can say, that
-the models perform less. All values are lesser than in table 3. Note the
-high bias for the random forest. The model highli overestimate the
-temperature. We do not have an explanation for this. May be there is a
-problem with the reducing process. If we only use 5% of our data, then we
-lose a lot of information. If we lose all information about a certain
-logger station but the model predict this station, the it could b that the
-model perfoms worse. But we are not sure and more investigations are
-needed. But as a conclusion we can say, that more data improve the
-models.**
-
-\-\-\-\-\-\--\> Should this part really be here?, no remove and assume only one part
 
 ## Discussion of the Results
 
@@ -1546,7 +1491,7 @@ Bern using geospatial layers. His model achieved an R² in the range of
 explains more or less the same percentage of the variance as ours, it has a
 significantly lower RMSE. We believe this difference is because he modeled
 the UHI night-time mean only (22:00-06:00), while our model covers the
-entire day. As observed in the evaluation, our model underestimates values !!!### correct? mean only?
+entire day. As observed in the evaluation, our model underestimates values 
 during the day and overestimates them during the night. We attribute our
 larger RMSE to higher scattering, as we are modeling 24 hours. This
 scattering may result from the radiation shield. In the 24-hour boxplot of
@@ -1655,5 +1600,10 @@ well as thoughts\
 taken from other authors as such in the study. We used AI (DeepL and
 ChatGPT) to check our grammar (but only small adjustments) or to find a
 synonym but not to generate the text itself. The text is our own work.
+ChatGPT and Stackoverflow were used to resolve some coding issues.
+
+We thank our supervisors Prof. Dr. Benjamin Stocker, Dr. Laura Marques and 
+Pepa Aran for their support.
+
 
 # Bibliography^WP2^
