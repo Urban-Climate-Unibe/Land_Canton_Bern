@@ -318,6 +318,9 @@ predictor class. The data of the predictor classes which corresponds to the
 raw layers can be found in the data-raw subfolder of this project for the
 land use classes. The processed files can be found in the data folder in
 the subdirectory Tiffs.
+We were not able to generate all layers from @burger2021 as they were generated 
+in a GIS. For the sky view factor an alternative was chosen (ROU) but some layers
+were not replaced such as "AMT": amount of trees.
 
 #### Variable Selection
 
@@ -1556,9 +1559,9 @@ Zollikofen to automatically flow into the function, ensuring the generation
 of an up-to-date map. This would also increase the application
 possibilities. As mentioned in the introduction, people in urban areas are
 affected by the urban heat island effect. This is particularly problematic
-for vulnerable people. With an up-to-date map, these people would be able
-to identify hotspots and specifically avoid them. However, the map is not
-yet ready. Unfortunately, this is not possible because MeteoSwiss does not
+for vulnerable people. With an real time prediction map, these people would be able
+to identify hotspots and specifically avoid them. 
+Unfortunately, this is not possible because MeteoSwiss does not
 transmit data automatically but only provide a csv file on request.
 
 The use of a Shiny map could enable the manual adjustment of parameters. We
@@ -1567,7 +1570,7 @@ generation took several minutes, and changing even one of the 16 parameters
 during generation caused the code to crash. Nevertheless, it would
 certainly make sense to invest more time in this.
 
-## Conclusion^WP2^
+# Conclusion^WP2^
 
 This study aimed to adsress our four research questions. In summary, we can
 conclude:
@@ -1590,6 +1593,40 @@ conclude:
 -   A map is a powerful instrument to visualize the findings. It also shows
     a possible application. In future, vulnerable people could use our map
     to decide where hot spots are and avoid them based on our map.
+    
+    
+# Outlook
+Since this project already quite blew the timescope of this proseminar we sadly 
+could not explore all possibilities this modelling approach would offer. Some of 
+the possible extensions or new ideas for this project were already mentioned in 
+the text. Still we would like to mention all of them here:
+- With real time access to the weather forecast one could now forecast the UHI 
+of Bern at an hourly rate! We already talked to people and they said getting this
+data for scientific use should be no problem. Alternatively a open source weather
+forecast could be used. The possibilities for an application or warning system are
+endless. This of course could also generate a realtime map that warns people in affected hotspots.
+- There is more data: we know of data from for example meteobikes that were run 
+during a field course for an entire week that would enable much more datapoints 
+then the fixed loggers, this could also be used to assess the quality of the 
+spatial upscaling and also to better the model. Furthermore since 2023 there is
+now real-time data from the logger generation 2.0 which could be used for maybe 
+forecasting or at least as more training data. Furthermore the year 2018 
+(the first year) of measurements was not used because of data compatability issues.
+This data could now also be used as well as also winter measurements. 
+There is truly still so much more data.
+- Other machine learning algorithms could be tested.
+- This model could be expanded for the whole of Switzerland.
+- More predictor classes could be used to assess the UHI effect. This starts with 
+the layers from @burger2021 which we were not able to generate as well as other 
+layers such as possibly geophysical layers such as wind flow. 
+- A spatial or environmental covariate clustering and following cross validation
+could be performed and then the reasonability of upscaling could be assessed. 
+See: https://onlinelibrary.wiley.com/doi/10.1111/geb.13635 !! Or https://geco-bern.github.io/spatial_upscaling/ !!
+- A shiny app could be used to let a user set environmental variables to get a 
+realtime map based on scenarios. (similar to what was done in this script just more interactive)
+- Data from the loggers could be calibrated so that there is less bias during 
+the day and so presumably improve the model performance with this calibrated data.
+
 
 # Acknowledgment
 
