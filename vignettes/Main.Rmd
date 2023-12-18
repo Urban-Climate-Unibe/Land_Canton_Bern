@@ -1332,6 +1332,7 @@ map_generater(model = random_forest, meteoswiss_input = normal_summarevening)
 
 \-\-\-\-\-\--\> Should this part really be here?
 
+!!###
 To fully implement the Open Sciences approach, the models can be computed
 using the following code chunks. Further, for every model, a short synopsis
 of the optimized hyperparameters is given. It must therefore be decided
@@ -1343,11 +1344,14 @@ a linear regression. Further, we want to explore the superior of machine
 learning compared to a linear regression. Table 3 gives you an overview
 about our results, if you use the entire 'combined' data set. You see, that
 both KNN and random forest are superior compared to the linear regression
-model.
+model. 
+
+!!###
+!!### Results? Method? I dont understand
 
 The random forest model explains about 73% of the variance. The RSME is
 about 0.63 °C. Note that the error of a single LCD in the climate network
-of the city of Bern is about 1.5°C (see Burger et all 2019). Further we can
+of the city of Bern is up to 1.5°C (see Burger et. al. 2019). Further we can
 see, that data scattering is about 0.2°C lower than for a KNN- or lm-model
 (accuracy). The bias is for all models about 0.07°C (systematic error /
 precision). It is positive and therefore our models overestimate the
@@ -1355,20 +1359,20 @@ temperature (see evaluation and access the second element of the list).
 
 The XGB Boost and the neuronal network are additional and should show you,
 that there are further techniques which could be explored. But those model
-we did not taken into account.
+were not taken into account for discussion.
 
 As mentioned, the model calculation can be very time intensive. Table 4
-shows the results for approach with reduced data. Overall we can say, that
-the models perform less. All values are lesser than in table 3. Note the
+shows the results for an approach with reduced data (5%). Overall we can say, that
+the models perform worse. All values are worse than in table 3. Note the
 high bias for the random forest. The model highly overestimate the
-temperature. We do not have an explanation for this. May be there is a
+temperature. We do not have an explanation for this. Maybe there is a
 problem with the reducing process. If we only use 5% of our data, then we
-lose a lot of information. If we lose all information about a certain
-logger station but the model predict this station, the it could b that the
+lose a lot of information. If we lose all information about a certain land use type,
+the result could be that the
 model performs worse. But we are not sure and more investigations are
-needed. But as a conclusion we can say, that more data improve the models.
+needed. But as a conclusion we can say that more data improve the models.
 
-\-\-\-\-\-\--\> Should this part really be here?
+!!###
 
 ## Discussion of the Methodology Used
 
@@ -1379,12 +1383,15 @@ to assume that no major errors were made in the implementation and
 evaluation of the models. However, we would like to briefly discuss a point
 in the implementation and two points in the evaluation.
 
+
+
 During implementation, we observed that the knn algorithm is only suitable
 for large data sets to a limited extent due to its high computational time.
 This is especially true when considering that the output still only
 demonstrates average performance. We had to reduce the data input to
-approximately 500,000 data points, as the calculation would otherwise take
-several hours. Consequently, the knn model is not as well-trained as the
+approximately 500,000 data points when training with all of the data,  !!###Correct?
+as the calculation would otherwise take several hours.
+Consequently, the knn model is not as well-trained as the
 random forest, which partly explains its poorer performance. In 'demo
 mode,' however, knn and random forest show comparable performance.
 
@@ -1396,15 +1403,30 @@ the knn and random forest models with the same data set, which might
 explain the large difference in performance. But here again, the models are
 comparable in 'demo mode.'
 
+
+
 There might also be a problem with the evaluation itself. As seen in the
 box plot, 10 randomly chosen LDC locations are used. However, it is
-possible that these 10 loggers represent the worst ones, having the highest
-RMSE and Bias and the lowest R². This would degrade our models. Of course,
-this would be true for all models, including Burger's. But we think this
-would make the validity of the models more honest. We recommend improving
-the evaluation function by including more locations, perhaps using all 55
-locations used in all years between 2019-2022. We believe this adjustment
-would enhance our evaluation.
+possible that these 10 loggers represent a biased sample, having the highest or lowest
+RMSE and Bias and the lowest R². This would degrade or improve our models. 
+Of course, this would be true for all models, including Burger's. For this
+reason we also implemented a 3 folds cross validation by logger number. The results of these
+can be seen in the evaluation presentation of the models under "values of the model".
+There we see slight deviations but nothing that would cause suspicion and therefore
+we assume this random logger sample is a valid representation of the training task.
+
+Of course also a spatial or environmental covariates cross-validation could be performed
+and also assess whether these covariates represent the prediction task of the model at hand
+for spatial upscaling. This would be more direct then taking the logger ID for cross validation
+as it looks directly at the enviromental covariates and the logger ID is just a representation
+for these enviromental covariates as ir represents different logger sites.
+This enviromental or spatial cross validation should be done as a follow up as we 
+did not find time to implement this.
+This Logger ID approach should still be much more representative then a 3 fold 
+random cross validation split as each fold has to predict unknown loggers. 
+
+!!!####
+
 
 ### Advanced Model: Implementation and Evaluation
 
@@ -1426,7 +1448,7 @@ model perfoms worse. But we are not sure and more investigations are
 needed. But as a conclusion we can say, that more data improve the
 models.**
 
-\-\-\-\-\-\--\> Should this part really be here?
+\-\-\-\-\-\--\> Should this part really be here?, no remove and assume only one part
 
 ## Discussion of the Results
 
@@ -1462,7 +1484,8 @@ regression in general. Such a conclusion would necessitate further
 research, including additional case studies, mathematical considerations,
 and a more comprehensive investigation involving a broader range of models
 under varying conditions. Nevertheless, we recommend considering the use of
-machine learning in future model selection.
+machine learning in future model selection as in our project, machine learning 
+does outperform classical multivariate linear regression.
 
 The third research question involves the comparison between our 'regular
 mode' and the 'Burger regular mode.' As mentioned in the introduction,
@@ -1471,8 +1494,8 @@ Bern using geospatial layers. His model achieved an R² in the range of
 [0.72, 0.77] and an RMSE in the range of [0.47, 0.62]. Although his model
 explains more or less the same percentage of the variance as ours, it has a
 significantly lower RMSE. We believe this difference is because he modeled
-the UHI during night-time only (22:00-06:00), while our model covers the
-entire day. As observed in the evaluation, our model underestimates values
+the UHI night-time mean only (22:00-06:00), while our model covers the
+entire day. As observed in the evaluation, our model underestimates values !!!### correct? mean only?
 during the day and overestimates them during the night. We attribute our
 larger RMSE to higher scattering, as we are modeling 24 hours. This
 scattering may result from the radiation shield. In the 24-hour boxplot of
@@ -1482,7 +1505,7 @@ diurnal cycle. This cycle presumably correlates with the radiation hitting
 the radiation shield. We recommend performing our analysis with night-time
 data only to make the results more comparable with those of @burger2021.
 
-One of our main findings is intresting, and we are not entirely certain
+One of our main findings is interesting, and we are not entirely certain
 about the reasons behind these results. As observed in tables 4 and 6, the
 models performed best when we ran the code in 'Burger demo mode' or 'Burger
 regular mode,' respectively. This implies that the geospatial layers from
@@ -1493,7 +1516,7 @@ RMSE rather than on $R^2$. Although the models have the same RMSE, their
 $R^2$ values differ. This discrepancy could be due to overfitting when
 there are too many spatial predictors. In such cases, the model may learn
 very localized patterns that are poorly generalizable. To confirm this
-suspicion, however, more in-depth investigations would be needed."
+suspicion, however, more in-depth investigations would be needed.
 
 ### Performance of the Advanced Models
 
@@ -1503,7 +1526,7 @@ would like to discuss them briefly.
 The XGBoost model performes best of all models with 5% of the data for our
 own layers but poorer than the random forest with all of the data for the
 layers of [@burger2021]. This might be due to overfitting. The RMSE of the
-XGBoost of the training dataset become very low (not shown in the results)
+XGBoost of the training dataset becomes very low (not shown in the results)
 but is high for the evaluation dataset with all of the data. One
 explanation could be overfitting.
 
