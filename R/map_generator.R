@@ -31,7 +31,7 @@ names(meteoswiss) <- combined |>
 for (name_var in names(meteoswiss)) {
   temp <- terra::rast(ncol=293, nrow=247, xmin=2592670, xmax=2607320, ymin=1193202, ymax=1205552,names = name_var)
   terra::values(temp) <- unname(meteoswiss[name_var])
-  print(unname(meteoswiss[name_var]))
+  print(paste0(unname(meteoswiss[name_var]),": ",name_var))
   temp <- crop(temp,tiffs_only)
   temp <- resample(temp,tiffs_only)
   tiffs_only <- c(tiffs_only,temp)
@@ -74,7 +74,7 @@ p <- ggplot() +
   annotate("text", x = 2602300, y = 1204410.1, label= "AWS Zollikofen", hjust = 0) +
   labs(title = paste('Temperatureanomaly for the suburban area of Bern'),
        subtitle = paste('This map uses a',model_input,'and the following variable inputs:',
-                        "\nTemp [K]: now = ",meteoswiss[1],', 6h =',meteoswiss[6],
+                        "\nTemp [°C]: now = ",meteoswiss[1],', 6h =',meteoswiss[6],
                         ', 12h =',meteoswiss[7],', 1d =',meteoswiss[8],', 3d =',meteoswiss[9],
                         ', 5d =', meteoswiss[10],
                         "\nPrec [mm]: now =",meteoswiss[2],', 6h =',meteoswiss[11],
