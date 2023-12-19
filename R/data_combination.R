@@ -83,7 +83,7 @@ data_combination <- suppressWarnings(function(){
   combined <- combined |> ungroup()
 
   combined <- combined |>
-    mutate(ID = row_number())
+    dplyr::mutate(ID = row_number())
 
 
   tiff_names <- list.files("../data/Tiffs/")

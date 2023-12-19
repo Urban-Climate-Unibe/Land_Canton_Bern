@@ -15,7 +15,7 @@ First some data processing
 # Decide which packages you need. For this Project you need the following:
 packages <- c("influxdbclient","ggplot2","tidyverse","lubridate",
               "dplyr","googledrive","caret","vip","parsnip",
-              "workflows","tune","dials","stringr","terra","stars","sf","plyr",
+              "workflows","tune","dials","stringr","terra","stars","sf",
               "doParallel","terrainr","starsExtra", "pdp", "kableExtra", "recipes","Boruta")
 
 # Load the R script to install and load all the packages from above

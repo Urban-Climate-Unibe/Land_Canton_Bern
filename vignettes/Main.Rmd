@@ -54,49 +54,55 @@ work package 2 (WP2):
 
 # Introduction^WP1, WP2^
 
-Anthropogenic climate change is expected to increase the amount, intensity,
-and duration of heat waves [@burger2021]. The urban heat island (UHI)
-effect further amplifies this trend in urban environments [@burger2021;
-@gubler2021; @wicki2018]. The UHI effect is expressed by higher air
-temperatures in urban areas compared to rural areas in the region
-[@oke2017]. The effect is highest during night, as the emission of
-long-wave radiation in urban environments is impaired and sensible heat
-fluxes are enhanced, whilst latent fluxes are reduced [@burger2021;
-@gubler2021]. People living in urban areas are thus highly affected by the
-UHI effect via thermal stress [@burger2021; @wicki2018]. Given that more
-than 75% of the Central European population lives in urban areas, the
-increasing trend poses one of the major weather threats to people in urban
-environments [@wicki2018]. Studying spatial temperature variability in
-urban areas is therefore crucial to implement adaptation measures to
-minimize effects on human health and the environment [@burger2021].
+Climate change, influenced by human activities, is likely to increase the
+frequency, intensity, and length of heatwaves, as discussed in studies like
+!!IPCC . In urban settings, this effect is intensified by the urban heat
+island (UHI) phenomenon, which results in higher temperatures in city areas
+than in surrounding rural regions, as explored in works like @oke2017. This
+discrepancy is particularly pronounced at night due to reduced long-wave
+radiation emission and altered heat fluxes in urban areas [@burger2021;
+@gubler2021]. Consequently, urban residents face significant thermal stress
+from the UHI effect [@burger2021; @wicki2018]. With over 75% of the Central
+European population residing in urban zones, this escalating trend is a
+major climatic concern for these inhabitants. Therefore, examining the
+spatial variability of temperatures in urban areas is essential for
+developing adaptation strategies to mitigate impacts on public health and
+the environment [@burger2021].
 
-To capture small-scale temperature changes in these climatically complex
-areas, high spatial resolution measurement networks are needed. However,
-automated weather stations (AWS) are scarce due to their high costs. To
-tackle this problem, @gubler2021 developed a new type of low-cost
-measurement devices (LCDs). The LCD consists of a temperature logger and a
-custom-made radiation shield that is naturally ventilated. 79 LCDs were
-installed in the city of Bern, Switzerland in 2018 [@gubler2021]. The study
-reported an overestimation of hourly mean temperature measurements by the
-LCDs (0.61 °C - 0.93 °C) compared to the reference station (AWS) during
-daytime (06:00 -- 22:00). During night-time (22:00 -- 06:00), differences
-were much lower or even negative (between -0.12 °C and 0.23 °C). But not
-only the LCD temperature and the anomaly between the LCDs and the AWS is
-interesting, but also the temperature distribution of the entire suburban
-region of the city of Bern, shown on a map [@gubler2021].
+In order to accurately monitor temperature variations in climatically
+diverse urban areas, there is a need for high-resolution measurement
+networks. The scarcity of automated weather stations (AWS) due to their
+high cost poses a challenge in this regard. Addressing this issue,
+@gubler2021 introduced a novel, cost-effective type of measurement devices
+(LCDs). These devices comprise a temperature logger and a specially
+designed, naturally ventilated radiation shield. In 2018, 79 of these LCDs
+were deployed across Bern, Switzerland [@gubler2021]. The research found
+that, compared to the AWS reference station, the LCDs tended to
+overestimate the average hourly temperatures during the day (06:00 --
+22:00) by 0.61°C to 0.93°C. At night (22:00 -- 06:00), the discrepancies
+were significantly smaller, ranging from -0.12°C to 0.23°C. The study not
+only focused on the temperature readings from the LCDs and their variance
+from AWS data but also mapped the temperature distribution across the
+suburban areas of Bern, providing a comprehensive overview [@gubler2021].
+Building materials with high heat capacity are commonly used in
+construction, leading to the storage of considerable sensible heat
+throughout the day. Coupled with a scarcity of vegetation, this situation
+results in an increase in sensible heat fluxes and a reduction in latent
+heat fluxes, as described by @oke2017.
 
-In spring 2023, Nils Tinner generated a map of the current LCDs temperature
-in the city of Bern based on the study of @burger2021. He improved the map
-in June 2023 by also using geospatial data from the study of @burger2021.
-These improvements enabled him to generate a map showing the spatial
-temperature distribution of the suburban area of the city of Bern. The
-approach used was a classic multivariate linear regression model. As the
-model only knows the current temperature distribution, its scope and
-statistical power are limited. But because both @burger2021 and @gubler2021
-showed that the city of Bern is affected by the urban heat island effect it
-is crucial to know more about it. This fact and the limited power of the
-first map from Nils Tinner motivated us to investigate the urban heat
-island using machine learning techniques.
+In spring 2023, N. Tinner generated a map of the current LCDs temperature
+in the city of Bern based on the study of @burger2021. Here, a spatial
+upscaling from single measurement points of temperature is performed for a
+night mean based on spatial predictors and meteorology, which are known
+causes for the UHI [@oke2017]. N. Tinner implemented a approach where the
+upscaling is performed on real time data for upscaling. The approach used
+was a classic multivariate linear regression model. As the model only knows
+the current temperature distribution, its scope and statistical power are
+limited. But because both @burger2021 and @gubler2021 showed that the city
+of Bern is affected by the urban heat island effect it is crucial to know
+more about it. This fact and the limited power of the first map from Nils
+Tinner motivated us to investigate the urban heat island using machine
+learning techniques.
 
 ## Objectives and Research Questions
 
@@ -179,99 +185,99 @@ into R and then used as predictor classes. The geospatial layers roughness
 based on these data sets and are then used as predictor classes. Table 1
 provides a brief overview of the data we use.
 
-+----------------------------+-----------------+-------------------------+
-| Predictor class            | Variable Type   | Resolution / zonal mean |
-|                            |                 | [used resolutions /     |
-|                            |                 | zonal means]            |
-+============================+=================+=========================+
-| 2m Temperature in °C       | Meteorological  | 15 minutes / [1h mean,  |
-| [Zollikofen] for the time  |                 | 6, 12, 24, 72, 120      |
-| period 2019 - 2022         |                 | hours rolling mean]     |
-+----------------------------+-----------------+-------------------------+
-| Precipitation in mm        | Meteorological  | 15 minutes / [1h mean,  |
-| [Zollikofen] for the time  |                 | 6, 12, 24, 72, 120, 240 |
-| period 2019 - 2022         |                 | hours rolling sum]      |
-+----------------------------+-----------------+-------------------------+
-| Radiation in $W*m^{-2}$    | Meteorological  | 15 minutes / [1h mean]  |
-| [Zollikofen] for the time  |                 |                         |
-| period 2019 - 2022         |                 |                         |
-+----------------------------+-----------------+-------------------------+
-| Windspeed in $m*s^{-1}$    | Meteorological  | 15 minutes / [1h mean]  |
-| [Zollikofen] for the time  |                 |                         |
-| period 2019 - 2022         |                 |                         |
-+----------------------------+-----------------+-------------------------+
-| Winddirection in °         | Meteorological  | 15 minutes / [1h mean]  |
-| [Zollikofen] for the time  |                 |                         |
-| period 2019 - 2022         |                 |                         |
-+----------------------------+-----------------+-------------------------+
-| Land Cover Building [LC_B] | Geospatial      | [25m / 150m / 1000m],   |
-|                            | Layer           |                         |
-|                            |                 | Burger used [250m]      |
-+----------------------------+-----------------+-------------------------+
-| Open Space Forest [OS_FO]  | Geospatial      | [[25m / 150m / 1000m],  |
-|                            | Layer           |                         |
-|                            |                 | Burger used [250m]      |
-+----------------------------+-----------------+-------------------------+
-| Open Space Garden [OS_GA]  | Geospatial      | [25m / 150m / 1000m],   |
-|                            | Layer           |                         |
-|                            |                 | Burger used [25m]       |
-+----------------------------+-----------------+-------------------------+
-| Open Space Sealed [OS_SE]  | Geospatial      | [25m / 150m / 1000m],   |
-|                            | Layer           |                         |
-|                            |                 | Burger used [500m]      |
-+----------------------------+-----------------+-------------------------+
-| Open Space Agriculture     | Geospatial      | [25m / 150m / 1000m],   |
-| [OS_AC]                    | Layer           |                         |
-|                            |                 | Burger used [500m]      |
-+----------------------------+-----------------+-------------------------+
-| Open Space Water [OS_WA]   | Geospatial      | [25m / 150m / 1000m],   |
-|                            | Layer           |                         |
-|                            |                 | Burger used [150m]      |
-+----------------------------+-----------------+-------------------------+
-| Vegetation Height [VH]     | Geospatial      | [25m / 150m / 1000m],   |
-|                            | Layer           |                         |
-|                            |                 | Burger used [150m]      |
-+----------------------------+-----------------+-------------------------+
-| Mean Building Heights [BH] | Geospatial      | [25m / 150m / 1000m],   |
-|                            | Layer           |                         |
-|                            |                 | Burger used [150m]      |
-+----------------------------+-----------------+-------------------------+
-| Slope [SLO]                | Geospatial      | [25m / 150m / 1000m],   |
-|                            | Layer           |                         |
-|                            |                 | Burger used [100m]      |
-+----------------------------+-----------------+-------------------------+
-| Digital Elevation Model    | Geospatial      | No zonal mean           |
-| (DEM)                      | Layer           |                         |
-+----------------------------+-----------------+-------------------------+
-| Aspect [ASP]               | Geospatial      | [25m / 150m / 1000m],   |
-|                            | Layer           |                         |
-|                            |                 | Burger used [150m]      |
-+----------------------------+-----------------+-------------------------+
-| Flow accumulation [FLAC]   | Geospatial      | [25m / 150m / 1000m],   |
-|                            | Layer           |                         |
-|                            |                 | Burger used [200m]      |
-+----------------------------+-----------------+-------------------------+
-| Roughness [ROU]            | Geospatial      | [25m / 150m / 1000m],   |
-|                            | Layer           |                         |
-|                            |                 | Burger used [25m,       |
-|                            |                 | replaces SVF]           |
-+----------------------------+-----------------+-------------------------+
-| Climate Network in °C (80  | Meteorological  | 10 minutes / [1h mean]  |
-| LCDs, different sides) in  |                 |                         |
-| year 2019                  |                 |                         |
-+----------------------------+-----------------+-------------------------+
-| Climate Network in °C (67  | Meteorological  | 10 minutes / [1h mean]  |
-| LCDs, different sides) in  |                 |                         |
-| year 2020                  |                 |                         |
-+----------------------------+-----------------+-------------------------+
-| Climate Network in °C (67  | Meteorological  | 10 minutes / [1h mean]  |
-| LCDs, different sides) in  |                 |                         |
-| year 2021                  |                 |                         |
-+----------------------------+-----------------+-------------------------+
-| Climate Network in °C (81  | Meteorological  | 10 minutes / [1h mean]  |
-| LCDs, different sides) in  |                 |                         |
-| year 2022                  |                 |                         |
-+----------------------------+-----------------+-------------------------+
++-------------------------+------------------+-------------------------+
+| Predictor class         | Variable Type    | Resolution / zonal mean |
+|                         |                  | [used resolutions /     |
+|                         |                  | zonal means]            |
++=========================+==================+=========================+
+| 2m Temperature in °C    | Meteorological   | 15 minutes / [1h mean,  |
+| [Zollikofen] for the    |                  | 6, 12, 24, 72, 120      |
+| time period 2019 - 2022 |                  | hours rolling mean]     |
++-------------------------+------------------+-------------------------+
+| Precipitation in mm     | Meteorological   | 15 minutes / [1h mean,  |
+| [Zollikofen] for the    |                  | 6, 12, 24, 72, 120, 240 |
+| time period 2019 - 2022 |                  | hours rolling sum]      |
++-------------------------+------------------+-------------------------+
+| Radiation in $W*m^{-2}$ | Meteorological   | 15 minutes / [1h mean]  |
+| [Zollikofen] for the    |                  |                         |
+| time period 2019 - 2022 |                  |                         |
++-------------------------+------------------+-------------------------+
+| Windspeed in $m*s^{-1}$ | Meteorological   | 15 minutes / [1h mean]  |
+| [Zollikofen] for the    |                  |                         |
+| time period 2019 - 2022 |                  |                         |
++-------------------------+------------------+-------------------------+
+| Winddirection in °      | Meteorological   | 15 minutes / [1h mean]  |
+| [Zollikofen] for the    |                  |                         |
+| time period 2019 - 2022 |                  |                         |
++-------------------------+------------------+-------------------------+
+| Land Cover Building     | Geospatial Layer | [25m / 150m / 1000m],   |
+| [LC_B]                  |                  |                         |
+|                         |                  | Burger used [250m]      |
++-------------------------+------------------+-------------------------+
+| Open Space Forest       | Geospatial Layer | [[25m / 150m / 1000m],  |
+| [OS_FO]                 |                  |                         |
+|                         |                  | Burger used [250m]      |
++-------------------------+------------------+-------------------------+
+| Open Space Garden       | Geospatial Layer | [25m / 150m / 1000m],   |
+| [OS_GA]                 |                  |                         |
+|                         |                  | Burger used [25m]       |
++-------------------------+------------------+-------------------------+
+| Open Space Sealed       | Geospatial Layer | [25m / 150m / 1000m],   |
+| [OS_SE]                 |                  |                         |
+|                         |                  | Burger used [500m]      |
++-------------------------+------------------+-------------------------+
+| Open Space Agriculture  | Geospatial Layer | [25m / 150m / 1000m],   |
+| [OS_AC]                 |                  |                         |
+|                         |                  | Burger used [500m]      |
++-------------------------+------------------+-------------------------+
+| Open Space Water        | Geospatial Layer | [25m / 150m / 1000m],   |
+| [OS_WA]                 |                  |                         |
+|                         |                  | Burger used [150m]      |
++-------------------------+------------------+-------------------------+
+| Vegetation Height [VH]  | Geospatial Layer | [25m / 150m / 1000m],   |
+|                         |                  |                         |
+|                         |                  | Burger used [150m]      |
++-------------------------+------------------+-------------------------+
+| Mean Building Heights   | Geospatial Layer | [25m / 150m / 1000m],   |
+| [BH]                    |                  |                         |
+|                         |                  | Burger used [150m]      |
++-------------------------+------------------+-------------------------+
+| Slope [SLO]             | Geospatial Layer | [25m / 150m / 1000m],   |
+|                         |                  |                         |
+|                         |                  | Burger used [100m]      |
++-------------------------+------------------+-------------------------+
+| Digital Elevation Model | Geospatial Layer | No zonal mean           |
+| (DEM)                   |                  |                         |
++-------------------------+------------------+-------------------------+
+| Aspect [ASP]            | Geospatial Layer | [25m / 150m / 1000m],   |
+|                         |                  |                         |
+|                         |                  | Burger used [150m]      |
++-------------------------+------------------+-------------------------+
+| Flow accumulation       | Geospatial Layer | [25m / 150m / 1000m],   |
+| [FLAC]                  |                  |                         |
+|                         |                  | Burger used [200m]      |
++-------------------------+------------------+-------------------------+
+| Roughness [ROU]         | Geospatial Layer | [25m / 150m / 1000m],   |
+|                         |                  |                         |
+|                         |                  | Burger used [25m,       |
+|                         |                  | replaces SVF]           |
++-------------------------+------------------+-------------------------+
+| Climate Network in °C   | Meteorological   | 10 minutes / [1h mean]  |
+| (80 LCDs, different     |                  |                         |
+| sides) in year 2019     |                  |                         |
++-------------------------+------------------+-------------------------+
+| Climate Network in °C   | Meteorological   | 10 minutes / [1h mean]  |
+| (67 LCDs, different     |                  |                         |
+| sides) in year 2020     |                  |                         |
++-------------------------+------------------+-------------------------+
+| Climate Network in °C   | Meteorological   | 10 minutes / [1h mean]  |
+| (67 LCDs, different     |                  |                         |
+| sides) in year 2021     |                  |                         |
++-------------------------+------------------+-------------------------+
+| Climate Network in °C   | Meteorological   | 10 minutes / [1h mean]  |
+| (81 LCDs, different     |                  |                         |
+| sides) in year 2022     |                  |                         |
++-------------------------+------------------+-------------------------+
 
 : **Table 1:** Brief overview of the data we use. Zonal mean resolution is
 indicated with our owns first and then the zonal mean used by @burger2021.
@@ -317,10 +323,10 @@ this results in three (or one in case of
 predictor class. The data of the predictor classes which corresponds to the
 raw layers can be found in the data-raw subfolder of this project for the
 land use classes. The processed files can be found in the data folder in
-the subdirectory Tiffs.
-We were not able to generate all layers from @burger2021 as they were generated 
-in a GIS. For the sky view factor an alternative was chosen (ROU) but some layers
-were not replaced such as "AMT": amount of trees.
+the subdirectory Tiffs. We were not able to generate all layers from
+@burger2021 as they were generated in a GIS. For the sky view factor an
+alternative was chosen (ROU) but some layers were not replaced such as
+"AMT": amount of trees.
 
 #### Variable Selection
 
@@ -337,27 +343,14 @@ certain variables were rejected. Based on this selection, a formula is now
 generated, which is processed into a recipe. This is now the basis for
 creating the models.
 
-+----------------+--------------------------------------------------------+
-| **Variable     | **Reason**                                             |
-| which is not a |                                                        |
-| predictor**    |                                                        |
-+----------------+--------------------------------------------------------+
-| Log_Nr and     | Does not make sens for spatial upscaling               |
-| name           |                                                        |
-+----------------+--------------------------------------------------------+
-| temperature    | It is the target variable                              |
-+----------------+--------------------------------------------------------+
-| timestamp,     | Because it is controversial whether time and date      |
-| year, month,   | should be used as predictors. The model could simply   |
-| day and hour   | learn the mean of specific timestamps and not the      |
-|                | underlying pattern.                                    |
-+----------------+--------------------------------------------------------+
-| NORD_CHTOP,    | Coordinates are not used because the model should      |
-| OST_CHTOP      | learn the underlying pattern.                          |
-+----------------+--------------------------------------------------------+
-| LV_03_E,       | Coordinates are not used because the model should      |
-| LV_03_N        | learn the underlying pattern.                          |
-+----------------+--------------------------------------------------------+
+|                                       |                                                                                                                                                                              |
+|---------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Variable which is not a predictor** | **Reason**                                                                                                                                                                   |
+| Log_Nr and name                       | Does not make sens for spatial upscaling                                                                                                                                     |
+| temperature                           | It is the target variable                                                                                                                                                    |
+| timestamp, year, month, day and hour  | Because it is controversial whether time and date should be used as predictors. The model could simply learn the mean of specific timestamps and not the underlying pattern. |
+| NORD_CHTOP, OST_CHTOP                 | Coordinates are not used because the model should learn the underlying pattern.                                                                                              |
+| LV_03_E, LV_03_N                      | Coordinates are not used because the model should learn the underlying pattern.                                                                                              |
 
 : **TABLE 2:** Overview about the reasons why a variable were rejected as a
 predictor.
@@ -1145,25 +1138,13 @@ noting that, while the random forest model does not achieve the highest
 accuracy due to a slightly higher bias (approximately 0.04 °C), its
 exceptional $R^2$ and RMSE lead us to consider it as our best model.
 
-+-------------+-------------+-------------+-------------+-------------+
-| Model       | RSQ [Test   | RMSE [Test  | MAE [Test   | Bias [Test  |
-|             | set]        | set]        | set]        | set]        |
-+=============+=============+=============+=============+=============+
-| Linear      | 0.45        | 0.88 °C     | 0.69 °C     | 0.088 °C    |
-| Regression  |             |             |             |             |
-+-------------+-------------+-------------+-------------+-------------+
-| KNN         | 0.48        | 0.86 °C     | 0.66 °C     | 0.03 C °    |
-| [reduced to |             |             |             |             |
-| 13%]        |             |             |             |             |
-+-------------+-------------+-------------+-------------+-------------+
-| Random      | 0.73        | 0.62 °C     | 0.46 °C     | 0.083 °C    |
-| Forest      |             |             |             |             |
-+-------------+-------------+-------------+-------------+-------------+
-| XGB Boost   | \-          | \-          | \-          | \-          |
-+-------------+-------------+-------------+-------------+-------------+
-| Neuronal    | \-          | \-          | \-          | \-          |
-| Network     |             |             |             |             |
-+-------------+-------------+-------------+-------------+-------------+
+| Model                | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
+|----------------------|----------------|-----------------|----------------|-----------------|
+| Linear Regression    | 0.45           | 0.88 °C         | 0.69 °C        | 0.088 °C        |
+| KNN [reduced to 13%] | 0.48           | 0.86 °C         | 0.66 °C        | 0.03 C °        |
+| Random Forest        | 0.73           | 0.62 °C         | 0.46 °C        | 0.083 °C        |
+| XGB Boost            | \-             | \-              | \-             | \-              |
+| Neuronal Network     | \-             | \-              | \-             | \-              |
 
 : **TABLE 3:** Overview of the results and evaluation of the models in the
 'regular-mode' (all meteorologic data and our own geospatial layers).
@@ -1187,25 +1168,13 @@ improvement (approximately 0.03°C lower). The bias (accuracy) is
 significantly reduced in the random forest model of the 'Burger regular
 mode' (approximately 0.03°C).
 
-+-------------+-------------+-------------+-------------+-------------+
-| Model       | RSQ [Test   | RMSE [Test  | MAE [Test   | Bias [Test  |
-|             | set]        | set]        | set]        | set]        |
-+=============+=============+=============+=============+=============+
-| Linear      | 0.49        | 0.91 °C     | 0.7 °C      | 0.001 °C    |
-| Regression  |             |             |             |             |
-+-------------+-------------+-------------+-------------+-------------+
-| KNN         | 0.55        | 0.84 °C     | 0.63 °C     | -0.03 C °   |
-| [reduced to |             |             |             |             |
-| 13%]        |             |             |             |             |
-+-------------+-------------+-------------+-------------+-------------+
-| Random      | 0.78        | 0.62 °C     | 0.45 °C     | 0.03 °C     |
-| Forest      |             |             |             |             |
-+-------------+-------------+-------------+-------------+-------------+
-| XGB Boost   | 0.65        | 0.752 °C    | 0.538 °C    | -0.061      |
-+-------------+-------------+-------------+-------------+-------------+
-| Neuronal    | \-          | \-          | \-          | \-          |
-| Network     |             |             |             |             |
-+-------------+-------------+-------------+-------------+-------------+
+| Model                | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
+|----------------------|----------------|-----------------|----------------|-----------------|
+| Linear Regression    | 0.49           | 0.91 °C         | 0.7 °C         | 0.001 °C        |
+| KNN [reduced to 13%] | 0.55           | 0.84 °C         | 0.63 °C        | -0.03 C °       |
+| Random Forest        | 0.78           | 0.62 °C         | 0.45 °C        | 0.03 °C         |
+| XGB Boost            | 0.65           | 0.752 °C        | 0.538 °C       | -0.061          |
+| Neuronal Network     | \-             | \-              | \-             | \-              |
 
 : **TABLE 4:** Overview of the results and evaluation of the models in the
 'Burger regular mode' (all meteorologic data and the geospatial layers of
@@ -1224,23 +1193,13 @@ more variance than other models and demonstrating superior precision with
 the lowest RMSE. However, its bias is approximately 0.18°C higher than the
 bias of the KNN model, which excels in accuracy and overall performance.
 
-+-------------+-------------+-------------+-------------+-------------+
-| Model       | RSQ [Test   | RMSE [Test  | MAE [Test   | Bias [Test  |
-|             | set]        | set]        | set]        | set]        |
-+=============+=============+=============+=============+=============+
-| Linear      | 0.422       | 0.93 °C     | 0.739 °C    | 0.125 °C    |
-| Regression  |             |             |             |             |
-+-------------+-------------+-------------+-------------+-------------+
-| KNN         | 0.457       | 0.91 °C     | 0.704 °C    | 0.05 °C     |
-+-------------+-------------+-------------+-------------+-------------+
-| Random      | 0.477       | 0.899 °C    | 0.661 °C    | 0.184 °C    |
-| Forest      |             |             |             |             |
-+-------------+-------------+-------------+-------------+-------------+
-| XGB Boost   | 0.533       | 0.829 °C    | 0.629 °C    | 0.061 °C    |
-+-------------+-------------+-------------+-------------+-------------+
-| Neuronal    | 0.185       | 1.104 °C    | 0.890 °C    | 0.047 °C    |
-| Network     |             |             |             |             |
-+-------------+-------------+-------------+-------------+-------------+
+| Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
+|-------------------|----------------|-----------------|----------------|-----------------|
+| Linear Regression | 0.422          | 0.93 °C         | 0.739 °C       | 0.125 °C        |
+| KNN               | 0.457          | 0.91 °C         | 0.704 °C       | 0.05 °C         |
+| Random Forest     | 0.477          | 0.899 °C        | 0.661 °C       | 0.184 °C        |
+| XGB Boost         | 0.533          | 0.829 °C        | 0.629 °C       | 0.061 °C        |
+| Neuronal Network  | 0.185          | 1.104 °C        | 0.890 °C       | 0.047 °C        |
 
 : **TABLE 5:** Overview of the results and evaluation of the models in the
 'demo mode' (with 5 % of the data and our own geospatial layer).
@@ -1260,23 +1219,13 @@ excessive computational time. The results presented in Tables 3 and 4 hold
 the most meaningful insights, as they directly address the objectives of
 this study.
 
-+-------------+-------------+-------------+-------------+-------------+
-| Model       | RSQ [Test   | RMSE [Test  | MAE [Test   | Bias [Test  |
-|             | set]        | set]        | set]        | set]        |
-+=============+=============+=============+=============+=============+
-| Linear      | 0.45        | 0.9 °C      | 0.7 °C      | 0.1 °C      |
-| Regression  |             |             |             |             |
-+-------------+-------------+-------------+-------------+-------------+
-| KNN         | 0.54        | 0.82 °C     | 0.63 °C     | 0.09 °C     |
-+-------------+-------------+-------------+-------------+-------------+
-| Random      | 0.52        | 0.85 °C     | 0.64 °C     | 0.12 °C     |
-| Forest      |             |             |             |             |
-+-------------+-------------+-------------+-------------+-------------+
-| XGB Boost   | \-          | \-          | \-          | \-          |
-+-------------+-------------+-------------+-------------+-------------+
-| Neuronal    | \-          | \-          | \-          | \-          |
-| Network     |             |             |             |             |
-+-------------+-------------+-------------+-------------+-------------+
+| Model             | RSQ [Test set] | RMSE [Test set] | MAE [Test set] | Bias [Test set] |
+|-------------------|----------------|-----------------|----------------|-----------------|
+| Linear Regression | 0.45           | 0.9 °C          | 0.7 °C         | 0.1 °C          |
+| KNN               | 0.54           | 0.82 °C         | 0.63 °C        | 0.09 °C         |
+| Random Forest     | 0.52           | 0.85 °C         | 0.64 °C        | 0.12 °C         |
+| XGB Boost         | \-             | \-              | \-             | \-              |
+| Neuronal Network  | \-             | \-              | \-             | \-              |
 
 : **TABLE 6:** Overview of the results and evaluation of the models in
 'Burger demo mode' (with 5 % of the data and the geospatial layer of
@@ -1299,61 +1248,24 @@ These intervals are derived from extreme events recorded by
 We reduced the intervals (rounded it to a even number), where possible.
 Please keep this in mind when exploring and adjusting values.
 
-+----------------+----------------+-------------------------------------+
-| Variable       | Default        | Realistic Interval                  |
-+================+================+=====================================+
-| Temperature    | 22 °C          | $x[°C] \in[-15\leq x \leq 35]$      |
-+----------------+----------------+-------------------------------------+
-| Rain           | 0 mm           | $x[mm] \in[0 \leq x \leq 200]$      |
-+----------------+----------------+-------------------------------------+
-| Radiation      | 0 $[W*m^{-2}]$ | $x                                  |
-|                |                | [W*m^{-2}] \in[0 \leq x \leq 300]$, |
-|                |                | for a 10' mean                      |
-+----------------+----------------+-------------------------------------+
-| Wind speed     | 8 $m*s^{-1}$   | $x[m*s^{-1}] \in[0 \leq x \leq 20]$ |
-+----------------+----------------+-------------------------------------+
-| Wind direction | 0 (north wind) | $x[°] \in[0 \leq x \leq 360]$, with |
-|                |                | 0° = N, 180° = S                    |
-+----------------+----------------+-------------------------------------+
-| 6h mean        | 22 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
-| temperature    |                |                                     |
-+----------------+----------------+-------------------------------------+
-| 12h mean       | 19 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
-| temperature    |                |                                     |
-+----------------+----------------+-------------------------------------+
-| 1d mean        | 20 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
-| temperature    |                |                                     |
-+----------------+----------------+-------------------------------------+
-| 3d mean        | 18 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
-| temperature    |                |                                     |
-+----------------+----------------+-------------------------------------+
-| 5d mean        | 17 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
-| temperature    |                |                                     |
-+----------------+----------------+-------------------------------------+
-| 6h             | 30 mm          | $x[mm] \in[0 \leq x \leq 100]$      |
-| precipitation  |                |                                     |
-| [sum]          |                |                                     |
-+----------------+----------------+-------------------------------------+
-| 12h            | 25 mm          | $x[mm] \in[0 \leq x \leq 200]$      |
-| precipitation  |                |                                     |
-| [sum]          |                |                                     |
-+----------------+----------------+-------------------------------------+
-| 1d             | 20 mm          | $x[mm] \in[0 \leq x \leq 400]$      |
-| precipitation  |                |                                     |
-| [sum]          |                |                                     |
-+----------------+----------------+-------------------------------------+
-| 3d             | 15 mm          | $x[mm] \in[0 \leq x \leq 600]$      |
-| precipitation  |                |                                     |
-| [sum]          |                |                                     |
-+----------------+----------------+-------------------------------------+
-| 5d             | 10 mm          | $x[mm] \in[0 \leq x \leq 600]$      |
-| precipitation  |                |                                     |
-| [sum]          |                |                                     |
-+----------------+----------------+-------------------------------------+
-| 10d            | 5 mm           | $x[mm] \in[0 \leq x \leq 600]$      |
-| precipitation  |                |                                     |
-| [sum]          |                |                                     |
-+----------------+----------------+-------------------------------------+
+| Variable                | Default        | Realistic Interval                                    |
+|-------------------------|----------------|-------------------------------------------------------|
+| Temperature             | 22 °C          | $x[°C] \in[-15\leq x \leq 35]$                        |
+| Rain                    | 0 mm           | $x[mm] \in[0 \leq x \leq 200]$                        |
+| Radiation               | 0 $[W*m^{-2}]$ | $x [W*m^{-2}] \in[0 \leq x \leq 300]$, for a 10' mean |
+| Wind speed              | 8 $m*s^{-1}$   | $x[m*s^{-1}] \in[0 \leq x \leq 20]$                   |
+| Wind direction          | 0 (north wind) | $x[°] \in[0 \leq x \leq 360]$, with 0° = N, 180° = S  |
+| 6h mean temperature     | 22 °C          | $x[°C] \in[-15 \leq x \leq 35]$                       |
+| 12h mean temperature    | 19 °C          | $x[°C] \in[-15 \leq x \leq 35]$                       |
+| 1d mean temperature     | 20 °C          | $x[°C] \in[-15 \leq x \leq 35]$                       |
+| 3d mean temperature     | 18 °C          | $x[°C] \in[-15 \leq x \leq 35]$                       |
+| 5d mean temperature     | 17 °C          | $x[°C] \in[-15 \leq x \leq 35]$                       |
+| 6h precipitation [sum]  | 30 mm          | $x[mm] \in[0 \leq x \leq 100]$                        |
+| 12h precipitation [sum] | 25 mm          | $x[mm] \in[0 \leq x \leq 200]$                        |
+| 1d precipitation [sum]  | 20 mm          | $x[mm] \in[0 \leq x \leq 400]$                        |
+| 3d precipitation [sum]  | 15 mm          | $x[mm] \in[0 \leq x \leq 600]$                        |
+| 5d precipitation [sum]  | 10 mm          | $x[mm] \in[0 \leq x \leq 600]$                        |
+| 10d precipitation [sum] | 5 mm           | $x[mm] \in[0 \leq x \leq 600]$                        |
 
 : **Table 7:** Overview about the default values for the variables used to
 predict the map. Further, it shows reasonable possible values for the
@@ -1384,12 +1296,6 @@ map_generater(model = random_forest, meteoswiss_input = normal_summarevening)
 
 # Discussion
 
-
-
-
-
-
-
 ## Discussion of the Methodology Used
 
 Generally, we find that our results are plausible and promising, leading us
@@ -1397,17 +1303,15 @@ to assume that no major errors were made in the implementation and
 evaluation of the models. However, we would like to briefly discuss a point
 in the implementation and two points in the evaluation.
 
-
-
 During implementation, we observed that the knn algorithm is only suitable
 for large data sets to a limited extent due to its high computational time.
 This is especially true when considering that the output still only
 demonstrates average performance. We had to reduce the data input to
-approximately 500,000 data points when training with all of the data,  
-as the calculation would otherwise take several hours.
-Consequently, the knn model is not as well-trained as the
-random forest, which partly explains its poorer performance. In 'demo
-mode,' however, knn and random forest show comparable performance.
+approximately 500,000 data points when training with all of the data,\
+as the calculation would otherwise take several hours. Consequently, the
+knn model is not as well-trained as the random forest, which partly
+explains its poorer performance. In 'demo mode,' however, knn and random
+forest show comparable performance.
 
 In the evaluation phase, we encountered a similar problem with the knn
 algorithm. Predicting the temperature and thus modeling the UHI effect
@@ -1417,37 +1321,34 @@ the knn and random forest models with the same data set, which might
 explain the large difference in performance. But here again, the models are
 comparable in 'demo mode.'
 
-
-
 There might also be a problem with the evaluation itself. As seen in the
 box plot, 10 randomly chosen LDC locations are used. However, it is
-possible that these 10 loggers represent a biased sample, having the highest or lowest
-RMSE and Bias and the lowest $R^2$. This would degrade or improve our models. 
-Of course, this would be true for all models, including Burger's. For this
-reason we also implemented a 3 folds cross validation by logger number. The results of these
-can be seen in the evaluation presentation of the models under "values of the model".
-There we see slight deviations but nothing that would cause suspicion and therefore
-we assume this random logger sample is a valid representation of the training task.
+possible that these 10 loggers represent a biased sample, having the
+highest or lowest RMSE and Bias and the lowest $R^2$. This would degrade or
+improve our models. Of course, this would be true for all models, including
+Burger's. For this reason we also implemented a 3 folds cross validation by
+logger number. The results of these can be seen in the evaluation
+presentation of the models under "values of the model". There we see slight
+deviations but nothing that would cause suspicion and therefore we assume
+this random logger sample is a valid representation of the training task.
 
-Of course also a spatial or environmental covariates cross-validation could be performed
-and also assess whether these covariates represent the prediction task of the model at hand
-for spatial upscaling. This would be more direct then taking the logger ID for cross validation
-as it looks directly at the enviromental covariates and the logger ID is just a representation
-for these enviromental covariates as ir represents different logger sites.
-This enviromental or spatial cross validation should be done as a follow up as we 
-did not find time to implement this.
-This Logger ID approach should still be much more representative then a 3 fold 
-random cross validation split as each fold has to predict unknown loggers. 
+Of course also a spatial or environmental covariates cross-validation could
+be performed and also assess whether these covariates represent the
+prediction task of the model at hand for spatial upscaling. This would be
+more direct then taking the logger ID for cross validation as it looks
+directly at the enviromental covariates and the logger ID is just a
+representation for these enviromental covariates as ir represents different
+logger sites. This enviromental or spatial cross validation should be done
+as a follow up as we did not find time to implement this. This Logger ID
+approach should still be much more representative then a 3 fold random
+cross validation split as each fold has to predict unknown loggers.
 
-
-The XGB Boost and the neuronal network are additional and should show
-you, that there are further techniques which could be explored. For the XGBoost model,
-all parameters are tuned and therefore the model should perform optimally. 
-The nerual network was a ad hoc implementation and we are not familiar with
-neural networks. All results are therefore not guaranteed to be anything
-like optimal. Please look at the implementation yourself.
-
-
+The XGB Boost and the neuronal network are additional and should show you,
+that there are further techniques which could be explored. For the XGBoost
+model, all parameters are tuned and therefore the model should perform
+optimally. The nerual network was a ad hoc implementation and we are not
+familiar with neural networks. All results are therefore not guaranteed to
+be anything like optimal. Please look at the implementation yourself.
 
 ## Discussion of the Results
 
@@ -1483,8 +1384,8 @@ regression in general. Such a conclusion would necessitate further
 research, including additional case studies, mathematical considerations,
 and a more comprehensive investigation involving a broader range of models
 under varying conditions. Nevertheless, we recommend considering the use of
-machine learning in future model selection as in our project, machine learning 
-does outperform classical multivariate linear regression.
+machine learning in future model selection as in our project, machine
+learning does outperform classical multivariate linear regression.
 
 The third research question involves the comparison between our 'regular
 mode' and the 'Burger regular mode.' As mentioned in the introduction,
@@ -1494,7 +1395,7 @@ Bern using geospatial layers. His model achieved an R² in the range of
 explains more or less the same percentage of the variance as ours, it has a
 significantly lower RMSE. We believe this difference is because he modeled
 the UHI night-time mean only (22:00-06:00), while our model covers the
-entire day. As observed in the evaluation, our model underestimates values 
+entire day. As observed in the evaluation, our model underestimates values
 during the day and overestimates them during the night. We attribute our
 larger RMSE to higher scattering, as we are modeling 24 hours. This
 scattering may result from the radiation shield. In the 24-hour boxplot of
@@ -1504,12 +1405,10 @@ diurnal cycle. This cycle presumably correlates with the radiation hitting
 the radiation shield. We recommend performing our analysis with night-time
 data only to make the results more comparable with those of @burger2021.
 
-
 The evaluation of our models shows that the predicted values are similar to
 the actual values. However, the probability density shows that the models
 predict frequent values more frequently. This presumably also explains the
 RMSE, as this results in imprecision.
-
 
 One of our main findings is interesting, and we are not entirely certain
 about the reasons behind these results. As observed in tables 4 and 6, the
@@ -1559,10 +1458,10 @@ Zollikofen to automatically flow into the function, ensuring the generation
 of an up-to-date map. This would also increase the application
 possibilities. As mentioned in the introduction, people in urban areas are
 affected by the urban heat island effect. This is particularly problematic
-for vulnerable people. With an real time prediction map, these people would be able
-to identify hotspots and specifically avoid them. 
-Unfortunately, this is not possible because MeteoSwiss does not
-transmit data automatically but only provide a csv file on request.
+for vulnerable people. With an real time prediction map, these people would
+be able to identify hotspots and specifically avoid them. Unfortunately,
+this is not possible because MeteoSwiss does not transmit data
+automatically but only provide a csv file on request.
 
 The use of a Shiny map could enable the manual adjustment of parameters. We
 did attempt this approach, but it proved to be quite unstable. The map
@@ -1593,40 +1492,42 @@ conclude:
 -   A map is a powerful instrument to visualize the findings. It also shows
     a possible application. In future, vulnerable people could use our map
     to decide where hot spots are and avoid them based on our map.
-    
-    
-# Outlook
-Since this project already quite blew the timescope of this proseminar we sadly 
-could not explore all possibilities this modelling approach would offer. Some of 
-the possible extensions or new ideas for this project were already mentioned in 
-the text. Still we would like to mention all of them here:
-- With real time access to the weather forecast one could now forecast the UHI 
-of Bern at an hourly rate! We already talked to people and they said getting this
-data for scientific use should be no problem. Alternatively a open source weather
-forecast could be used. The possibilities for an application or warning system are
-endless. This of course could also generate a realtime map that warns people in affected hotspots.
-- There is more data: we know of data from for example meteobikes that were run 
-during a field course for an entire week that would enable much more datapoints 
-then the fixed loggers, this could also be used to assess the quality of the 
-spatial upscaling and also to better the model. Furthermore since 2023 there is
-now real-time data from the logger generation 2.0 which could be used for maybe 
-forecasting or at least as more training data. Furthermore the year 2018 
-(the first year) of measurements was not used because of data compatability issues.
-This data could now also be used as well as also winter measurements. 
-There is truly still so much more data.
-- Other machine learning algorithms could be tested.
-- This model could be expanded for the whole of Switzerland.
-- More predictor classes could be used to assess the UHI effect. This starts with 
-the layers from @burger2021 which we were not able to generate as well as other 
-layers such as possibly geophysical layers such as wind flow. 
-- A spatial or environmental covariate clustering and following cross validation
-could be performed and then the reasonability of upscaling could be assessed. 
-See: https://onlinelibrary.wiley.com/doi/10.1111/geb.13635 !! Or https://geco-bern.github.io/spatial_upscaling/ !!
-- A shiny app could be used to let a user set environmental variables to get a 
-realtime map based on scenarios. (similar to what was done in this script just more interactive)
-- Data from the loggers could be calibrated so that there is less bias during 
-the day and so presumably improve the model performance with this calibrated data.
 
+# Outlook
+
+Since this project already quite blew the timescope of this proseminar we
+sadly could not explore all possibilities this modelling approach would
+offer. Some of the possible extensions or new ideas for this project were
+already mentioned in the text. Still we would like to mention all of them
+here: - With real time access to the weather forecast one could now
+forecast the UHI of Bern at an hourly rate! We already talked to people and
+they said getting this data for scientific use should be no problem.
+Alternatively a open source weather forecast could be used. The
+possibilities for an application or warning system are endless. This of
+course could also generate a realtime map that warns people in affected
+hotspots. - There is more data: we know of data from for example meteobikes
+that were run during a field course for an entire week that would enable
+much more datapoints then the fixed loggers, this could also be used to
+assess the quality of the spatial upscaling and also to better the model.
+Furthermore since 2023 there is now real-time data from the logger
+generation 2.0 which could be used for maybe forecasting or at least as
+more training data. Furthermore the year 2018 (the first year) of
+measurements was not used because of data compatability issues. This data
+could now also be used as well as also winter measurements. There is truly
+still so much more data. - Other machine learning algorithms could be
+tested. - This model could be expanded for the whole of Switzerland. - More
+predictor classes could be used to assess the UHI effect. This starts with
+the layers from @burger2021 which we were not able to generate as well as
+other layers such as possibly geophysical layers such as wind flow. - A
+spatial or environmental covariate clustering and following cross
+validation could be performed and then the reasonability of upscaling could
+be assessed. See: <https://onlinelibrary.wiley.com/doi/10.1111/geb.13635>
+!! Or <https://geco-bern.github.io/spatial_upscaling/> !! - A shiny app
+could be used to let a user set environmental variables to get a realtime
+map based on scenarios. (similar to what was done in this script just more
+interactive) - Data from the loggers could be calibrated so that there is
+less bias during the day and so presumably improve the model performance
+with this calibrated data.
 
 # Acknowledgment
 
@@ -1639,8 +1540,7 @@ ChatGPT) to check our grammar (but only small adjustments) or to find a
 synonym but not to generate the text itself. The text is our own work.
 ChatGPT and Stackoverflow were used to resolve some coding issues.
 
-We thank our supervisors Prof. Dr. Benjamin Stocker, Dr. Laura Marques and 
+We thank our supervisors Prof. Dr. Benjamin Stocker, Dr. Laura Marques and
 Pepa Aran for their support.
-
 
 # Bibliography^WP2^
