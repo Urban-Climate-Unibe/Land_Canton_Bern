@@ -12,6 +12,7 @@ editor_options:
   markdown:
     wrap: 75
 bibliography: references.bib
+
 ---
 
 Course: Proseminar in Applied Geo-Data Science at the University of Bern
@@ -421,7 +422,7 @@ at all time.
 
 As described above, this markdown can run with either our geospatial layers
 (three different zonal mean values [25m, 150m, 1000m]), or with one zonal
-mean as demonstrated by @burger. It depends on the mode you choose. To
+mean as demonstrated by @burger2021. It depends on the mode you choose. To
 avoid misunderstandings, you can choose whether you want to download our
 geospatial layers from a Dropbox account (default) or if you want to
 generate our geospatial layers from scratch (time-intensive but guarantees
@@ -1176,7 +1177,7 @@ exceptional $R^2$ and RMSE lead us to consider it as our best model.
 
 In order to comprehensively assess the quality of our models, we generated
 and evaluated them in 'Burger regular mode', utilizing full meteorologic
-data but employing the geospatial layer from @burger. In this mode, the
+data but employing the geospatial layer from @burger2021. In this mode, the
 random forest model outperforms all others, excelling in both explaining
 variance (highest $R^2$) and precision (lowest RMSE). While its bias
 (accuracy) is not the lowest, it remains at a low level. It's essential to
@@ -1253,7 +1254,7 @@ bias of the KNN model, which excels in accuracy and overall performance.
 
 In order to comprehensively assess the quality of our models, we generated
 and evaluated them in 'Burger demo mode', utilizing 5% of the meteorologic
-data and incorporating the geospatial layer from @burger. In this context,
+data and incorporating the geospatial layer from @burger2021. In this context,
 the knn model exhibits the best performance, explaining the highest amount
 of variance (highest $R^2$), achieving the best precision (lowest RMSE),
 and demonstrating superior accuracy (lowest bias).
