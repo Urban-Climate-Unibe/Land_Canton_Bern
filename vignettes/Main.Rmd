@@ -57,19 +57,18 @@ work package 2 (WP2):
 
 Climate change, influenced by human activities, is likely to increase the
 frequency, intensity, and length of heatwaves, as discussed in studies like
-@intergovernmentalpanelonclimatechange(ipcc)2023. In urban settings, this
-effect is intensified by the urban heat island (UHI) phenomenon, which
-results in higher temperatures in city areas than in surrounding rural
-regions, as explored in works like @oke2017. This discrepancy is
-particularly pronounced at night due to reduced long-wave radiation
-emission and altered heat fluxes in urban areas [@burger2021; @gubler2021].
-Consequently, urban residents face significant thermal stress from the UHI
-effect [@burger2021; @wicki2018]. With over 75% of the Central European
-population residing in urban zones, this escalating trend is a major
-climatic concern for these inhabitants. Therefore, examining the spatial
-variability of temperatures in urban areas is essential for developing
-adaptation strategies to mitigate impacts on public health and the
-environment [@burger2021].
+(IPCC, 2023). In urban settings, this effect is intensified by the urban
+heat island (UHI) phenomenon, which results in higher temperatures in city
+areas than in surrounding rural regions, as explored in works like
+@oke2017. This discrepancy is particularly pronounced at night due to
+reduced long-wave radiation emission and altered heat fluxes in urban areas
+[@burger2021; @gubler2021]. Consequently, urban residents face significant
+thermal stress from the UHI effect [@burger2021; @wicki2018]. With over 75%
+of the Central European population residing in urban zones, this escalating
+trend is a major climatic concern for these inhabitants. Therefore,
+examining the spatial variability of temperatures in urban areas is
+essential for developing adaptation strategies to mitigate impacts on
+public health and the environment [@burger2021].
 
 In order to accurately monitor temperature variations in climatically
 diverse urban areas, there is a need for high-resolution measurement
@@ -87,20 +86,20 @@ only focused on the temperature readings from the LCDs and their variance
 from AWS data but also mapped the temperature distribution across the
 suburban areas of Bern, providing a comprehensive overview [@gubler2021].
 
-
 In spring 2023, N. Tinner generated a map of the current LCDs temperature
 in the city of Bern based on the study of @burger2021. Here, a spatial
 upscaling from single measurement points of temperature is performed for a
 night mean based on spatial predictors and meteorology, which are known
 causes for the UHI [@oke2017]. N. Tinner implemented an approach where the
-upscaling is performed on real time data. The approach used
-is a classic multivariate linear regression model. As the model only knows
-the current temperature distribution, its scope and statistical power are
-limited. But because both @burger2021 and @gubler2021 showed that the city
-of Bern is affected by the urban heat island effect it is crucial to know
-more about it. Therefore @burger2021 modelled the nighttime mean UHI effect.
-The fact that the first real time map of N.Tinner is very limited in its statistical power and @burger2021 only modeled nighttime mean motivated us to investigate the urban heat island using machine
-learning techniques.
+upscaling is performed on real time data. The approach used is a classic
+multivariate linear regression model. As the model only knows the current
+temperature distribution, its scope and statistical power are limited. But
+because both @burger2021 and @gubler2021 showed that the city of Bern is
+affected by the urban heat island effect it is crucial to know more about
+it. Therefore @burger2021 modelled the nighttime mean UHI effect. The fact
+that the first real time map of N.Tinner is very limited in its statistical
+power and @burger2021 only modeled nighttime mean motivated us to
+investigate the urban heat island using machine learning techniques.
 
 ## Objectives and Research Questions
 
@@ -174,14 +173,15 @@ urban patterns of temperature distributions, zonally meaned geospatial data
 as shown in [\@burger2021](mailto:in@burger2021){.email} is used. These are
 cantonal land use classes as well as federal geospatial data. All of the
 data is spatially averaged to obtain the layers most effective as shown in
-@burger2021 as well as with our own distances (Table 1). The federal data (meteorologic values from the AWS at
-Zollikofen, digital elevation model (DEM), and vegetation height (VH)) and
-cantonal data (all land cover classes: land cover (LC), different open
-spaces (OS) and building heights (BH)) is directly downloaded from the web
-into R and then used as predictor classes. The geospatial layers roughness
-(ROU), flow accumulation (FLAC), aspect (ASP) and slop (SLO) are calculated
-based on these data sets and are then used as predictor classes. Table 1
-provides a brief overview of the data we use.
+@burger2021 as well as with our own distances (Table 1). The federal data
+(meteorologic values from the AWS at Zollikofen, digital elevation model
+(DEM), and vegetation height (VH)) and cantonal data (all land cover
+classes: land cover (LC), different open spaces (OS) and building heights
+(BH)) is directly downloaded from the web into R and then used as predictor
+classes. The geospatial layers roughness (ROU), flow accumulation (FLAC),
+aspect (ASP) and slop (SLO) are calculated based on these data sets and are
+then used as predictor classes. Table 1 provides a brief overview of the
+data we use.
 
 +----------------------------+-----------------+-------------------------+
 | Predictor class            | Variable Type   | Resolution / zonal mean |
@@ -306,30 +306,30 @@ repository (dropbox account), which is the case when knitting (default).
 Alternatively, the geospatial layers are generated by downloading and
 processing of the geospatial layers as raw data from open sources. First,
 the files are downloaded from either cantonal or federal swiss websites.
-Then, the processing goes as follows: 
+Then, the processing goes as follows:
 
-1) The predictor classes layers are
-formatted to be separate files. This means that for each land use class as
-defined by [\@burger2021](mailto:by@burger2021){.email} and for each
-geospatial layer from Swisstopo there is a raster file which is the
-predictor class. 
+1)  The predictor classes layers are formatted to be separate files. This
+    means that for each land use class as defined by
+    [\@burger2021](mailto:by@burger2021){.email} and for each geospatial
+    layer from Swisstopo there is a raster file which is the predictor
+    class.
 
-2) Then spatial extent and resolution are all standardized
-to 5 meters and the extent of the city and the surrounding lands. 
+2)  Then spatial extent and resolution are all standardized to 5 meters and
+    the extent of the city and the surrounding lands.
 
-3) Each layer then is zonally averaged. This can be performed with the layer
-resolutions by @burger2021 which corresponds to one predictor per predictor
-class in table 1. Alternatively, the geospatial layers are all meaned by
-the resolutions in table 1 (3 mean layers per predictor class). Finally,
-this results in three (or one in case of
-[\@burger2021](mailto:of@burger2021){.email}) geospatial layers per
-predictor class. The data of the predictor classes which corresponds to the
-raw layers can be found in the data-raw subfolder of this project for the
-land use classes. The processed files can be found in the data folder in
-the subdirectory Tiffs. We were not able to generate all layers from
-@burger2021 as they were generated in a GIS. For the sky view factor an
-alternative was chosen (ROU) but some layers were not replaced such as
-"AMT": amount of trees.
+3)  Each layer then is zonally averaged. This can be performed with the
+    layer resolutions by @burger2021 which corresponds to one predictor per
+    predictor class in table 1. Alternatively, the geospatial layers are
+    all meaned by the resolutions in table 1 (3 mean layers per predictor
+    class). Finally, this results in three (or one in case of
+    [\@burger2021](mailto:of@burger2021){.email}) geospatial layers per
+    predictor class. The data of the predictor classes which corresponds to
+    the raw layers can be found in the data-raw subfolder of this project
+    for the land use classes. The processed files can be found in the data
+    folder in the subdirectory Tiffs. We were not able to generate all
+    layers from @burger2021 as they were generated in a GIS. For the sky
+    view factor an alternative was chosen (ROU) but some layers were not
+    replaced such as "AMT": amount of trees.
 
 #### Variable Selection
 
@@ -398,8 +398,8 @@ serves as the basis for this study.
 
 To address the research questions, you can modify the workflow by changing
 the data source of your 'Combined.csv' file. By default, it randomly
-selects 5% of the 'Combined.csv' file. The following subsection provides
-an overview of the modes within this workflow.
+selects 5% of the 'Combined.csv' file. The following subsection provides an
+overview of the modes within this workflow.
 
 ### How this Workflow Works^WP1, WP2^
 
