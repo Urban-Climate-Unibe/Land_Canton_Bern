@@ -517,7 +517,7 @@ set.seed(123)
 source("../R/load_packages.R")  
 load_packages(packages = packages)
 
-if (isTRUE(getOption('knitr.in.progress'))) { 
+if (isTRUE(getOption('knitr.in.progress'))) {
   ### For knitting, adjust here! ###
   # Model_demo means, you only keep 5% of the data for training
   model_demo <- "y" 
@@ -1653,5 +1653,7 @@ ChatGPT and Stackoverflow were used to resolve some coding issues.
 
 We thank our supervisors Prof. Dr. Benjamin Stocker, Dr. Laura Marques and
 Pepa Aran for their support.
+
+We especially also thank Moritz Burger for his support!
 
 # Bibliography^WP2^
