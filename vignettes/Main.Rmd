@@ -611,7 +611,7 @@ computational time). Additionally, the models are designed and tuned to
 deliver optimal performance in 'regular mode'. Consequently, significant
 deviations are inevitable when operating in 'demo mode', 'Burger demo
 mode', or 'Burger regular mode'. The estimated computational time depends
-on your device and should be considerd as a guiding value.
+on your device and should be considered as a guiding value.
 
 #### Implementation of the Linear Regression Model
 
