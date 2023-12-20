@@ -1,5 +1,5 @@
 ---
-title: "Workflow to Model the Urban Heat Island Effect of the City of Bern"
+title: "Modelling the Urban Heat Island Effect of the City of Bern with Machine Learning"
 author: "Nils Tinner, Patrick Bigler"
 date: "12-01-2023"
 output:
