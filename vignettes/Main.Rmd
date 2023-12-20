@@ -12,7 +12,6 @@ editor_options:
   markdown:
     wrap: 75
 bibliography: references.bib
-
 ---
 
 Course: Proseminar in Applied Geo-Data Science at the University of Bern
@@ -57,29 +56,30 @@ work package 2 (WP2):
 
 Climate change, influenced by human activities, is likely to increase the
 frequency, intensity, and length of heatwaves, as discussed in studies like
-!!IPCC . In urban settings, this effect is intensified by the urban heat
-island (UHI) phenomenon, which results in higher temperatures in city areas
-than in surrounding rural regions, as explored in works like @oke2017. This
-discrepancy is particularly pronounced at night due to reduced long-wave
-radiation emission and altered heat fluxes in urban areas [@burger2021;
-@gubler2021]. Consequently, urban residents face significant thermal stress
-from the UHI effect [@burger2021; @wicki2018]. With over 75% of the Central
-European population residing in urban zones, this escalating trend is a
-major climatic concern for these inhabitants. Therefore, examining the
-spatial variability of temperatures in urban areas is essential for
-developing adaptation strategies to mitigate impacts on public health and
-the environment [@burger2021].
+@intergovernmentalpanelonclimatechange(ipcc)2023. In urban settings, this
+effect is intensified by the urban heat island (UHI) phenomenon, which
+results in higher temperatures in city areas than in surrounding rural
+regions, as explored in works like @oke2017. This discrepancy is
+particularly pronounced at night due to reduced long-wave radiation
+emission and altered heat fluxes in urban areas [@burger2021; @gubler2021].
+Consequently, urban residents face significant thermal stress from the UHI
+effect [@burger2021; @wicki2018]. With over 75% of the Central European
+population residing in urban zones, this escalating trend is a major
+climatic concern for these inhabitants. Therefore, examining the spatial
+variability of temperatures in urban areas is essential for developing
+adaptation strategies to mitigate impacts on public health and the
+environment [@burger2021].
 
 In order to accurately monitor temperature variations in climatically
 diverse urban areas, there is a need for high-resolution measurement
 networks. The scarcity of automated weather stations (AWS) due to their
 high cost poses a challenge in this regard. Addressing this issue,
 @gubler2021 introduced a novel, cost-effective type of measurement devices
-(LCDs). These devices comprise a temperature logger and a specially
-designed, naturally ventilated radiation shield. In 2018, 79 of these LCDs
-were deployed across Bern, Switzerland [@gubler2021]. The research found
-that, compared to the AWS reference station, the LCDs tended to
-overestimate the average hourly temperatures during the day (06:00 --
+(Low Coast Devices, LCDs). These devices comprise a temperature logger and
+a specially designed, naturally ventilated radiation shield. In 2018, 79 of
+these LCDs were deployed across Bern, Switzerland [@gubler2021]. The
+research found that, compared to the AWS reference station, the LCDs tended
+to overestimate the average hourly temperatures during the day (06:00 --
 22:00) by 0.61°C to 0.93°C. At night (22:00 -- 06:00), the discrepancies
 were significantly smaller, ranging from -0.12°C to 0.23°C. The study not
 only focused on the temperature readings from the LCDs and their variance
@@ -1254,10 +1254,10 @@ bias of the KNN model, which excels in accuracy and overall performance.
 
 In order to comprehensively assess the quality of our models, we generated
 and evaluated them in 'Burger demo mode', utilizing 5% of the meteorologic
-data and incorporating the geospatial layer from @burger2021. In this context,
-the knn model exhibits the best performance, explaining the highest amount
-of variance (highest $R^2$), achieving the best precision (lowest RMSE),
-and demonstrating superior accuracy (lowest bias).
+data and incorporating the geospatial layer from @burger2021. In this
+context, the knn model exhibits the best performance, explaining the
+highest amount of variance (highest $R^2$), achieving the best precision
+(lowest RMSE), and demonstrating superior accuracy (lowest bias).
 
 However, it's crucial to approach the results of the two demo modes with
 particular caution, as their significance is limited. The hyperparameters
@@ -1289,7 +1289,7 @@ this study.
 'Burger demo mode' (with 5 % of the data and the geospatial layer of
 @burger2021).
 
-## Map^WP2^
+## Spatial Upscaling: The Map^WP2^
 
 This subsection aims to generate maps to visualize our key findings. The
 map displays the spatial distribution of temperature anomalies for the
@@ -1300,6 +1300,13 @@ important to note that the models are not trained for extremes.
 Additionally, ensure that you avoid contradictions (e.g., the sum of 3 day
 precipitation \< sum of 1 day precipitation).
 
+If we use our best model (random forest) we can predict new values and do a
+spatial upscale. If we use our default situation (summer evening (after
+sunset)) we can generate a map of the suburban area of the city of Bern. We
+see, that open water spaces (Aare, Wohlensee) have a cooling effect as
+welle as forest (Bremgartenwald) or agricultural land use (surounding areas
+like Zolikofen, Kirchlindach etc.).
+
 Table 7 provides a brief overview of possible intervals for each variable.
 These intervals are derived from extreme events recorded by
 [MeteoSchweiz](https://www.meteoschweiz.admin.ch/klima/klima-der-schweiz/rekorde-und-extreme.html).
@@ -1308,8 +1315,10 @@ Please keep this in mind when exploring and adjusting values.
 
 +----------------+----------------+-------------------------------------+
 | Variable       | Default        | Realistic Interval                  |
+|                | (sommer        |                                     |
+|                | evening)       |                                     |
 +================+================+=====================================+
-| Temperature    | 22 °C          | $x[°C] \in[-15\leq x \leq 35]$      |
+| Temperature    | 25 °C          | $x[°C] \in[-15\leq x \leq 35]$      |
 +----------------+----------------+-------------------------------------+
 | Rain           | 0 mm           | $x[mm] \in[0 \leq x \leq 200]$      |
 +----------------+----------------+-------------------------------------+
@@ -1317,47 +1326,47 @@ Please keep this in mind when exploring and adjusting values.
 |                |                | [W*m^{-2}] \in[0 \leq x \leq 300]$, |
 |                |                | for a 10' mean                      |
 +----------------+----------------+-------------------------------------+
-| Wind speed     | 8 $m*s^{-1}$   | $x[m*s^{-1}] \in[0 \leq x \leq 20]$ |
+| Wind speed     | 1 $m*s^{-1}$   | $x[m*s^{-1}] \in[0 \leq x \leq 20]$ |
 +----------------+----------------+-------------------------------------+
-| Wind direction | 0 (north wind) | $x[°] \in[0 \leq x \leq 360]$, with |
-|                |                | 0° = N, 180° = S                    |
+| Wind direction | 180 (south     | $x[°] \in[0 \leq x \leq 360]$, with |
+|                | wind)          | 0° = N, 180° = S                    |
 +----------------+----------------+-------------------------------------+
-| 6h mean        | 22 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
+| 6h mean        | 30 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
 | temperature    |                |                                     |
 +----------------+----------------+-------------------------------------+
-| 12h mean       | 19 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
+| 12h mean       | 28 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
 | temperature    |                |                                     |
 +----------------+----------------+-------------------------------------+
-| 1d mean        | 20 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
+| 1d mean        | 24 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
 | temperature    |                |                                     |
 +----------------+----------------+-------------------------------------+
-| 3d mean        | 18 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
+| 3d mean        | 22 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
 | temperature    |                |                                     |
 +----------------+----------------+-------------------------------------+
-| 5d mean        | 17 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
+| 5d mean        | 22 °C          | $x[°C] \in[-15 \leq x \leq 35]$     |
 | temperature    |                |                                     |
 +----------------+----------------+-------------------------------------+
-| 6h             | 30 mm          | $x[mm] \in[0 \leq x \leq 100]$      |
+| 6h             | 0 mm           | $x[mm] \in[0 \leq x \leq 100]$      |
 | precipitation  |                |                                     |
 | [sum]          |                |                                     |
 +----------------+----------------+-------------------------------------+
-| 12h            | 25 mm          | $x[mm] \in[0 \leq x \leq 200]$      |
+| 12h            | 0 mm           | $x[mm] \in[0 \leq x \leq 200]$      |
 | precipitation  |                |                                     |
 | [sum]          |                |                                     |
 +----------------+----------------+-------------------------------------+
-| 1d             | 20 mm          | $x[mm] \in[0 \leq x \leq 400]$      |
+| 1d             | 0 mm           | $x[mm] \in[0 \leq x \leq 400]$      |
 | precipitation  |                |                                     |
 | [sum]          |                |                                     |
 +----------------+----------------+-------------------------------------+
-| 3d             | 15 mm          | $x[mm] \in[0 \leq x \leq 600]$      |
+| 3d             | 0 mm           | $x[mm] \in[0 \leq x \leq 600]$      |
 | precipitation  |                |                                     |
 | [sum]          |                |                                     |
 +----------------+----------------+-------------------------------------+
-| 5d             | 10 mm          | $x[mm] \in[0 \leq x \leq 600]$      |
+| 5d             | 0 mm           | $x[mm] \in[0 \leq x \leq 600]$      |
 | precipitation  |                |                                     |
 | [sum]          |                |                                     |
 +----------------+----------------+-------------------------------------+
-| 10d            | 5 mm           | $x[mm] \in[0 \leq x \leq 600]$      |
+| 10d            | 0 mm           | $x[mm] \in[0 \leq x \leq 600]$      |
 | precipitation  |                |                                     |
 | [sum]          |                |                                     |
 +----------------+----------------+-------------------------------------+
@@ -1374,17 +1383,19 @@ meteorolgical variables according to
 # Load the function to generate the map
 source('../R/map_generator.R')
 
+# Define a vector with your inputs (here, we use a default as described in table x)
 
 #scenario default, rainy stormy day
-rainy_stormday = c(22, 5,290, 10, 200, 22, 19, 20, 18, 17, 15, 30, 30, 40, 45, 50)
+rainy_stormday = c(22, 5, 0, 10, 200, 22, 19, 20, 18, 17, 15, 30, 30, 40, 45, 50)
 
-# Define a vector with your inputs (here, we use a default as described in table x)
-#scenario heat day evening
+#scenario heat day evening (default)
 normal_summarevening = c(25, 0, 0, 1, 180, 30, 28 , 24, 22, 22, 0, 0, 0, 0, 0, 0)
 
+# scenario: cold and rainy day
 cold_rain = c(26, 0, 0, 1, 180, 30, 28 , 24, 22, 22, 0, 0, 0, 0, 0, 0)
 
-heat_cloudless = c(32, 0, 800, 1, 180, 30, 26 , 24, 22, 22, 0, 0, 0, 0, 0, 0)
+# scenario: hot summer day
+heat_cloudless = c(32, 0, 300, 1, 180, 30, 26 , 24, 22, 22, 0, 0, 0, 0, 0, 0)
 
 # Function call
 map_generater(model = random_forest, meteoswiss_input = normal_summarevening)
@@ -1432,17 +1443,18 @@ Of course also a spatial or environmental covariates cross-validation could
 be performed and also assess whether these covariates represent the
 prediction task of the model at hand for spatial upscaling. This would be
 more direct then taking the logger ID for cross validation as it looks
-directly at the enviromental covariates and the logger ID is just a
-representation for these enviromental covariates as ir represents different
-logger sites. This enviromental or spatial cross validation should be done
-as a follow up as we did not find time to implement this. This Logger ID
-approach should still be much more representative then a 3 fold random
-cross validation split as each fold has to predict unknown loggers.
+directly at the environmental covariates and the logger ID is just a
+representation for these environmental covariates as ir represents
+different logger sites. This environmental or spatial cross validation
+should be done as a follow up as we did not find time to implement this.
+This Logger ID approach should still be much more representative then a 3
+fold random cross validation split as each fold has to predict unknown
+loggers.
 
 The XGB Boost and the neuronal network are additional and should show you,
 that there are further techniques which could be explored. For the XGBoost
 model, all parameters are tuned and therefore the model should perform
-optimally. The nerual network was a ad hoc implementation and we are not
+optimally. The neural network was a ad hoc implementation and we are not
 familiar with neural networks. All results are therefore not guaranteed to
 be anything like optimal. Please look at the implementation yourself.
 
@@ -1559,12 +1571,6 @@ be able to identify hotspots and specifically avoid them. Unfortunately,
 this is not possible because MeteoSwiss does not transmit data
 automatically but only provide a csv file on request.
 
-The use of a Shiny map could enable the manual adjustment of parameters. We
-did attempt this approach, but it proved to be quite unstable. The map
-generation took several minutes, and changing even one of the 16 parameters
-during generation caused the code to crash. Nevertheless, it would
-certainly make sense to invest more time in this.
-
 # Conclusion^WP2^
 
 This study aimed to adsress our four research questions. In summary, we can
@@ -1589,7 +1595,7 @@ conclude:
 
 # Outlook
 
-Since this project already quite blew the timescope of this proseminar we
+Since this project already quite blew the time-scope of this proseminar we
 sadly could not explore all possibilities this modelling approach would
 offer. Some of the possible extensions or new ideas for this project were
 already mentioned in the text. Still we would like to mention all of them
@@ -1625,9 +1631,7 @@ here:
 
 -   A spatial or environmental covariate clustering and following cross
     validation could be performed and then the reasonability of upscaling
-    could be assessed. See:
-    <https://onlinelibrary.wiley.com/doi/10.1111/geb.13635> !! Or
-    <https://geco-bern.github.io/spatial_upscaling/> !!
+    could be assessed. See: @ludwig2023.
 
 -   A shiny app could be used to let a user set environmental variables to
     get a realtime map based on scenarios. (similar to what was done in
