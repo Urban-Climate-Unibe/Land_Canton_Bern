@@ -31,8 +31,10 @@ data_combination <- suppressWarnings(function(){
            rain = as.numeric(rre150z0),
            rad = as.numeric(gre000z0),
            winds = as.numeric(fkl010z0),
-           windd = as.numeric(dkl010z0))|>
-    dplyr::select(time,temp,rain,rad,winds,windd) |>
+           windd = as.numeric(dkl010z0),
+           pres = as.numeric(prestas0),
+           relhum = as.numeric(rre150z0))|>
+    dplyr::select(time,temp,rain,rad,winds,windd,pres,relhum) |>
     mutate(time = time+hours(2)) |>
     drop_na() #some parsing error,dk why, 60 NA..
 
