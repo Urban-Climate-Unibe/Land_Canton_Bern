@@ -7,8 +7,8 @@ random_forest <- function(pp,training_data,tuning = FALSE){
   if (tuning == FALSE) {
     print('The model is currently being generated with mtry = 16 and min.node.size = 3. Please be patient...')
     grid <- expand.grid(
-      .mtry = pred_count/3.5, #default p/3.5
-      .min.node.size = 3,         # set to 3
+      .mtry = round(pred_count/3.5), #default p/3.5
+      .min.node.size = 5,         # set to 5
       .splitrule = "variance"     # default variance
     ) #Result of hyperparameter tuning
   }else{print('The model is now in the tuning process. Please be patient...')
@@ -18,7 +18,7 @@ random_forest <- function(pp,training_data,tuning = FALSE){
       .splitrule = "variance"     # default variance
     )
   }
-group_folds <- groupKFold(training_data$Log_Nr, k = 3)
+group_folds <- groupKFold(training_data$Log_Nr, k = 5)
 mod_cv <- caret::train(
   pp,
   data = training_data,
@@ -27,14 +27,13 @@ mod_cv <- caret::train(
   trControl = trainControl(
     method = "cv",
     index = group_folds,
-    number = 3,
+    number = 5,
     savePredictions = "final"),
-    parallel = 'foreach',
   tuneGrid = grid,
   # arguments specific to "ranger" method
   replace = FALSE,
   sample.fraction = 0.5,
-  num.trees = 100,
+  num.trees = 200,
   seed = 1982
 )
 
