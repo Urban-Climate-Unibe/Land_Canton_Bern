@@ -47,7 +47,7 @@ data_api <- fromJSON(content(response, "text"), flatten = TRUE)
 forecast <- data_api$hourly
 forecast <- as_tibble(forecast)
 forecast <- forecast |> mutate(time = datetime <- as.POSIXct(time, format = "%Y-%m-%dT%H:%M")) |>
-  dplyr::slice(1:72)
+  dplyr::slice(1:(4*24))
 
 # Take all column-names you need as predictors from the combined file
 predictors <- combined |>
@@ -150,7 +150,7 @@ p <- ggplot() +
   geom_point(aes(x = 2601930.3, y = 1204410.1)) +
   annotate("text", x = 2602300, y = 1204410.1, label= "AWS Zollikofen", hjust = 0) +
   labs(title = paste('Temperatureanomaly for the suburban area of Bern'),
-       subtitle = paste('This map uses a',model_input,'and the following variable inputs:',
+       subtitle = paste('This map uses a random forest and the following variable inputs:',
                         "\nTemp [°C]: = ",row$temp,
                         "\nPrec [mm]: =", row$rain,
                         '\nWindspeed [m/s] =',row$winds,', Winddirection [°] =',row$windd,

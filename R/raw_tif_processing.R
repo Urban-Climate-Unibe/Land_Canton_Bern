@@ -19,7 +19,7 @@ library(dplyr)
 
 # Read in the shapefile MPOU
 shapefile <- st_read(paste0(tempdir(),"mopu/data/MOPUBE_BBF.shp"))
-
+shapefile <- st_make_valid(shapefile)
 # Define the extent to cut
 extent_to_cut <- st_bbox(c(xmin = 2594313, xmax = 2605813, ymin = 1194069, ymax = 1204804), crs = st_crs(shapefile))
 
@@ -125,7 +125,7 @@ unzip(paste0(tempdir(),"GEBHOEHE.zip"),exdir = paste0(tempdir(),"/GEBHOEH"))
 # Read in the shapefile
 
 shapefile <- st_read(paste0(tempdir(),"/GEBHOEH/GEBHOEHE/data/GEBHOEHE_GEBHOEHE.shp"))
-
+shapefile <- st_make_valid(shapefile)
 # Define the extent, same as before
 
 extent_to_cut <- st_bbox(c(xmin = 2594313, xmax = 2605813, ymin = 1194069, ymax = 1204804), crs = st_crs(shapefile))
@@ -212,7 +212,10 @@ tiff_focal(tiff = aspect,150,"ASP.tif")
 if (Sys.Date()>as.Date("2024-03-01")){return()} #ensure reproducability after march 2024
 #and Vegetation height
 
-download.file("https://www.dropbox.com/scl/fi/ywx8f4cufj0l43p9nh5ze/VH_WSL_21.tif?rlkey=swtvr5zw4sit9qtw5pu4ju5o3&dl=1", destfile = paste0(tempdir(),"/VH.tif"))
+url <- "https://www.dropbox.com/scl/fi/ywx8f4cufj0l43p9nh5ze/VH_WSL_21.tif?rlkey=swtvr5zw4sit9qtw5pu4ju5o3&dl=1"
+destfile <- paste0(tempdir(), "/VH.tif")
+download.file(url, destfile, mode = "wb")
+
 VH <- terra::rast(paste0(tempdir(),"/VH.tif"))
 VH <- terra::resample(VH,ex)
 tiff_focal(tiff = VH,150,"VH.tif")
