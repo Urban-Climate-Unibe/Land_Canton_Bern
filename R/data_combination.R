@@ -7,8 +7,9 @@ data_combination <- suppressWarnings(function(){
   measurement_files <- list.files("../data/Measurements/")
   measurement_files <- purrr::map(as.list(paste("../data/Measurements/",measurement_files,sep = "")),~read_csv(.))
   measurement_files <- bind_rows(measurement_files, .id = "column_label")
-  measurement_files <-  mutate(measurement_files,time = mdy_hm(Zeit)) |>
-    dplyr::select(-Zeit)
+  measurement_files <- measurement_files|> mutate(time = mdy_hm(Zeit))
+  measurement_files <-  measurement_files|>mutate(time = if_else(is.na(time),Time,time)) |>
+    dplyr::select(-Zeit,-Time)
   measurement_files <- measurement_files |>
     mutate(hour = hour(time),
            month = month(time),
@@ -38,7 +39,7 @@ data_combination <- suppressWarnings(function(){
     mutate(time = time+hours(2)) |>
     drop_na() #some parsing error,dk why, 60 NA..
 
-
+  meteoswiss2 <- read_delim("../data/Meteoswiss/order_117685_data.txt",delim = ";")
 
 
 
@@ -51,6 +52,18 @@ data_combination <- suppressWarnings(function(){
     dplyr::group_by(hour, day, month, year) |>
     dplyr::summarise(across(where(is.numeric), mean),.groups = 'drop') |>
     mutate(rain = rain*6) # to get sum... was mean
+
+  meteoswiss2 <- meteoswiss2 |>
+    mutate(time = as.POSIXct(as.character(time), format = "%Y%m%d%H%M"),
+           temp_5cm = as.numeric(tso005s0))|>
+    select(-tso005s0)|>
+    mutate(hour = hour(time),
+           month = month(time),
+           day = day(time),
+           year = year(time))
+  meteoswiss2 <- meteoswiss2 |>
+    dplyr::group_by(hour, day, month, year) |>
+    dplyr::summarise(across(where(is.numeric), mean),.groups = 'drop')
 
   meteoswiss <- meteoswiss|>
     mutate(timestamp = ymd_h(paste(year,month,day,hour,sep = "-"))) |>
@@ -73,14 +86,28 @@ data_combination <- suppressWarnings(function(){
 
 
 
-
+  meteoswiss <- inner_join(meteoswiss,meteoswiss2,by = c("hour","day","month","year"))
 
   combined = inner_join(measurement_files,meteoswiss,by = c("hour","day","month","year"))
 
-  measurement_metadata <- read_csv("../data/Metadata_19-22.csv")
+  measurement_metadata_19_22 <- read_csv("../data/Metadata_19-22.csv")|>  mutate(NORD_CHTOPO = NORD_CHTOP)|> select(-NORD_CHTOP)
+  measurement_metadata_23 <- read_csv2("../data/metadata_network_2023.csv")|>
+    mutate(Log_Nr = Log_NR,
+           Name = STANDORT)|>
+    select(-Log_NR)
+  combined_metadata <- anti_join(measurement_metadata_23,measurement_metadata_19_22, by = "Log_Nr") |>
+    bind_rows(measurement_metadata_19_22) |> select(Name, LV_03_N,LV_03_E,Log_Nr)
+
+  combined = inner_join(combined, combined_metadata, by = "Log_Nr")
+
+  combined <- combined |> ungroup()
+#Bike measurements?
 
 
-  combined = inner_join(combined, measurement_metadata, by = "Log_Nr")
+
+
+
+
 
   combined <- combined |> ungroup()
 

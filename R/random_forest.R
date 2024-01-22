@@ -33,7 +33,7 @@ mod_cv <- caret::train(
   # arguments specific to "ranger" method
   replace = FALSE,
   sample.fraction = 0.5,
-  num.trees = 200,
+  num.trees = 150,
   seed = 1982
 )
 

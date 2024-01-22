@@ -1,11 +1,19 @@
 set.seed(123)
+
+#To run in batch mode consider:
+
+# setwd("C:/Users/ntinner/Documents/AGDS_Bigler_Tinner/")
+jpg_files <- list.files(path = "../data/Current_Output", pattern = "\\.jpg$", full.names = TRUE)
+file.remove(jpg_files)
+
 setwd("./vignettes")
 packages <- c('influxdbclient', 'ggplot2', 'tidyverse', 'lubridate', 'dplyr', 'caret',
               'vip', 'parsnip', 'workflows', 'tune', 'dials', 'stringr', 'terra', 'stars',
               'sf', 'plyr', 'doParallel', 'foreach', 'terrainr', 'starsExtra', 'pdp',
               'recipes', 'tidyterra', 'shiny', 'xgboost', 'kableExtra', 'rnaturalearth', 'zoo',
               'moments', 'tibble', 'rsample', 'yardstick', 'cowplot', 'purrr', 'renv',
-              'ranger','Boruta','devtools','sp','keras','tensorflow',"jsonlite","httr")
+              'ranger','Boruta','sp',"jsonlite","httr","scales")
+
 # Load the R script to install and load all the packages from above
 source("../R/load_packages.R")
 load_packages(packages = packages)
@@ -38,7 +46,7 @@ combined <- read_csv("../data/Combined.csv") |>
   drop_na()
 
 
-url <- "https://api.open-meteo.com/v1/forecast?latitude=46.99905&longitude=7.45809&hourly=temperature_2m,relative_humidity_2m,precipitation,surface_pressure,wind_speed_10m,wind_direction_10m,soil_temperature_0cm,soil_moisture_0_to_1cm,direct_radiation&timezone=Europe%2FBerlin"
+url <- "https://api.open-meteo.com/v1/forecast?latitude=46.99905&longitude=7.45809&hourly=temperature_2m,relative_humidity_2m,precipitation,surface_pressure,wind_speed_10m,wind_direction_10m,soil_temperature_6cm,soil_temperature_54cm,direct_radiation&timezone=Europe%2FBerlin"
 
 response <- GET(url)
 data_api <- fromJSON(content(response, "text"), flatten = TRUE)
@@ -52,7 +60,7 @@ forecast <- forecast |> mutate(time = datetime <- as.POSIXct(time, format = "%Y-
 # Take all column-names you need as predictors from the combined file
 predictors <- combined |>
   # select our predictors (we want all columns except those in the select() function)
-  dplyr::select(-c(Log_Nr,temperature,timestamp,Name,NORD_CHTOP,OST_CHTOPO,pres,
+  dplyr::select(-c(Log_Nr,temperature,timestamp,Name,pres,
                    year,month,day,LV_03_E,LV_03_N),
                 -contains("sum"),
                 -contains("mean")) |>
@@ -93,11 +101,16 @@ forecast <- forecast |> mutate(hour = hour(time),
                    winds = wind_speed_10m,
                    windd = wind_direction_10m,
                    pres = surface_pressure,
-                   relhum = relative_humidity_2m) |>
+                   relhum = relative_humidity_2m,
+                   temp_5cm = soil_temperature_54cm) |>
   select(any_of(predictors),time)
 
+max_temp <- max(forecast$temp)
+min_temp <- min(forecast$temp)
+num_colors <- 11
+color_palette <- c("#0000FF", "#00FFFF", "purple2", "purple4","darkgreen","yellow2","orange2" ,"darkred","black")
 
-
+break_points <- seq(min_temp, max_temp, length.out = num_colors)
 
 map_generator <- function(row){
   tiff_names <- str_sub(list.files("../data/Tiffs/"),end = -5)
@@ -108,6 +121,7 @@ map_generator <- function(row){
 for (name_var in colnames(row |> select(-time))) {
   temp <- terra::rast(ncol=293, nrow=247, xmin=2592670, xmax=2607320, ymin=1193202, ymax=1205552,names = name_var)
   terra::values(temp) <- row |>select(any_of(name_var))
+
   print(paste0(row |>select(name_var),": ",name_var))
   temp <- crop(temp,tiffs_only)
   temp <- resample(temp,tiffs_only)
@@ -115,11 +129,13 @@ for (name_var in colnames(row |> select(-time))) {
 }
 
 
+
 print('Tiff processing successful. Model prediction in progress...')
 temperature <- terra::predict(tiffs_only, random_forest, na.rm = TRUE)
 
 print('Model prediction sucessful. Create a data frame')
-temperature_df <- terra::as.data.frame(temperature, xy = TRUE)
+temperature_df <- terra::as.data.frame(temperature+row$temp, xy = TRUE)
+
 
 #------------------------------------------------------------------------------
 # load the spatial layer for communal boarders and the rivers
@@ -139,7 +155,18 @@ print('Your card will now be generated')
 
 #------------------------------------------------------------------------------
 # Read out the absolute maximum value to generate leveles for the legend
-max_value <- max(abs(temperature_df$lyr1), na.rm = TRUE)
+
+
+# Assuming you have a data frame 'df' with a temperature column 'temp
+
+# Generate a color palette with the required number of colors
+
+
+# Define your breakpoints and their corresponding colors manually
+
+
+
+
 
 #------------------------------------------------------------------------------
 # Generate the map
@@ -155,15 +182,11 @@ p <- ggplot() +
                         "\nPrec [mm]: =", row$rain,
                         '\nWindspeed [m/s] =',row$winds,', Winddirection [°] =',row$windd,
                         '\nRadiation [W/m^2*s] =',row$rad),
-       fill = expression(paste(Delta,'Temp [K]'))) +
-  scale_fill_gradient2(low = "blue4",
-                       mid = "white",
-                       high = "red4",
-                       midpoint = 0,
-                       space = 'Lab',
-                       guide = 'colourbar',
-                       aesthetics = 'fill',
-                       limits = c(-max_value, max_value)) +
+       fill = expression(paste(Delta,'Temperature (°C)'))) +
+  scale_fill_gradientn(colors = color_palette,
+                       values = scales::rescale(break_points),
+                       limits = c(min_temp, max_temp),
+                       guide = "colorbar") +
   theme_classic() +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))+
   theme(
@@ -177,7 +200,7 @@ p <- ggplot() +
 if (!dir.exists("../data/Current_Output")) {
   dir.create("../data/Current_Output")
 }
-ggsave(paste0("../data/Current_Output/",format(row$time, "%Y-%m-%d_%H:%M:%S"),".jpg"), plot = p, width = 10, height = 6, dpi = 300)
+ggsave(paste0("../data/Current_Output/",format(row$time, "%Y-%m-%d_%H-%M-%S"),".jpg"), plot = p, width = 10, height = 6, dpi = 300)
 }
 
 for (n in 1:nrow(forecast)) {
