@@ -104,7 +104,9 @@ data_combination <- suppressWarnings(function(){
   combined = inner_join(combined, combined_metadata, by = "Log_Nr")
 
   combined <- combined |> ungroup()
-#Bike measurements?
+
+
+#Bike measurements
   bike_data <- read_csv("../data//Bicycle_data_complete_bugfix.csv")
   bike_data <- bike_data|>
     filter(!is.na(Latitude) & !is.na(Longitude))|>
