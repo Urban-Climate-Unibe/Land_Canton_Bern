@@ -61,7 +61,7 @@ forecast <- forecast |> mutate(time = datetime <- as.POSIXct(time, format = "%Y-
 predictors <- combined |>
   # select our predictors (we want all columns except those in the select() function)
   dplyr::select(-c(Log_Nr,temperature,timestamp,Name,pres,
-                   year,month,day,LV_03_E,LV_03_N,-sum_precipitation_10_days,hour)) |>
+                   year,month,day,LV_03_E,LV_03_N,sum_precipitation_10_days,hour)) |>
   colnames()
 
 # Define a formula in the following format: target ~ predictor_1 + ... + predictor_n

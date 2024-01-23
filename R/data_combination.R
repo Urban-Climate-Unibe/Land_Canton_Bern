@@ -9,7 +9,7 @@ data_combination <- suppressWarnings(function(){
   measurement_files <- bind_rows(measurement_files, .id = "column_label")
   measurement_files <- measurement_files|> mutate(time = mdy_hm(Zeit))
   measurement_files <-  measurement_files|>mutate(time = if_else(is.na(time),Time,time)) |>
-    dplyr::select(-Zeit,-Time)
+    dplyr::select(-Zeit,-Time)#weird because 2023 file different...
   measurement_files <- measurement_files |>
     mutate(hour = hour(time),
            month = month(time),
@@ -18,11 +18,14 @@ data_combination <- suppressWarnings(function(){
 
   measurement_files <- measurement_files |>
     group_by(hour, day, month, year) |>
-    dplyr::summarise(across(where(is.numeric), mean))
+    dplyr::summarise(across(where(is.numeric), mean))|>
+    ungroup()
 
   measurement_files <-  measurement_files |> pivot_longer(cols = starts_with("L"), names_to = "Log_Nr",values_to = "temperature") |>
     mutate(Log_Nr = as.numeric(str_replace(Log_Nr, "Log_", ""))) |>
     drop_na()
+
+
 
 
   meteoswiss <- read_delim("../data/Meteoswiss/order_114596_data.txt",delim = ";")
@@ -102,8 +105,28 @@ data_combination <- suppressWarnings(function(){
 
   combined <- combined |> ungroup()
 #Bike measurements?
+  bike_data <- read_csv("../data//Bicycle_data_complete_bugfix.csv")
+  bike_data <- bike_data|>
+    filter(!is.na(Latitude) & !is.na(Longitude))|>
+    st_as_sf(coords = c("Longitude","Latitude"), crs = 4326)|>
+    st_transform(2056)
+  coords <- st_coordinates(bike_data)
+  bike_data <- bind_cols(as.tibble(bike_data),coords)|>
+    mutate(LV_03_E = X,
+           LV_03_N = Y)
+  bike_data <- bike_data |>
+    mutate(timestamp = dmy_hms(Date.Time),
+           temperature = Temp..C.)|>
+    mutate(hour = hour(timestamp),
+           month = month(timestamp),
+           day = day(timestamp),
+           year = year(timestamp),
+           Log_Nr = 999,
+           Name = "Meteobike")|>
+    select(hour,day,month,year,temperature,Log_Nr,Name,LV_03_N,LV_03_E)
 
-
+  bike_data <- inner_join(bike_data,meteoswiss,by = c("hour","day","month","year"))
+  combined <- bind_rows(bike_data,combined)
 
 
 
