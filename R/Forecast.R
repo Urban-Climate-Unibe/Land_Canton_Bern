@@ -3,10 +3,11 @@ set.seed(123)
 #To run in batch mode consider:
 
 # setwd("C:/Users/ntinner/Documents/AGDS_Bigler_Tinner/")
+setwd("./vignettes")
 jpg_files <- list.files(path = "../data/Current_Output", pattern = "\\.jpg$", full.names = TRUE)
 file.remove(jpg_files)
 
-setwd("./vignettes")
+
 packages <- c('influxdbclient', 'ggplot2', 'tidyverse', 'lubridate', 'dplyr', 'caret',
               'vip', 'parsnip', 'workflows', 'tune', 'dials', 'stringr', 'terra', 'stars',
               'sf', 'plyr', 'doParallel', 'foreach', 'terrainr', 'starsExtra', 'pdp',
@@ -46,7 +47,7 @@ combined <- read_csv("../data/Combined.csv") |>
   drop_na()
 
 
-url <- "https://api.open-meteo.com/v1/forecast?latitude=46.99905&longitude=7.45809&hourly=temperature_2m,relative_humidity_2m,precipitation,surface_pressure,wind_speed_10m,wind_direction_10m,soil_temperature_6cm,soil_temperature_54cm,direct_radiation&timezone=Europe%2FBerlin"
+url <- "https://api.open-meteo.com/v1/forecast?latitude=46.99905&longitude=7.45809&hourly=temperature_2m,relative_humidity_2m,precipitation,surface_pressure,wind_speed_10m,wind_direction_10m,soil_temperature_6cm,soil_temperature_54cm,shortwave_radiation&timezone=Europe%2FBerlin&past_days=5"
 
 response <- GET(url)
 data_api <- fromJSON(content(response, "text"), flatten = TRUE)
@@ -54,16 +55,13 @@ data_api <- fromJSON(content(response, "text"), flatten = TRUE)
 
 forecast <- data_api$hourly
 forecast <- as_tibble(forecast)
-forecast <- forecast |> mutate(time = datetime <- as.POSIXct(time, format = "%Y-%m-%dT%H:%M")) |>
-  dplyr::slice(1:(4*24))
+forecast <- forecast |> mutate(time = datetime <- as.POSIXct(time, format = "%Y-%m-%dT%H:%M"))
 
 # Take all column-names you need as predictors from the combined file
 predictors <- combined |>
   # select our predictors (we want all columns except those in the select() function)
   dplyr::select(-c(Log_Nr,temperature,timestamp,Name,pres,
-                   year,month,day,LV_03_E,LV_03_N),
-                -contains("sum"),
-                -contains("mean")) |>
+                   year,month,day,LV_03_E,LV_03_N,-sum_precipitation_10_days,hour)) |>
   colnames()
 
 # Define a formula in the following format: target ~ predictor_1 + ... + predictor_n
@@ -97,20 +95,36 @@ forecast <- forecast |> mutate(hour = hour(time),
                    month = month(time),
                    temp = temperature_2m,
                    rain = precipitation,
-                   rad = direct_radiation,
+                   rad = shortwave_radiation,
                    winds = wind_speed_10m,
                    windd = wind_direction_10m,
                    pres = surface_pressure,
                    relhum = relative_humidity_2m,
                    temp_5cm = soil_temperature_54cm) |>
-  select(any_of(predictors),time)
+  select(any_of(predictors),time)|>
+  ungroup()|>
+  arrange(time)|>
+  mutate(
+    mean_temp_6_hours = zoo::rollmean(temp, k = 6, fill = NA, align = "right"),
+    mean_temp_12_hours = zoo::rollmean(temp, k = 12, fill = NA, align = "right"),
+    mean_temp_1_day = zoo::rollmean(temp, k = 24 * 1, fill = NA, align = "right"),
+    mean_temp_3_days = zoo::rollmean(temp, k = 24 * 3, fill = NA, align = "right"),
+    mean_temp_5_days = zoo::rollmean(temp, k = 24 * 5, fill = NA, align = "right"),
+    sum_precipitation_6_hours = zoo::rollsum(rain, k = 6, fill = NA, align = "right"),
+    sum_precipitation_12_hours = zoo::rollsum(rain, k = 12, fill = NA, align = "right"),
+    sum_precipitation_1_day = zoo::rollsum(rain, k = 24 * 1, fill = NA, align = "right"),
+    sum_precipitation_3_days = zoo::rollsum(rain, k = 24 * 3, fill = NA, align = "right"),
+    sum_precipitation_5_days = zoo::rollsum(rain, k = 24 * 5, fill = NA, align = "right"),
+  ) |>
+  mutate_at(vars(starts_with("sum_precip")), ~ ifelse(. < 0.1, 0, .))|>
+  filter(time >= Sys.Date())
 
-max_temp <- max(forecast$temp)
-min_temp <- min(forecast$temp)
-num_colors <- 11
-color_palette <- c("#0000FF", "#00FFFF", "purple2", "purple4","darkgreen","yellow2","orange2" ,"darkred","black")
+max_temp <- max(forecast$temp)+5
+min_temp <- min(forecast$temp)-2
 
-break_points <- seq(min_temp, max_temp, length.out = num_colors)
+color_palette <- c("blue4","#0000FF", "#00FFFF", "purple2", "purple4","darkgreen","yellow2","orange2" ,"darkred","black")
+
+break_points <- seq(min_temp, max_temp, length.out = length(color_palette))
 
 map_generator <- function(row){
   tiff_names <- str_sub(list.files("../data/Tiffs/"),end = -5)
@@ -203,6 +217,6 @@ if (!dir.exists("../data/Current_Output")) {
 ggsave(paste0("../data/Current_Output/",format(row$time, "%Y-%m-%d_%H-%M-%S"),".jpg"), plot = p, width = 10, height = 6, dpi = 300)
 }
 
-for (n in 1:nrow(forecast)) {
+for (n in 1:(7*24)) {
   map_generator(forecast |> dplyr::slice(n))
 }
