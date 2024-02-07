@@ -1,6 +1,6 @@
-setwd("./vignettes")
+#setwd("./vignettes")
 
-
+download_geospatial <- function(extent= c(xmin = 2594313, xmax = 2605813, ymin = 1194069, ymax = 1204804)){#default is Bern as in Burger et al.2019
 
 packages <- c('influxdbclient', 'ggplot2', 'tidyverse', 'lubridate', 'dplyr', 'caret',
               'vip', 'parsnip', 'workflows', 'tune', 'dials', 'stringr', 'terra', 'stars',
@@ -34,7 +34,7 @@ unzip(paste0(tempdir(),"mopu.zip"),exdir = paste0(tempdir(),"mopu"))
 shapefile <- st_read(paste0(tempdir(),"mopu/data/MOPUBE_BBF.shp"))
 shapefile <- st_make_valid(shapefile)
 # Define the extent to cut
-extent = c(xmin = 2594313, xmax = 2605813, ymin = 1194069, ymax = 1204804)
+
 extent_to_cut <- st_bbox(extent, crs = st_crs(shapefile))
 
 #crop the shapefile to the specified extent
@@ -159,11 +159,11 @@ terrainr::merge_rasters(DEM_paths,output_raster = paste0(tempdir(),"/DEM/DEM.tif
 
 
 DEM <- terra::rast(paste0(tempdir(),"/DEM/DEM.tif"))
-ex <- terra::rast("../data/Tiffs/OS_AC_500.tif") #not very elegant, maybe improve?
+ex <- terra::rast("../data-raw/OS_AC.tif") #not very elegant, maybe improve?
 
 DEM <- terra::resample(DEM,ex)
 
-terra::writeRaster(DEM, filename = "../data/Tiffs/DEM.tif",overwrite = T)
+terra::writeRaster(DEM, filename = "../data-raw/DEM.tif",overwrite = T)
 
 lv95_point <- st_sfc(st_point(c(mean(extent[1]:extent[2]),mean(extent[3]:extent[4]))), crs = 2056)
 middle_modis <- st_coordinates(st_transform(lv95_point, crs = 4326))
@@ -192,7 +192,7 @@ NDVI_raster <- MODISTools::mt_to_terra(
 )
 NDVI_raster <- terra::project(NDVI_raster,ex)
 NDVI_raster  <- terra::resample(NDVI_raster,ex)
-terra::writeRaster(NDVI_raster,"../data-raw//NDVI_250.tif")
+terra::writeRaster(NDVI_raster,"../data-raw//NDVI.tif")
 
 
 slope <- terra::terrain(DEM,v = "slope")
@@ -217,3 +217,5 @@ terra::writeRaster(roughness,"../data-raw/ROU.tif")
 TPI <- terra::terrain(DEM,v = "TPI")
 TPI <- terra::resample(TPI,ex)
 terra::writeRaster(TPI,"../data-raw/TPI.tif")
+
+}
