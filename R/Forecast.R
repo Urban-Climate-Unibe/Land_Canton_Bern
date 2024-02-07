@@ -122,7 +122,7 @@ forecast <- forecast |> mutate(hour = hour(time),
 max_temp <- max(forecast$temp)+5
 min_temp <- min(forecast$temp)-2
 
-color_palette <- c("blue4","#0000FF", "#00FFFF", "purple2", "purple4","darkgreen","yellow2","orange2" ,"darkred","black")
+color_palette <- c("purple", "purple4","blue4","#0000FF", "skyblue2","white","yellow2","orange2","orangered" ,"darkred","black")
 
 break_points <- seq(min_temp, max_temp, length.out = length(color_palette))
 
@@ -146,6 +146,12 @@ for (name_var in colnames(row |> select(-time))) {
 
 print('Tiff processing successful. Model prediction in progress...')
 temperature <- terra::predict(tiffs_only, random_forest, na.rm = TRUE)
+if(!exists("tempstack")){
+  tempstack <<- temperature
+}else{
+  tempstack <<- c(tempstack,temperature)
+}
+
 
 print('Model prediction sucessful. Create a data frame')
 temperature_df <- terra::as.data.frame(temperature+row$temp, xy = TRUE)
@@ -191,7 +197,7 @@ p <- ggplot() +
   geom_point(aes(x = 2601930.3, y = 1204410.1)) +
   annotate("text", x = 2602300, y = 1204410.1, label= "AWS Zollikofen", hjust = 0) +
   labs(title = paste('Temperatureanomaly for the suburban area of Bern'),
-       subtitle = paste('This map uses a random forest and the following variable inputs:',
+       subtitle = paste('Time: ',row$time,
                         "\nTemp [°C]: = ",row$temp,
                         "\nPrec [mm]: =", row$rain,
                         '\nWindspeed [m/s] =',row$winds,', Winddirection [°] =',row$windd,
@@ -217,6 +223,6 @@ if (!dir.exists("../data/Current_Output")) {
 ggsave(paste0("../data/Current_Output/",format(row$time, "%Y-%m-%d_%H-%M-%S"),".jpg"), plot = p, width = 10, height = 6, dpi = 300)
 }
 
-for (n in 1:(7*24)) {
+for (n in 1:(5*24)) {
   map_generator(forecast |> dplyr::slice(n))
 }
