@@ -42,7 +42,7 @@ tiff_focal <- function(tiff,meter,filename){
     writeRaster(tiff, filename=paste0("../data/Tiffs/",filename,"_5",".tif"),overwrite = T)
   }else{ #to ensure no focal is applied when none should
 
-  n <-2 * round(meter/2)/5+1 #get unequal number, div by 5 since 5m resolution
+    n <-2*round(meter/(5*2))+1 #get unequal number, div by 5 since 5m resolution
 
   mean_focal <- terra::focal(tiff, w=matrix(1, nrow=n, ncol=n), fun=mean, na.rm=TRUE)
   names(mean_focal) <- paste0(str_sub(filename, end = -5),"_",meter)
@@ -56,6 +56,7 @@ tiff_focal <- function(tiff,meter,filename){
 
 for (i in 1:nrow(meters)) {
   row <- dplyr::slice(meters, i)
+  print(row)
   tiff_focal(tiff=terra::rast(paste0("../data-raw/",row$Variable,".tif")),meter = row$Chosen_buffer_radiusm,filename = row$Variable)
 }
 
