@@ -34,6 +34,7 @@ if(is.null(meters)){
 }
 
 tiff_focal <- function(tiff,meter,filename){
+  names(tiff) <- paste0(filename,"_",meter)
   if(grepl("NDVI", filename)){
     writeRaster(tiff, filename=paste0("../data/Tiffs/",filename,"_250",".tif"),overwrite = T)
   }#cannot be downloaded with a resolution of less than 250 meters, so this is the basic case.
