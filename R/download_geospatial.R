@@ -96,7 +96,7 @@ for (class in unique(classification$Variable)) {
   print(number_classes)
   temp_raster <- raster %in% number_classes*1
 
-
+  dir.create("../data-raw/", showWarnings = FALSE)
   terra::writeRaster(temp_raster,paste0("../data-raw/",class,".tif"),overwrite = T)
 
 }
