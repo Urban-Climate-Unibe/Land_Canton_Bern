@@ -19,12 +19,24 @@ packages <- c('influxdbclient', 'ggplot2', 'tidyverse', 'lubridate', 'dplyr', 'c
 source("../R/load_packages.R")
 load_packages(packages = packages)
 
-
-extent = c(xmin = 2594313, xmax = 2605813, ymin = 1194069, ymax = 1204804)
+# Define the extent: xmin = W, xmax = E, ymin = S, ymax = N, Coordinate system: CH1903+/LV95
+city = "Thun"
+#extent = c(xmin = 2594313, xmax = 2605813, ymin = 1194069, ymax = 1204804) # Bern
+extent = c(xmin = 2608999, xmax = 2619222, ymin = 1173148, ymax = 1183507) # Thun
+# city = "test"
+# extent = c(xmin = 2594313, xmax = 2595000, ymin = 1194069, ymax = 1194600)
 source("../R/download_geospatial.R")
-download_geospatial(extent)
-
+download_geospatial(extent, city)
 ```
+
+**Optional**: Calculate Altitude difference between DEM and location of MeteoCH reference station
+```{r}
+AD <- rast(paste0("../data-raw/", city, "/DEM.tif"))
+AD <- AD - 570 # adapt to the location of the MeteoCH reference station
+plot(AD)
+writeRaster(AD, paste0("../data-raw/", city, "/AD.tif"), overwrite = TRUE)
+```
+
 
 Then we process. Here we can define the resolution of each layer currently viable. Please feel free to add more layers and make a pull request.
 ```{r}
@@ -51,31 +63,29 @@ processing_geospatial(meters)
 Alternativly, one can also create several buffer zones by:
 
 ```{r}
-
 meters_burger <- tibble(
-  Category = c("Land Cover Building", "Open Space Sealed", "Open Space Forest", "Open Space Garden", "Open Space Water", "Open Space Agriculture"),
-  Variable = c("LC_B", "OS_SE", "OS_FO", "OS_GA", "OS_WA", "OS_AC")
+  Category = c("Land Cover Building", "Open Space Sealed", "Open Space Forest", "Open Space Garden", "Open Space Water", "Open Space Agriculture", "Building Height", "Vegetation height"),
+  Variable = c("LC_B", "OS_SE", "OS_FO", "OS_GA", "OS_WA", "OS_AC", "BH_NA", "VH"),
 )
 
 # Creating a new tibble for the buffer radius expansion
-buffer_values <- tibble(Chosen_buffer_radiusm = c(25, 100, 750))
+buffer_values <- tibble(Chosen_buffer_radiusm = c(25, 100, 175, 250, 500, 750, 1000))
 
 # Expand meters_burger to include new Chosen_buffer_radiusm values by crossing with buffer_values
 meters_burger <- crossing(meters_burger, buffer_values)
 
 # New entries to add
 meters_new <- tibble(
-  Category = c("Aspect", "Flow accumulation", "Roughness", "Slope", "Terrain index","DEM"),
-  Variable = c("ASP", "FLAC", "ROU", "SLO", "TPI","DEM")
+  Category = c("Aspect", "Flow accumulation", "Roughness", "Slope", "Terrain index","DEM", "Altitude Difference"),
+  Variable = c("ASP", "FLAC", "ROU", "SLO", "TPI","DEM", "AD"),
 )
-buffer_values <- tibble(Chosen_buffer_radiusm = c(5, 50, 500))
+buffer_values <- tibble(Chosen_buffer_radiusm = c(5, 50, 125, 250, 500))
 meters_new <- crossing(meters_new, buffer_values)
 
-
 meters <- bind_rows(meters_burger, meters_new)|>
-  add_row(Category = "NDVI", Variable = "NDVI", Chosen_buffer_radiusm = 250)
+  add_row(Category = "NDVI", Variable = "NDVI", Chosen_buffer_radiusm = c(250, 500)) # NDVI original resolution is 250
 
 source("../R/processing_geospatial.R")
-processing_geospatial(meters)
+processing_geospatial(meters, city)
 ```
 

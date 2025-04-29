@@ -1,6 +1,6 @@
 #setwd("./vignettes")
 
-processing_geospatial <- function(meters = NULL){ #a tibble of the format described in markdown Geo_Data, set to NULL if you want to use default values
+processing_geospatial <- function(meters = NULL, city = ""){ #a tibble of the format described in markdown Geo_Data, set to NULL if you want to use default values
 
 packages <- c('influxdbclient', 'ggplot2', 'tidyverse', 'lubridate', 'dplyr', 'caret',
               'vip', 'parsnip', 'workflows', 'tune', 'dials', 'stringr', 'terra', 'stars',
@@ -36,20 +36,20 @@ if(is.null(meters)){
 tiff_focal <- function(tiff,meter,filename){
   names(tiff) <- paste0(filename,"_",meter)
   if(grepl("NDVI", filename)){
-    writeRaster(tiff, filename=paste0("../data/Tiffs/",filename,"_250",".tif"),overwrite = T)
+    writeRaster(tiff, filename=paste0("../data/Tiffs/", city, "/",filename,"_250",".tif"),overwrite = T)
   }#cannot be downloaded with a resolution of less than 250 meters, so this is the basic case.
 
   else if(meter == 5){
-    writeRaster(tiff, filename=paste0("../data/Tiffs/",filename,"_5",".tif"),overwrite = T)
+    writeRaster(tiff, filename=paste0("../data/Tiffs/", city, "/",filename,"_5",".tif"),overwrite = T)
   }else{ #to ensure no focal is applied when none should
 
     n <-2*round(meter/(5*2))+1 #get unequal number, div by 5 since 5m resolution
 
-  mean_focal <- terra::focal(tiff, w=matrix(1, nrow=n, ncol=n), fun=mean, na.rm=TRUE)
-  names(mean_focal) <- paste0(filename,"_",meter)
+    mean_focal <- terra::focal(tiff, w=matrix(1, nrow=n, ncol=n), fun=mean, na.rm=TRUE)
+    names(mean_focal) <- paste0(filename,"_",meter)
 
-  writeRaster(mean_focal, filename=paste0("../data/Tiffs/",filename,"_",meter,".tif"),overwrite = T)
-}
+    writeRaster(mean_focal, filename=paste0("../data/Tiffs/", city, "/",filename,"_",meter,".tif"),overwrite = T)
+  }
 }
 
 # Combining the old and new entries
@@ -58,7 +58,7 @@ tiff_focal <- function(tiff,meter,filename){
 for (i in 1:nrow(meters)) {
   row <- dplyr::slice(meters, i)
   print(row)
-  tiff_focal(tiff=terra::rast(paste0("../data-raw/",row$Variable,".tif")),meter = row$Chosen_buffer_radiusm,filename = row$Variable)
+  tiff_focal(tiff=terra::rast(paste0("../data-raw/", city, "/",row$Variable,".tif")),meter = row$Chosen_buffer_radiusm,filename = row$Variable)
 }
 
 }
